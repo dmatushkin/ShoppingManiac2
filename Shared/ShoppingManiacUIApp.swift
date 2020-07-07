@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct ShoppingManiacUIApp: App {
+	@StateObject private var mainListModel = MainListCoreDataModel() as MainListModel
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+			MainListScreen()
+				.environmentObject(mainListModel)
         }
     }
 }
