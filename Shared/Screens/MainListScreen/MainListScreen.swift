@@ -18,7 +18,8 @@ struct MainListScreen: View {
 					label: {
 						MainListCell(listName: item.name, isCompleted: item.isCompleted, isRemote: item.isRemote)
 					})
-			}.navigationTitle(Text("Shopping Lists"))
+			}.listStyle(PlainListStyle())
+			.navigationTitle(Text("Shopping Lists"))
 			.navigationBarItems(trailing:
 									Button(action: {}, label: {
 										Image(systemName: "doc.badge.plus").imageScale(.large)

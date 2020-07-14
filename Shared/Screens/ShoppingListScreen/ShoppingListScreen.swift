@@ -26,7 +26,8 @@ struct ShoppingListScreen: View {
 					}
 				}
 			}
-		}.navigationTitle(Text("Shopping List"))
+		}.listStyle(SidebarListStyle())
+		.navigationTitle(Text("Shopping List"))
 		.navigationBarItems(trailing: EditButton())
 		.environment(\.editMode, $editMode)
     }

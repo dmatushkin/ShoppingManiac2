@@ -14,8 +14,11 @@ struct MainListCell: View {
 
     var body: some View {
 		HStack {
-			Image(systemName: isRemote ? "cloud" : "iphone").padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/, /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/).frame(minWidth: 40, maxWidth: 40, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
-			Text(listName).padding([.trailing, .top, .bottom], /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/).foregroundColor(isCompleted ? .secondary : .primary)
+			Text(listName).padding([.leading, .top, .bottom], /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/).foregroundColor(isCompleted ? .secondary : .primary)
+			if isRemote {
+				Spacer(minLength: 0)
+				Image(systemName: isRemote ? "cloud" : "iphone").padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/, /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/).frame(minWidth: 40, maxWidth: 40, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/)
+			}
 		}
     }
 }
