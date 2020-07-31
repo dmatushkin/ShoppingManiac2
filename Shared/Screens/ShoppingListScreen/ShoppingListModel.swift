@@ -10,6 +10,8 @@ import SwiftUI
 
 class ShoppingListModel: ObservableObject {
 
+	@Environment(\.previewMode) private var previewMode
+
 	@Published fileprivate(set) var sections: [ShoppingListSection] = [
 		ShoppingListSection(id: 0, name: "Grocery store", items: [
 			ShoppingListItem(id: 0, name: "Bread", amount: .quantity(value: 2), isPurchased: false),

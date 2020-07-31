@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MainListScreen: View {
-	@EnvironmentObject private var model: MainListModel
+	@StateObject private var model = MainListModel()
 
 	var body: some View {
 		NavigationView {
@@ -35,6 +35,6 @@ struct MainListScreen: View {
 struct MainListScreen_Previews: PreviewProvider {
 
 	static var previews: some View {
-		MainListScreen().environmentObject(MainListModel())
+		MainListScreen()
 	}
 }
