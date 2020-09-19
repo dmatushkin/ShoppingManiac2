@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct ShoppingListScreen: View {
-	@StateObject var shoppingListModel = ShoppingListModel()
-	@State private var editMode = EditMode.inactive
+	@ObservedObject
+	var shoppingListModel: ShoppingListModel
+	@State
+	private var editMode = EditMode.inactive
+
+	init() {
+		shoppingListModel = ShoppingListModel()
+	}
 	
     var body: some View {
 		List {
@@ -21,12 +27,14 @@ struct ShoppingListScreen: View {
 								shoppingListModel.toggle(item: item)
 							}
 					}.onDelete { indexSet in
-						let items = section.items[indexSet]
-						shoppingListModel.delete(items: items, fromSection: section)
 					}
 				}
 			}
-		}.listStyle(SidebarListStyle())
+		}.swipeActions(editAction: {path in
+
+		}, deleteAction: {path in
+			shoppingListModel.delete(fromPath: path)
+		}).listStyle(SidebarListStyle())
 		.navigationTitle(Text("Shopping List"))
 		.navigationBarItems(trailing: EditButton())
 		.environment(\.editMode, $editMode)

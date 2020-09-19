@@ -15,6 +15,10 @@
 		568A964025161515007CBA29 /* CloudKitSync in Frameworks */ = {isa = PBXBuildFile; productRef = 568A963F25161515007CBA29 /* CloudKitSync */; };
 		568A964325161663007CBA29 /* CoreStore in Frameworks */ = {isa = PBXBuildFile; productRef = 568A964225161663007CBA29 /* CoreStore */; };
 		568A964925161670007CBA29 /* CoreStore in Frameworks */ = {isa = PBXBuildFile; productRef = 568A964825161670007CBA29 /* CoreStore */; };
+		568A964F25161D7B007CBA29 /* ShoppinngListSwipeActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568A964E25161D7B007CBA29 /* ShoppinngListSwipeActions.swift */; };
+		568A965B25161EF3007CBA29 /* Introspect in Frameworks */ = {isa = PBXBuildFile; productRef = 568A965A25161EF3007CBA29 /* Introspect */; };
+		568A966125161EFF007CBA29 /* Introspect in Frameworks */ = {isa = PBXBuildFile; productRef = 568A966025161EFF007CBA29 /* Introspect */; };
+		568A96662516218A007CBA29 /* ShoppinngListSwipeActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568A964E25161D7B007CBA29 /* ShoppinngListSwipeActions.swift */; };
 		5693BAD124B0F50F0031BF9C /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5693BAD024B0F50F0031BF9C /* Tests_iOS.swift */; };
 		5693BADC24B0F50F0031BF9C /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5693BADB24B0F50F0031BF9C /* Tests_macOS.swift */; };
 		5693BADE24B0F50F0031BF9C /* ShoppingManiacUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5693BAB524B0F50E0031BF9C /* ShoppingManiacUIApp.swift */; };
@@ -63,6 +67,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		568A964E25161D7B007CBA29 /* ShoppinngListSwipeActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppinngListSwipeActions.swift; sourceTree = "<group>"; };
 		5693BAB524B0F50E0031BF9C /* ShoppingManiacUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingManiacUIApp.swift; sourceTree = "<group>"; };
 		5693BAB724B0F50F0031BF9C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5693BABC24B0F50F0031BF9C /* ShoppingManiacUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoppingManiacUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -96,6 +101,7 @@
 			files = (
 				568A9635251614F5007CBA29 /* CloudKitSync in Frameworks */,
 				568A962E251614DF007CBA29 /* CommonError in Frameworks */,
+				568A965B25161EF3007CBA29 /* Introspect in Frameworks */,
 				568A9627251614BE007CBA29 /* DependencyInjection in Frameworks */,
 				568A964325161663007CBA29 /* CoreStore in Frameworks */,
 			);
@@ -107,6 +113,7 @@
 			files = (
 				568A964025161515007CBA29 /* CloudKitSync in Frameworks */,
 				568A963E2516150F007CBA29 /* CommonError in Frameworks */,
+				568A966125161EFF007CBA29 /* Introspect in Frameworks */,
 				568A963C25161509007CBA29 /* DependencyInjection in Frameworks */,
 				568A964925161670007CBA29 /* CoreStore in Frameworks */,
 			);
@@ -235,6 +242,7 @@
 				56D659C824B2370300B7DC0A /* ShoppingListModel.swift */,
 				56D659CB24B2372400B7DC0A /* ShoppingListItem.swift */,
 				56D659CE24B240B800B7DC0A /* ShoppingListSection.swift */,
+				568A964E25161D7B007CBA29 /* ShoppinngListSwipeActions.swift */,
 			);
 			path = ShoppingListScreen;
 			sourceTree = "<group>";
@@ -268,6 +276,7 @@
 				568A962D251614DF007CBA29 /* CommonError */,
 				568A9634251614F5007CBA29 /* CloudKitSync */,
 				568A964225161663007CBA29 /* CoreStore */,
+				568A965A25161EF3007CBA29 /* Introspect */,
 			);
 			productName = iOS;
 			productReference = 5693BABC24B0F50F0031BF9C /* ShoppingManiacUI.app */;
@@ -291,6 +300,7 @@
 				568A963D2516150F007CBA29 /* CommonError */,
 				568A963F25161515007CBA29 /* CloudKitSync */,
 				568A964825161670007CBA29 /* CoreStore */,
+				568A966025161EFF007CBA29 /* Introspect */,
 			);
 			productName = macOS;
 			productReference = 5693BAC424B0F50F0031BF9C /* ShoppingManiacUI.app */;
@@ -371,6 +381,7 @@
 				568A962C251614DF007CBA29 /* XCRemoteSwiftPackageReference "CommonError" */,
 				568A9633251614F5007CBA29 /* XCRemoteSwiftPackageReference "CloudKitSync" */,
 				568A964125161663007CBA29 /* XCRemoteSwiftPackageReference "CoreStore" */,
+				568A965925161EF3007CBA29 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 			);
 			productRefGroup = 5693BABD24B0F50F0031BF9C /* Products */;
 			projectDirPath = "";
@@ -432,6 +443,7 @@
 				5693BAF824B0F5FF0031BF9C /* MainListCell.swift in Sources */,
 				5693BADE24B0F50F0031BF9C /* ShoppingManiacUIApp.swift in Sources */,
 				56D659CC24B2372400B7DC0A /* ShoppingListItem.swift in Sources */,
+				568A964F25161D7B007CBA29 /* ShoppinngListSwipeActions.swift in Sources */,
 				56D659C924B2370300B7DC0A /* ShoppingListModel.swift in Sources */,
 				56E209DE24B513D500BEF1CC /* ArrayExtension.swift in Sources */,
 			);
@@ -451,6 +463,7 @@
 				5693BAF924B0F5FF0031BF9C /* MainListCell.swift in Sources */,
 				5693BADF24B0F50F0031BF9C /* ShoppingManiacUIApp.swift in Sources */,
 				56D659CD24B2372400B7DC0A /* ShoppingListItem.swift in Sources */,
+				568A96662516218A007CBA29 /* ShoppinngListSwipeActions.swift in Sources */,
 				56D659CA24B2370300B7DC0A /* ShoppingListModel.swift in Sources */,
 				56E209DF24B513D500BEF1CC /* ArrayExtension.swift in Sources */,
 			);
@@ -660,7 +673,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.16;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = org.mdd.ShoppingManiacUI;
 				PRODUCT_NAME = ShoppingManiacUI;
 				SDKROOT = macosx;
@@ -684,7 +697,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.16;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = org.mdd.ShoppingManiacUI;
 				PRODUCT_NAME = ShoppingManiacUI;
 				SDKROOT = macosx;
@@ -864,6 +877,14 @@
 				minimumVersion = 7.3.0;
 			};
 		};
+		568A965925161EF3007CBA29 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -906,6 +927,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 568A964125161663007CBA29 /* XCRemoteSwiftPackageReference "CoreStore" */;
 			productName = CoreStore;
+		};
+		568A965A25161EF3007CBA29 /* Introspect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A965925161EF3007CBA29 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
+			productName = Introspect;
+		};
+		568A966025161EFF007CBA29 /* Introspect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A965925161EF3007CBA29 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
+			productName = Introspect;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

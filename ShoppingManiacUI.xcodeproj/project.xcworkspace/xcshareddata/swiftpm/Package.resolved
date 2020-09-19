@@ -1,0 +1,61 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CloudKitSync",
+        "repositoryURL": "https://github.com/dmatushkin/CloudKitSync.git",
+        "state": {
+          "branch": "master",
+          "revision": "db248a63581660b5e98404e30a2869d6eedec228",
+          "version": null
+        }
+      },
+      {
+        "package": "CommonError",
+        "repositoryURL": "https://github.com/dmatushkin/CommonError.git",
+        "state": {
+          "branch": "master",
+          "revision": "3150d7c8e7d443521aedfe95a89a9a742f243fe4",
+          "version": null
+        }
+      },
+      {
+        "package": "CoreStore",
+        "repositoryURL": "https://github.com/JohnEstropia/CoreStore",
+        "state": {
+          "branch": null,
+          "revision": "d6eae8c0912aafdcfdd6e97ccd39922b6a6b83e9",
+          "version": "7.3.0"
+        }
+      },
+      {
+        "package": "DependencyInjection",
+        "repositoryURL": "https://github.com/dmatushkin/DependencyInjection.git",
+        "state": {
+          "branch": "master",
+          "revision": "1babedfed7d52bb7350e29f1ea3be72e449830d5",
+          "version": null
+        }
+      },
+      {
+        "package": "Introspect",
+        "repositoryURL": "https://github.com/siteline/SwiftUI-Introspect.git",
+        "state": {
+          "branch": null,
+          "revision": "de5c32c15ae169cfcb27397ffb2734dcd0e1e6d5",
+          "version": "0.1.0"
+        }
+      },
+      {
+        "package": "SwiftyBeaver",
+        "repositoryURL": "https://github.com/SwiftyBeaver/SwiftyBeaver.git",
+        "state": {
+          "branch": null,
+          "revision": "c7b2fceb3fd0095acba4792c728f3f062baf8fb9",
+          "version": "1.9.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

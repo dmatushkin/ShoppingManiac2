@@ -53,4 +53,14 @@ class ShoppingListModel: ObservableObject {
 																				})}) : $0.items)
 		})
 	}
+
+	func delete(fromPath path: IndexPath) {
+		let section = sections[path.section]
+		let item = section.items[path.row]
+		sections = sections.map({
+			ShoppingListSection(id: $0.id,
+								name: $0.name,
+								items: $0.id == section.id ? $0.items.filter({ filtered in filtered.id != item.id }) : $0.items)
+		})
+	}
 }
