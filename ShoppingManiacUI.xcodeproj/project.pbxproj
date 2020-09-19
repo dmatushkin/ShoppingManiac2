@@ -3,10 +3,18 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		568A9627251614BE007CBA29 /* DependencyInjection in Frameworks */ = {isa = PBXBuildFile; productRef = 568A9626251614BE007CBA29 /* DependencyInjection */; };
+		568A962E251614DF007CBA29 /* CommonError in Frameworks */ = {isa = PBXBuildFile; productRef = 568A962D251614DF007CBA29 /* CommonError */; };
+		568A9635251614F5007CBA29 /* CloudKitSync in Frameworks */ = {isa = PBXBuildFile; productRef = 568A9634251614F5007CBA29 /* CloudKitSync */; };
+		568A963C25161509007CBA29 /* DependencyInjection in Frameworks */ = {isa = PBXBuildFile; productRef = 568A963B25161509007CBA29 /* DependencyInjection */; };
+		568A963E2516150F007CBA29 /* CommonError in Frameworks */ = {isa = PBXBuildFile; productRef = 568A963D2516150F007CBA29 /* CommonError */; };
+		568A964025161515007CBA29 /* CloudKitSync in Frameworks */ = {isa = PBXBuildFile; productRef = 568A963F25161515007CBA29 /* CloudKitSync */; };
+		568A964325161663007CBA29 /* CoreStore in Frameworks */ = {isa = PBXBuildFile; productRef = 568A964225161663007CBA29 /* CoreStore */; };
+		568A964925161670007CBA29 /* CoreStore in Frameworks */ = {isa = PBXBuildFile; productRef = 568A964825161670007CBA29 /* CoreStore */; };
 		5693BAD124B0F50F0031BF9C /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5693BAD024B0F50F0031BF9C /* Tests_iOS.swift */; };
 		5693BADC24B0F50F0031BF9C /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5693BADB24B0F50F0031BF9C /* Tests_macOS.swift */; };
 		5693BADE24B0F50F0031BF9C /* ShoppingManiacUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5693BAB524B0F50E0031BF9C /* ShoppingManiacUIApp.swift */; };
@@ -86,6 +94,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				568A9635251614F5007CBA29 /* CloudKitSync in Frameworks */,
+				568A962E251614DF007CBA29 /* CommonError in Frameworks */,
+				568A9627251614BE007CBA29 /* DependencyInjection in Frameworks */,
+				568A964325161663007CBA29 /* CoreStore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +105,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				568A964025161515007CBA29 /* CloudKitSync in Frameworks */,
+				568A963E2516150F007CBA29 /* CommonError in Frameworks */,
+				568A963C25161509007CBA29 /* DependencyInjection in Frameworks */,
+				568A964925161670007CBA29 /* CoreStore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -113,6 +129,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		568A963A25161509007CBA29 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5693BAAF24B0F50E0031BF9C = {
 			isa = PBXGroup;
 			children = (
@@ -122,6 +145,7 @@
 				5693BACF24B0F50F0031BF9C /* Tests iOS */,
 				5693BADA24B0F50F0031BF9C /* Tests macOS */,
 				5693BABD24B0F50F0031BF9C /* Products */,
+				568A963A25161509007CBA29 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -239,6 +263,12 @@
 			dependencies = (
 			);
 			name = iOS;
+			packageProductDependencies = (
+				568A9626251614BE007CBA29 /* DependencyInjection */,
+				568A962D251614DF007CBA29 /* CommonError */,
+				568A9634251614F5007CBA29 /* CloudKitSync */,
+				568A964225161663007CBA29 /* CoreStore */,
+			);
 			productName = iOS;
 			productReference = 5693BABC24B0F50F0031BF9C /* ShoppingManiacUI.app */;
 			productType = "com.apple.product-type.application";
@@ -256,6 +286,12 @@
 			dependencies = (
 			);
 			name = macOS;
+			packageProductDependencies = (
+				568A963B25161509007CBA29 /* DependencyInjection */,
+				568A963D2516150F007CBA29 /* CommonError */,
+				568A963F25161515007CBA29 /* CloudKitSync */,
+				568A964825161670007CBA29 /* CoreStore */,
+			);
 			productName = macOS;
 			productReference = 5693BAC424B0F50F0031BF9C /* ShoppingManiacUI.app */;
 			productType = "com.apple.product-type.application";
@@ -330,6 +366,12 @@
 				Base,
 			);
 			mainGroup = 5693BAAF24B0F50E0031BF9C;
+			packageReferences = (
+				568A9625251614BE007CBA29 /* XCRemoteSwiftPackageReference "DependencyInjection" */,
+				568A962C251614DF007CBA29 /* XCRemoteSwiftPackageReference "CommonError" */,
+				568A9633251614F5007CBA29 /* XCRemoteSwiftPackageReference "CloudKitSync" */,
+				568A964125161663007CBA29 /* XCRemoteSwiftPackageReference "CoreStore" */,
+			);
 			productRefGroup = 5693BABD24B0F50F0031BF9C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -788,6 +830,84 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		568A9625251614BE007CBA29 /* XCRemoteSwiftPackageReference "DependencyInjection" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dmatushkin/DependencyInjection.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		568A962C251614DF007CBA29 /* XCRemoteSwiftPackageReference "CommonError" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dmatushkin/CommonError.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		568A9633251614F5007CBA29 /* XCRemoteSwiftPackageReference "CloudKitSync" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dmatushkin/CloudKitSync.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		568A964125161663007CBA29 /* XCRemoteSwiftPackageReference "CoreStore" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/JohnEstropia/CoreStore";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		568A9626251614BE007CBA29 /* DependencyInjection */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A9625251614BE007CBA29 /* XCRemoteSwiftPackageReference "DependencyInjection" */;
+			productName = DependencyInjection;
+		};
+		568A962D251614DF007CBA29 /* CommonError */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A962C251614DF007CBA29 /* XCRemoteSwiftPackageReference "CommonError" */;
+			productName = CommonError;
+		};
+		568A9634251614F5007CBA29 /* CloudKitSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A9633251614F5007CBA29 /* XCRemoteSwiftPackageReference "CloudKitSync" */;
+			productName = CloudKitSync;
+		};
+		568A963B25161509007CBA29 /* DependencyInjection */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A9625251614BE007CBA29 /* XCRemoteSwiftPackageReference "DependencyInjection" */;
+			productName = DependencyInjection;
+		};
+		568A963D2516150F007CBA29 /* CommonError */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A962C251614DF007CBA29 /* XCRemoteSwiftPackageReference "CommonError" */;
+			productName = CommonError;
+		};
+		568A963F25161515007CBA29 /* CloudKitSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A9633251614F5007CBA29 /* XCRemoteSwiftPackageReference "CloudKitSync" */;
+			productName = CloudKitSync;
+		};
+		568A964225161663007CBA29 /* CoreStore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A964125161663007CBA29 /* XCRemoteSwiftPackageReference "CoreStore" */;
+			productName = CoreStore;
+		};
+		568A964825161670007CBA29 /* CoreStore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 568A964125161663007CBA29 /* XCRemoteSwiftPackageReference "CoreStore" */;
+			productName = CoreStore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5693BAB024B0F50E0031BF9C /* Project object */;
 }
