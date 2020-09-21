@@ -28,9 +28,14 @@ struct ShoppingListScreen: View {
 								shoppingListModel.toggle(item: item)
 							}
 					}.onDelete { indexSet in
-					}
+					}.onMove(perform: {from, to in
+						shoppingListModel.move(from: from, toRow: to, fromSection: section)
+						print("from \(from) to \(to)")
+					})
 				}
-			}
+			}.onMove(perform: {from, to in
+				print("from \(from) to \(to)")
+			})
 		}.swipeActions(editAction: {path in
 
 		}, deleteAction: {path in

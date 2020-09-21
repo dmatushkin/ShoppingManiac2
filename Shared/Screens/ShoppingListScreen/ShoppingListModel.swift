@@ -69,4 +69,8 @@ class ShoppingListModel: ObservableObject {
 								items: $0.id == section.id ? $0.items.filter({ filtered in filtered.id != item.id }) : $0.items)
 		})
 	}
+
+	func move(from: IndexSet, toRow: Int, fromSection: ShoppingListSection) {
+
+	}
 }
