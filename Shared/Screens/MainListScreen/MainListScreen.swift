@@ -9,7 +9,6 @@ import SwiftUI
 
 struct MainListScreen: View {
 	@StateObject private var model = MainListModel()
-	@State private var selectedItem: MainListItem?
 	@State private var showAddListPanel = false
 	@State private var listToAddName: String = ""
 
@@ -19,7 +18,7 @@ struct MainListScreen: View {
 				NavigationLink(
 					destination: ShoppingListScreen(mainListItem: item),
 					tag: item,
-					selection: $selectedItem,
+					selection: $model.selectedItem,
 					label: {
 						MainListCell(listName: item.name, isCompleted: item.isCompleted, isRemote: item.isRemote)
 					})
@@ -32,7 +31,7 @@ struct MainListScreen: View {
 									}, label: {
 										Image(systemName: "doc.badge.plus").imageScale(.large)
 									}).sheet(isPresented: $showAddListPanel, content: {
-										AddShoppingListScreen(listToAddName: $listToAddName, showAddListPanel: $showAddListPanel, selectedItem: $selectedItem, model: model)
+										AddShoppingListScreen(listToAddName: $listToAddName, showAddListPanel: $showAddListPanel, model: model)
 									})
 			)
 			VStack {
