@@ -9,20 +9,30 @@ import SwiftUI
 
 struct MainListScreen: View {
 	@StateObject private var model = MainListModel()
+	@State private var selectedItem: MainListItem?
+	@State private var showAddListPanel = false
+	@State private var listToAddName: String = ""
 
 	var body: some View {
 		NavigationView {
 			List(model.items) { item in
 				NavigationLink(
-					destination: ShoppingListScreen(),
+					destination: ShoppingListScreen(mainListItem: item),
+					tag: item,
+					selection: $selectedItem,
 					label: {
 						MainListCell(listName: item.name, isCompleted: item.isCompleted, isRemote: item.isRemote)
 					})
 			}.listStyle(PlainListStyle())
 			.navigationTitle(Text("Shopping Lists"))
 			.navigationBarItems(trailing:
-									Button(action: {}, label: {
+									Button(action: {
+										listToAddName = ""
+										showAddListPanel = true
+									}, label: {
 										Image(systemName: "doc.badge.plus").imageScale(.large)
+									}).sheet(isPresented: $showAddListPanel, content: {
+										AddShoppingListScreen(listToAddName: $listToAddName, showAddListPanel: $showAddListPanel, selectedItem: $selectedItem, model: model)
 									})
 			)
 			VStack {

@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-struct MainListItem: Identifiable {
+struct MainListItem: Identifiable, Hashable {
 	var id: NSManagedObjectID
 	let name: String
 	let isRemote: Bool

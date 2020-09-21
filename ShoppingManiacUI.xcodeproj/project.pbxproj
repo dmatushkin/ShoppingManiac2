@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		45B755E52518C5E400891701 /* AddShoppingListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B755E42518C5E400891701 /* AddShoppingListScreen.swift */; };
+		45B755E62518C5E400891701 /* AddShoppingListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B755E42518C5E400891701 /* AddShoppingListScreen.swift */; };
 		568A9627251614BE007CBA29 /* DependencyInjection in Frameworks */ = {isa = PBXBuildFile; productRef = 568A9626251614BE007CBA29 /* DependencyInjection */; };
 		568A962E251614DF007CBA29 /* CommonError in Frameworks */ = {isa = PBXBuildFile; productRef = 568A962D251614DF007CBA29 /* CommonError */; };
 		568A9635251614F5007CBA29 /* CloudKitSync in Frameworks */ = {isa = PBXBuildFile; productRef = 568A9634251614F5007CBA29 /* CloudKitSync */; };
@@ -67,6 +69,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		45B755E42518C5E400891701 /* AddShoppingListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShoppingListScreen.swift; sourceTree = "<group>"; };
 		568A964E25161D7B007CBA29 /* ShoppinngListSwipeActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppinngListSwipeActions.swift; sourceTree = "<group>"; };
 		5693BAB524B0F50E0031BF9C /* ShoppingManiacUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingManiacUIApp.swift; sourceTree = "<group>"; };
 		5693BAB724B0F50F0031BF9C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -230,6 +233,7 @@
 				5693BAF724B0F5FF0031BF9C /* MainListCell.swift */,
 				5693BAFA24B1008F0031BF9C /* MainListModel.swift */,
 				5693BAFD24B100B20031BF9C /* MainListItem.swift */,
+				45B755E42518C5E400891701 /* AddShoppingListScreen.swift */,
 			);
 			path = MainListScreen;
 			sourceTree = "<group>";
@@ -434,6 +438,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				56D659C624B236E800B7DC0A /* ShoppingListCell.swift in Sources */,
+				45B755E52518C5E400891701 /* AddShoppingListScreen.swift in Sources */,
 				5693BAF524B0F5700031BF9C /* MainListScreen.swift in Sources */,
 				5693BAFB24B1008F0031BF9C /* MainListModel.swift in Sources */,
 				56CF9C6224D4129B00A12DD1 /* PreviewModeEnvironment.swift in Sources */,
@@ -454,6 +459,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				56D659C724B236E800B7DC0A /* ShoppingListCell.swift in Sources */,
+				45B755E62518C5E400891701 /* AddShoppingListScreen.swift in Sources */,
 				5693BAF624B0F5700031BF9C /* MainListScreen.swift in Sources */,
 				5693BAFC24B1008F0031BF9C /* MainListModel.swift in Sources */,
 				56CF9C6324D4129B00A12DD1 /* PreviewModeEnvironment.swift in Sources */,

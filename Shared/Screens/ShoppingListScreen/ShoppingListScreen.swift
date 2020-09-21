@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct ShoppingListScreen: View {
 	@ObservedObject
@@ -13,8 +14,8 @@ struct ShoppingListScreen: View {
 	@State
 	private var editMode = EditMode.inactive
 
-	init() {
-		shoppingListModel = ShoppingListModel()
+	init(mainListItem: MainListItem) {
+		shoppingListModel = ShoppingListModel(mainListItem: mainListItem)
 	}
 	
     var body: some View {
@@ -43,6 +44,6 @@ struct ShoppingListScreen: View {
 
 struct ShoppingListScreen_Previews: PreviewProvider {
     static var previews: some View {
-        ShoppingListScreen()
+        ShoppingListScreen(mainListItem: MainListItem(id: NSManagedObjectID(), name: "test", isRemote: false, isCompleted: false))
     }
 }

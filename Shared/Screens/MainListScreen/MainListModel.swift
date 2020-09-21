@@ -19,4 +19,10 @@ class MainListModel: ObservableObject {
 		MainListItem(id: NSManagedObjectID(), name: "Test 2", isRemote: false, isCompleted: false),
 		MainListItem(id: NSManagedObjectID(), name: "Test 3", isRemote: false, isCompleted: true),
 	]
+
+	func addList(withTitle title: String) -> MainListItem {
+		let list = MainListItem(id: NSManagedObjectID(), name: title, isRemote: false, isCompleted: false)
+		items.insert(list, at: 0)
+		return list
+	}
 }
