@@ -7,13 +7,18 @@
 
 import SwiftUI
 
+enum Screens {
+    enum Main {}
+}
+
+
 @main
-struct ShoppingManiac2App: App {
+struct ShoppingManiacApp: App {
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainScreen()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
