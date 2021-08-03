@@ -15,7 +15,9 @@ struct PersistenceController {
         let viewContext = result.container.viewContext
         for _ in 0..<10 {
             let newItem = ShoppingList(context: viewContext)
-            newItem.date = Date().timeIntervalSinceReferenceDate
+            let date = Date()
+            newItem.date = date.timeIntervalSinceReferenceDate
+            newItem.name = date.description
         }
         do {
             try viewContext.save()
