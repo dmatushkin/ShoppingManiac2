@@ -15,6 +15,6 @@ struct StoresScreen: View {
 
 struct StoresScreen_Previews: PreviewProvider {
     static var previews: some View {
-        StoresScreen().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        StoresScreen()
     }
 }

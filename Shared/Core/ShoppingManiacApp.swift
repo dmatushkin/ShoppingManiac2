@@ -7,19 +7,16 @@
 
 import SwiftUI
 
-enum Screens {
-    enum Main {}
-}
-
-
 @main
 struct ShoppingManiacApp: App {
-    let persistenceController = PersistenceController.shared
+    let persistenceController:PersistenceController = {
+        PersistenceController.previewMode = true
+        return PersistenceController.preview
+    }()
 
     var body: some Scene {
         WindowGroup {
             MainScreen()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }

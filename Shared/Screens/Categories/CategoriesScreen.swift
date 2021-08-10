@@ -15,6 +15,6 @@ struct CategoriesScreen: View {
 
 struct CategoriesScreen_Previews: PreviewProvider {
     static var previews: some View {
-        CategoriesScreen().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        CategoriesScreen()
     }
 }

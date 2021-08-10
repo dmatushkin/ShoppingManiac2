@@ -36,6 +36,6 @@ struct MainScreen: View {
 
 struct MainScreen_Previews: PreviewProvider {
     static var previews: some View {
-        MainScreen().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        MainScreen()
     }
 }

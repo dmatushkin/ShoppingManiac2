@@ -9,7 +9,26 @@
 import Foundation
 import CoreData
 
+extension String {
+    
+    var nilIfEmpty: String? {
+        guard !self.isEmpty else { return nil }
+        return self
+    }
+}
+
 public class ShoppingList: NSManagedObject {
+    
+    private var dateString: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = DateFormatter.Style.long
+        dateFormatter.timeStyle = DateFormatter.Style.none
+        return dateFormatter.string(from: Date(timeIntervalSinceReferenceDate: self.date))
+    }
+    
+    var title: String {
+        return self.name?.nilIfEmpty ?? self.dateString
+    }
 
     /*var listItems: [ShoppingListItem] {
         return (Array(self.items ?? []) as? [ShoppingListItem]) ?? []
@@ -22,13 +41,6 @@ public class ShoppingList: NSManagedObject {
     var isPurchased: Bool {
         guard let items = self.items else { return false }
         return items.count > 0 && (items.allObjects as? [ShoppingListItem] ?? []).filter({ $0.purchased == false }).isEmpty
-    }
-
-    fileprivate var dateString: String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = DateFormatter.Style.long
-        dateFormatter.timeStyle = DateFormatter.Style.none
-        return dateFormatter.string(from: Date(timeIntervalSinceReferenceDate: self.date))
     }
 
     var jsonDate: String {
@@ -47,14 +59,6 @@ public class ShoppingList: NSManagedObject {
             } else {
                 self.date = Date().timeIntervalSinceReferenceDate
             }
-        }
-    }
-
-    var title: String {
-        if let name = self.name, name.isEmpty == false {
-            return name
-        } else {
-            return self.dateString
         }
     }
 
