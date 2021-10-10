@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import DependencyInjection
 
 @main
 struct ShoppingManiacApp: App {
-    let persistenceController:PersistenceController = {
-        PersistenceController.previewMode = true
-        return PersistenceController.preview
-    }()
+    
+    private let diProvider = DIProvider.shared
+        .register(forType: ContextProviderProtocol.self, dependency: ContextProvider.self)
+        .register(forType: DAOProtocol.self, dependency: DAO.self)
 
     var body: some Scene {
         WindowGroup {

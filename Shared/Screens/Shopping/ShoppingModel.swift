@@ -7,59 +7,33 @@
 
 import SwiftUI
 import Combine
-import CoreData
+import DependencyInjection
 
-final class ShoppingModel: NSObject, ObservableObject, NSFetchedResultsControllerDelegate {
+@MainActor
+final class ShoppingModel: ObservableObject {
     
-    var objectWillChange = PassthroughSubject<Void, Never>()
-    private let viewContext: NSManagedObjectContext
-    var items: [ShoppingList] = []
-    private var controller: NSFetchedResultsController<ShoppingList>!
+    @Autowired(cacheType: .share) private var dao: DAOProtocol
     
-    override init() {
-        self.viewContext = PersistenceController.viewContext
-        super.init()
-        guard self.viewContext.persistentStoreCoordinator != nil else {
-            print("No persistent store coordinator found")
-            return
-        }
-        let fetchRequest = NSFetchRequest<ShoppingList>(entityName: "ShoppingList")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \ShoppingList.date, ascending: false)]
-        self.controller = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.viewContext, sectionNameKeyPath: nil, cacheName: nil)
-        self.controller.delegate = self
-        try? self.controller.performFetch()
-        self.items = self.controller.fetchedObjects ?? []
-    }
-        
-    func addItem() {
-        withAnimation {
-            let newItem = ShoppingList(context: viewContext)
-            newItem.date = Date().timeIntervalSinceReferenceDate
-
-            do {
-                try viewContext.save()
-            } catch {
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+    @Published var items: [ShoppingListModel] = []
+    @Published var showAddSheet: Bool = false
+    
+    init() {
+        Task {
+            items = try await dao.getShoppingLists()
         }
     }
-
-    func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
+            
+    func addItem(name: String) async throws {
+        showAddSheet = false
+        try await dao.addShoppingList(name: name)
+        items = try await dao.getShoppingLists()
     }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.items = self.controller.fetchedObjects ?? []
-        self.objectWillChange.send()
+
+    func deleteItems(offsets: IndexSet) async throws {
+        let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
+        for item in itemsToDelete {
+            try await dao.deleteShoppingList(item)
+        }
+        items = try await dao.getShoppingLists()
     }
 }

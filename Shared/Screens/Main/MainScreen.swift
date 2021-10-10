@@ -11,23 +11,23 @@ struct MainScreen: View {
     var body: some View {
         TabView {
             ShoppingScreen().tabItem {
-                Image(systemName: "list.bullet")
+                Image("documents")
                 Text("Shopping")
             }
             GoodsScreen().tabItem {
-                Image(systemName: "square.grid.3x2")
+                Image("goods")
                 Text("Goods")
             }
             StoresScreen().tabItem {
-                Image(systemName: "house")
+                Image("store")
                 Text("Stores")
             }
             CategoriesScreen().tabItem {
-                Image(systemName: "rectangle.3.offgrid")
+                Image("categories")
                 Text("Categories")
             }
             AboutScreen().tabItem {
-                Image(systemName: "cart")
+                Image("empty_cart")
                 Text("About")
             }
         }
