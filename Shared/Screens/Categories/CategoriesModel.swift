@@ -22,15 +22,13 @@ final class CategoriesModel: ObservableObject {
             items = try await dao.getCategories()
         }
     }
-    
-    func addCategory(name: String) async throws {
-        _ = try await dao.addCategory(name: name)
-        items = try await dao.getCategories()
-        showAddSheet = false
-    }
-    
-    func editCategory(item: CategoriesItemModel, name: String) async throws {
-        _ = try await dao.editCategory(item: item, name: name)
+        
+    func editCategory(item: CategoriesItemModel?, name: String) async throws {
+        if let item = item {
+            _ = try await dao.editCategory(item: item, name: name)
+        } else {
+            _ = try await dao.addCategory(name: name)
+        }        
         items = try await dao.getCategories()
     }
     

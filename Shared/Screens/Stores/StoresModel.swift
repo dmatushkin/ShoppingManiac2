@@ -22,15 +22,13 @@ final class StoresModel: ObservableObject {
             items = try await dao.getStores()
         }
     }
-    
-    func addStore(name: String) async throws {
-        _ = try await dao.addStore(name: name)
-        items = try await dao.getStores()
-        showAddSheet = false
-    }
-    
-    func editStore(item: StoresItemModel, name: String) async throws {
-        _ = try await dao.editStore(item: item, name: name)
+        
+    func editStore(item: StoresItemModel?, name: String) async throws {
+        if let item = item {
+            _ = try await dao.editStore(item: item, name: name)
+        } else {
+            _ = try await dao.addStore(name: name)
+        }        
         items = try await dao.getStores()
     }
     

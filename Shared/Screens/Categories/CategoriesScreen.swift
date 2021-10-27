@@ -32,9 +32,9 @@ struct CategoriesScreen: View {
                     }) {
                         Label("Add Item", systemImage: "plus")
                     }
-                }.navigationTitle("Shopping lists")
+                }.navigationTitle("Categories")
         }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
-            AddCategoryView(model: model)
+            EditCategoryView(model: model, item: nil)
         })
     }
 }

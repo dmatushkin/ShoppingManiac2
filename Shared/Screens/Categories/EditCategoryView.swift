@@ -10,23 +10,24 @@ import SwiftUI
 struct EditCategoryView: View {
     
     let model: CategoriesModel
-    let item: CategoriesItemModel
+    let item: CategoriesItemModel?
     @State private var name: String = ""
     @Environment(\.presentationMode) var presentation
     
     var body: some View {
         VStack {
             TextField("Category name", text: $name).textFieldStyle(.roundedBorder)
-            Button("Save", action: {
+            Button(item == nil ? "Add" : "Save", action: {
                 Task {
                     try await model.editCategory(item: item, name: name)
                     presentation.wrappedValue.dismiss()
                 }
             }).padding([.top])
             Spacer()
-        }.padding().background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+        }.padding()
+            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
             .onAppear(perform: {
-                name = item.name
-        })
+                name = item?.name ?? ""
+            }).navigationTitle("Edit category")
     }
 }
