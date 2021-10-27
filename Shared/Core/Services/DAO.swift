@@ -21,8 +21,15 @@ protocol DAOProtocol {
     func getGoods() async throws -> [GoodsItemModel]
     func addGood(name: String, category: String) async throws -> GoodsItemModel
     func editGood(item: GoodsItemModel, name: String, category: String) async throws -> GoodsItemModel
+    func removeGood(item: GoodsItemModel) async throws
     func getCategories() async throws -> [CategoriesItemModel]
     func addCategory(name: String) async throws -> CategoriesItemModel
+    func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel
+    func removeCategory(item: CategoriesItemModel) async throws
+    func getStores() async throws -> [StoresItemModel]
+    func addStore(name: String) async throws -> StoresItemModel
+    func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel
+    func removeStore(item: StoresItemModel) async throws
 }
 
 final class DAO: DAOProtocol, DIDependency {
@@ -35,6 +42,9 @@ final class DAO: DAOProtocol, DIDependency {
         case unableToCreateGood
         case unableToGetGood
         case unableToCreateCategory
+        case unableToGetCategory
+        case unableToCreateStore
+        case unableToGetStore
     }
     
     @Autowired(cacheType: .share, instantiateOnInit: true) private var contextProvider: ContextProviderProtocol
@@ -102,7 +112,7 @@ final class DAO: DAOProtocol, DIDependency {
         let context = contextProvider.getContext()
         return try await context.perform({[weak self] in
             guard let shoppingList = try context.existingObject(with: list.id) as? ShoppingList else { throw DBError.unableToGetShoppingList }
-            guard let item = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem else { throw DBError.unableToCreateShoppingItem }
+            guard !name.isEmpty, let item = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem else { throw DBError.unableToCreateShoppingItem }
             item.list = shoppingList
             item.good = try self?.createOrGetGood(name: name, context: context)
             item.quantity = Float(amount) ?? 1
@@ -119,6 +129,17 @@ final class DAO: DAOProtocol, DIDependency {
         guard let good = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good else { throw DBError.unableToCreateGood }
         good.name = name
         return good
+    }
+    
+    private func createOrGetStore(name: String, context: NSManagedObjectContext) throws -> Store {
+        let request = NSFetchRequest<Store>(entityName: "Store")
+        request.predicate = NSPredicate(format: "name == %@", name)
+        if let store = try context.fetch(request).first {
+            return store
+        }
+        guard let store = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store else { throw DBError.unableToCreateStore }
+        store.name = name
+        return store
     }
     
     func removeShoppingListItem(item: ShoppingListItemModel) async throws {
@@ -190,6 +211,21 @@ final class DAO: DAOProtocol, DIDependency {
         return category
     }
     
+    func removeGood(item: GoodsItemModel) async throws {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard let good = try context.existingObject(with: item.id) as? Good else { throw DBError.unableToGetGood }
+            let request = NSFetchRequest<ShoppingListItem>(entityName: "ShoppingListItem")
+            request.predicate = NSPredicate(format: "good == %@", good)
+            let items: [ShoppingListItem] = try context.fetch(request)
+            for item in items {
+                item.isRemoved = true
+            }
+            context.delete(good)
+            try context.save()
+        })
+    }
+    
     func getCategories() async throws -> [CategoriesItemModel] {
         let context = contextProvider.getContext()
         return try await context.perform({
@@ -209,6 +245,66 @@ final class DAO: DAOProtocol, DIDependency {
             category.name = name
             try context.save()
             return CategoriesItemModel(id: category.objectID, name: category.name ?? "")
+        })
+    }
+    
+    func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard !name.isEmpty, let category = try context.existingObject(with: item.id) as? Category else { throw DBError.unableToGetCategory }
+            category.name = name
+            try context.save()
+            return CategoriesItemModel(id: category.objectID, name: category.name ?? "")
+        })
+    }
+    
+    func removeCategory(item: CategoriesItemModel) async throws {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard let category = try context.existingObject(with: item.id) as? Category else { throw DBError.unableToGetCategory }
+            context.delete(category)
+            try context.save()
+        })
+    }
+    
+    func getStores() async throws -> [StoresItemModel] {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            let request = NSFetchRequest<Store>(entityName: "Store")
+            request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+            let items: [Store] = try context.fetch(request)
+            return items.filter({ $0.name?.isEmpty == false }).map({ store in
+                StoresItemModel(id: store.objectID, name: store.name ?? "")
+            })
+        })
+    }
+    
+    func addStore(name: String) async throws -> StoresItemModel {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard !name.isEmpty, let store = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store else { throw DBError.unableToCreateStore }
+            store.name = name
+            try context.save()
+            return StoresItemModel(id: store.objectID, name: store.name ?? "")
+        })
+    }
+    
+    func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard !name.isEmpty, let store = try context.existingObject(with: item.id) as? Store else { throw DBError.unableToGetStore }
+            store.name = name
+            try context.save()
+            return StoresItemModel(id: store.objectID, name: store.name ?? "")
+        })
+    }
+    
+    func removeStore(item: StoresItemModel) async throws {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard let store = try context.existingObject(with: item.id) as? Store else { throw DBError.unableToGetStore }
+            context.delete(store)
+            try context.save()
         })
     }
 }

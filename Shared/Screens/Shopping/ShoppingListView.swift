@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ShoppingListView: View {
     
-    @StateObject private var model: ShoppingListViewModel = ShoppingListViewModel()
+    @StateObject private var model = ShoppingListViewModel()
     private let listModel: ShoppingListModel
     
     init(listModel: ShoppingListModel) {

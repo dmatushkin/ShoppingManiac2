@@ -9,7 +9,7 @@ import SwiftUI
 
 struct GoodsScreen: View {
     
-    @StateObject private var model: GoodsModel = GoodsModel()
+    @StateObject private var model = GoodsModel()
     
     var body: some View {
         NavigationView {
@@ -20,7 +20,11 @@ struct GoodsScreen: View {
                     }, label: {
                         Text(item.name)
                     })
-                }
+                }.onDelete(perform: {indexSet in
+                    Task {
+                        try await model.removeGood(offsets: indexSet)
+                    }
+                })
             }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
                 .toolbar {
                     Button(action: {

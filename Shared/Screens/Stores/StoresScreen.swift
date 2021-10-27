@@ -8,8 +8,34 @@
 import SwiftUI
 
 struct StoresScreen: View {
+    
+    @StateObject private var model = StoresModel()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationView {
+            List {
+                ForEach(model.items) { item in
+                    NavigationLink(destination: {
+                        NavigationLazyView(EditStoreView(model: model, item: item))
+                    }, label: {
+                        Text(item.name)
+                    })
+                }.onDelete(perform: {indexSet in
+                    Task {
+                        try await model.removeStore(offsets: indexSet)
+                    }
+                })
+            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                .toolbar {
+                    Button(action: {
+                        model.showAddSheet = true
+                    }) {
+                        Label("Add Item", systemImage: "plus")
+                    }
+                }.navigationTitle("Shopping lists")
+        }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
+            AddStoreView(model: model)
+        })
     }
 }
 

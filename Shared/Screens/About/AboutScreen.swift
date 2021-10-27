@@ -9,7 +9,13 @@ import SwiftUI
 
 struct AboutScreen: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            HStack {
+                Text("ShoppingManiac V2").padding()
+                Spacer()
+            }            
+            Spacer()
+        }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
     }
 }
 

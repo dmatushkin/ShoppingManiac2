@@ -33,4 +33,12 @@ final class GoodsModel: ObservableObject {
         _ = try await dao.editGood(item: item, name: name, category: category)
         items = try await dao.getGoods()
     }
+    
+    func removeGood(offsets: IndexSet) async throws {
+        let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
+        for item in itemsToDelete {
+            try await dao.removeGood(item: item)
+        }
+        items = try await dao.getGoods()
+    }
 }

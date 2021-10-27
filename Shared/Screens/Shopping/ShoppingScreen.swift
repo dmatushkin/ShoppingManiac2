@@ -10,7 +10,7 @@ import CoreData
 
 struct ShoppingScreen: View {
     
-    @StateObject private var model: ShoppingModel = ShoppingModel()
+    @StateObject private var model = ShoppingModel()
     
     var body: some View {
         NavigationView {
