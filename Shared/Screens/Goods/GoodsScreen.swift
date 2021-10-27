@@ -8,8 +8,30 @@
 import SwiftUI
 
 struct GoodsScreen: View {
+    
+    @StateObject private var model: GoodsModel = GoodsModel()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationView {
+            List {
+                ForEach(model.items) { item in
+                    NavigationLink(destination: {
+                        NavigationLazyView(EditGoodView(model: model, item: item))
+                    }, label: {
+                        Text(item.name)
+                    })
+                }
+            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                .toolbar {
+                    Button(action: {
+                        model.showAddSheet = true
+                    }) {
+                        Label("Add Item", systemImage: "plus")
+                    }
+                }.navigationTitle("Shopping lists")
+        }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
+            AddGoodView(model: model)
+        })
     }
 }
 

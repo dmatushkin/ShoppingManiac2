@@ -16,6 +16,7 @@ final class ShoppingModel: ObservableObject {
     
     @Published var items: [ShoppingListModel] = []
     @Published var showAddSheet: Bool = false
+    @Published var itemToOpen: ShoppingListModel?
     
     init() {
         Task {
@@ -25,8 +26,9 @@ final class ShoppingModel: ObservableObject {
             
     func addItem(name: String) async throws {
         showAddSheet = false
-        try await dao.addShoppingList(name: name)
+        let item = try await dao.addShoppingList(name: name)
         items = try await dao.getShoppingLists()
+        itemToOpen = item
     }
 
     func deleteItems(offsets: IndexSet) async throws {

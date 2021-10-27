@@ -25,6 +25,6 @@ struct AddShoppingListView: View {
                 }
             }).padding([.top])
             Spacer()
-        }.padding()
+        }.padding().background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
     }
 }

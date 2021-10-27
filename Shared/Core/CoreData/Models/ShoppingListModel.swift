@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-struct ShoppingListModel: Identifiable {
+struct ShoppingListModel: Identifiable, Hashable {
     let id: NSManagedObjectID
     let title: String
 }

@@ -8,6 +8,12 @@
 import SwiftUI
 
 struct MainScreen: View {
+    
+    init() {
+        UITableView.appearance().backgroundColor = .clear
+        UITableViewCell.appearance().backgroundColor = .clear
+    }
+    
     var body: some View {
         TabView {
             ShoppingScreen().tabItem {
