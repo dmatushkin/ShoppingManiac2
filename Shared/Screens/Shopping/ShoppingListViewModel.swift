@@ -23,13 +23,26 @@ final class ShoppingListViewModel: ObservableObject {
         }
     }
     
-    func addShoppingListItem(name: String, amount: String) async throws {
+    func addShoppingListItem(name: String,
+                             amount: String,
+                             store: String,
+                             isWeight: Bool,
+                             price: String,
+                             isImportant: Bool,
+                             rating: Int) async throws {
         showAddSheet = false
         guard let listModel = listModel else { return }
-        try await dao.addShoppingListItem(list: listModel, name: name, amount: amount)
+        try await dao.addShoppingListItem(list: listModel,
+                                          name: name,
+                                          amount: amount,
+                                          store: store,
+                                          isWeight: isWeight,
+                                          price: price,
+                                          isImportant: isImportant,
+                                          rating: rating)
         listItems = try await dao.getShoppingListItems(list: listModel)
     }
-    
+        
     func removeShoppingListItem(offsets: IndexSet) async throws {
         guard let listModel = listModel else { return }
         let itemsToDelete = listItems.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })

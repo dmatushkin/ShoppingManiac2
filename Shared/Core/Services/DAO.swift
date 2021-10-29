@@ -15,7 +15,14 @@ protocol DAOProtocol {
     func addShoppingList(name: String) async throws -> ShoppingListModel
     func removeShoppingList(_ item: ShoppingListModel) async throws
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel]
-    func addShoppingListItem(list: ShoppingListModel, name: String, amount: String) async throws
+    func addShoppingListItem(list: ShoppingListModel,
+                             name: String,
+                             amount: String,
+                             store: String,
+                             isWeight: Bool,
+                             price: String,
+                             isImportant: Bool,
+                             rating: Int) async throws
     func removeShoppingListItem(item: ShoppingListItemModel) async throws
     func togglePurchasedShoppingListItem(item: ShoppingListItemModel) async throws
     func getGoods() async throws -> [GoodsItemModel]
@@ -108,14 +115,28 @@ final class DAO: DAOProtocol, DIDependency {
         })
     }
     
-    func addShoppingListItem(list: ShoppingListModel, name: String, amount: String) async throws {
+    func addShoppingListItem(list: ShoppingListModel,
+                             name: String,
+                             amount: String,
+                             store: String,
+                             isWeight: Bool,
+                             price: String,
+                             isImportant: Bool,
+                             rating: Int) async throws {
         let context = contextProvider.getContext()
         return try await context.perform({[weak self] in
             guard let shoppingList = try context.existingObject(with: list.id) as? ShoppingList else { throw DBError.unableToGetShoppingList }
             guard !name.isEmpty, let item = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem else { throw DBError.unableToCreateShoppingItem }
             item.list = shoppingList
             item.good = try self?.createOrGetGood(name: name, context: context)
+            item.good?.personalRating = Int16(rating)
             item.quantity = Float(amount) ?? 1
+            item.isWeight = isWeight
+            item.price = Float(price) ?? 0
+            item.isImportant = isImportant
+            if !store.isEmpty {
+                item.store = try self?.createOrGetStore(name: store, context: context)
+            }
             try context.save()
         })
     }
