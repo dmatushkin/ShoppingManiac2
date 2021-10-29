@@ -13,7 +13,7 @@ import CommonError
 protocol DAOProtocol {
     func getShoppingLists() async throws -> [ShoppingListModel]
     func addShoppingList(name: String) async throws -> ShoppingListModel
-    func deleteShoppingList(_ item: ShoppingListModel) async throws
+    func removeShoppingList(_ item: ShoppingListModel) async throws
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel]
     func addShoppingListItem(list: ShoppingListModel, name: String, amount: String) async throws
     func removeShoppingListItem(item: ShoppingListItemModel) async throws
@@ -81,7 +81,7 @@ final class DAO: DAOProtocol, DIDependency {
         })
     }
     
-    func deleteShoppingList(_ item: ShoppingListModel) async throws {
+    func removeShoppingList(_ item: ShoppingListModel) async throws {
         let context = contextProvider.getContext()
         return try await context.perform({
             guard let item = try context.existingObject(with: item.id) as? ShoppingList else { throw DBError.unableToGetShoppingList }

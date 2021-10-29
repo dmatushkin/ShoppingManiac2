@@ -34,7 +34,7 @@ final class ShoppingModel: ObservableObject {
     func deleteItems(offsets: IndexSet) async throws {
         let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
         for item in itemsToDelete {
-            try await dao.deleteShoppingList(item)
+            try await dao.removeShoppingList(item)
         }
         items = try await dao.getShoppingLists()
     }

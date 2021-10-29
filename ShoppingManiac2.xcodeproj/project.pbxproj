@@ -55,8 +55,20 @@
 		565928D027131CA200B3EDE0 /* AddShoppingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565928CE27131CA200B3EDE0 /* AddShoppingListView.swift */; };
 		565928D227131F2000B3EDE0 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565928D127131F2000B3EDE0 /* StringExtension.swift */; };
 		565928D327131F2000B3EDE0 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565928D127131F2000B3EDE0 /* StringExtension.swift */; };
-		567DDE582675138600F59A54 /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567DDE572675138600F59A54 /* Tests_iOS.swift */; };
-		567DDE622675138600F59A54 /* Tests_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567DDE612675138600F59A54 /* Tests_macOS.swift */; };
+		567CC717272AA6F800CFA3F9 /* DAOTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567CC716272AA6F800CFA3F9 /* DAOTest.swift */; };
+		567CC718272AA6F800CFA3F9 /* DAOTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567CC716272AA6F800CFA3F9 /* DAOTest.swift */; };
+		567CC719272AA83200CFA3F9 /* ShoppingManiac.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 56F5742426B99C50007069D4 /* ShoppingManiac.xcdatamodeld */; };
+		567CC71A272AA83300CFA3F9 /* ShoppingManiac.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 56F5742426B99C50007069D4 /* ShoppingManiac.xcdatamodeld */; };
+		567CC71B272AA84400CFA3F9 /* GoodsItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5DB272933F40019AB13 /* GoodsItemModel.swift */; };
+		567CC71C272AA84500CFA3F9 /* GoodsItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5DB272933F40019AB13 /* GoodsItemModel.swift */; };
+		567CC71D272AA84900CFA3F9 /* CategoriesItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5DE272936A80019AB13 /* CategoriesItemModel.swift */; };
+		567CC71E272AA84A00CFA3F9 /* CategoriesItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5DE272936A80019AB13 /* CategoriesItemModel.swift */; };
+		567CC71F272AA84D00CFA3F9 /* StoresItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5E727294B020019AB13 /* StoresItemModel.swift */; };
+		567CC720272AA84E00CFA3F9 /* StoresItemModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5E727294B020019AB13 /* StoresItemModel.swift */; };
+		567CC721272AA9F700CFA3F9 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565928D127131F2000B3EDE0 /* StringExtension.swift */; };
+		567CC722272AA9F700CFA3F9 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565928D127131F2000B3EDE0 /* StringExtension.swift */; };
+		567CC723272AAA0600CFA3F9 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567DDE422675138500F59A54 /* Persistence.swift */; };
+		567CC724272AAA0700CFA3F9 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567DDE422675138500F59A54 /* Persistence.swift */; };
 		567DDE652675138600F59A54 /* ShoppingManiacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567DDE402675138500F59A54 /* ShoppingManiacApp.swift */; };
 		567DDE662675138600F59A54 /* ShoppingManiacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567DDE402675138500F59A54 /* ShoppingManiacApp.swift */; };
 		567DDE692675138600F59A54 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 567DDE422675138500F59A54 /* Persistence.swift */; };
@@ -129,15 +141,14 @@
 		565928C92712C82500B3EDE0 /* ContextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextProvider.swift; sourceTree = "<group>"; };
 		565928CE27131CA200B3EDE0 /* AddShoppingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShoppingListView.swift; sourceTree = "<group>"; };
 		565928D127131F2000B3EDE0 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
+		567CC716272AA6F800CFA3F9 /* DAOTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DAOTest.swift; sourceTree = "<group>"; };
 		567DDE402675138500F59A54 /* ShoppingManiacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingManiacApp.swift; sourceTree = "<group>"; };
 		567DDE422675138500F59A54 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		567DDE432675138600F59A54 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		567DDE482675138600F59A54 /* ShoppingManiac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoppingManiac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		567DDE4E2675138600F59A54 /* ShoppingManiac2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoppingManiac2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		567DDE532675138600F59A54 /* Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		567DDE572675138600F59A54 /* Tests_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_iOS.swift; sourceTree = "<group>"; };
 		567DDE5D2675138600F59A54 /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		567DDE612675138600F59A54 /* Tests_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOS.swift; sourceTree = "<group>"; };
 		56A26C7E26751BAC0071BF85 /* MainScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreen.swift; sourceTree = "<group>"; };
 		56A26C82267521420071BF85 /* ShoppingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingScreen.swift; sourceTree = "<group>"; };
 		56A26C862675218A0071BF85 /* GoodsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoodsScreen.swift; sourceTree = "<group>"; };
@@ -244,7 +255,7 @@
 		567DDE562675138600F59A54 /* Tests iOS */ = {
 			isa = PBXGroup;
 			children = (
-				567DDE572675138600F59A54 /* Tests_iOS.swift */,
+				567CC716272AA6F800CFA3F9 /* DAOTest.swift */,
 			);
 			path = "Tests iOS";
 			sourceTree = "<group>";
@@ -252,7 +263,6 @@
 		567DDE602675138600F59A54 /* Tests macOS */ = {
 			isa = PBXGroup;
 			children = (
-				567DDE612675138600F59A54 /* Tests_macOS.swift */,
 			);
 			path = "Tests macOS";
 			sourceTree = "<group>";
@@ -485,7 +495,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1300;
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1310;
 				TargetAttributes = {
 					567DDE472675138600F59A54 = {
 						CreatedOnToolsVersion = 13.0;
@@ -495,7 +505,6 @@
 					};
 					567DDE522675138600F59A54 = {
 						CreatedOnToolsVersion = 13.0;
-						TestTargetID = 567DDE472675138600F59A54;
 					};
 					567DDE5C2675138600F59A54 = {
 						CreatedOnToolsVersion = 13.0;
@@ -642,10 +651,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				567CC719272AA83200CFA3F9 /* ShoppingManiac.xcdatamodeld in Sources */,
+				567CC717272AA6F800CFA3F9 /* DAOTest.swift in Sources */,
 				565928C22712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
+				567CC71B272AA84400CFA3F9 /* GoodsItemModel.swift in Sources */,
+				567CC71F272AA84D00CFA3F9 /* StoresItemModel.swift in Sources */,
 				565928BD2712C6B500B3EDE0 /* DAO.swift in Sources */,
 				565928C72712C77200B3EDE0 /* ShoppingListItemModel.swift in Sources */,
-				567DDE582675138600F59A54 /* Tests_iOS.swift in Sources */,
+				567CC71D272AA84900CFA3F9 /* CategoriesItemModel.swift in Sources */,
+				567CC723272AAA0600CFA3F9 /* Persistence.swift in Sources */,
+				567CC721272AA9F700CFA3F9 /* StringExtension.swift in Sources */,
 				565928CC2712C82500B3EDE0 /* ContextProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -654,10 +669,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				567CC71A272AA83300CFA3F9 /* ShoppingManiac.xcdatamodeld in Sources */,
+				567CC718272AA6F800CFA3F9 /* DAOTest.swift in Sources */,
 				565928C32712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
+				567CC71C272AA84500CFA3F9 /* GoodsItemModel.swift in Sources */,
+				567CC720272AA84E00CFA3F9 /* StoresItemModel.swift in Sources */,
 				565928BE2712C6B500B3EDE0 /* DAO.swift in Sources */,
 				565928C82712C77200B3EDE0 /* ShoppingListItemModel.swift in Sources */,
-				567DDE622675138600F59A54 /* Tests_macOS.swift in Sources */,
+				567CC71E272AA84A00CFA3F9 /* CategoriesItemModel.swift in Sources */,
+				567CC724272AAA0700CFA3F9 /* Persistence.swift in Sources */,
+				567CC722272AA9F700CFA3F9 /* StringExtension.swift in Sources */,
 				565928CD2712C82500B3EDE0 /* ContextProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -857,6 +878,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -886,6 +908,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -927,11 +950,11 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.md.Tests-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "ShoppingManiac2 (iOS)";
 			};
 			name = Debug;
 		};
@@ -952,11 +975,11 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.md.Tests-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "ShoppingManiac2 (iOS)";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
