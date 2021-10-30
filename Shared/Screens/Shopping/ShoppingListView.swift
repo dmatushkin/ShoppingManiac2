@@ -34,21 +34,19 @@ struct ShoppingListView: View {
                         }.tint(.red)
                         Button("Edit") {
                             model.itemToShow = item
-                        }                        
+                        }
                     }
                 }
             }
-            HStack {
-                Spacer()
-                Image("add_purchase_large").onTapGesture {
-                    model.showAddSheet = true
-                }.padding()
-            }
         }.onAppear(perform: { model.listModel = listModel })
             .toolbar {
-#if os(iOS)
-                EditButton()
-#endif
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Image(systemName: "square.and.arrow.up").onTapGesture {
+                    }
+                    Image("add_purchase_large").onTapGesture {
+                        model.showAddSheet = true
+                    }
+                }
             }
             .navigationTitle(Text(listModel.title))
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
@@ -64,6 +62,10 @@ struct ShoppingListView_Previews: PreviewProvider {
     static var previews: some View {
         DIProvider.shared
             .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), title: "test list")))
+            .showView(
+                NavigationView {
+                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), title: "test list"))
+                }
+            )
     }
 }

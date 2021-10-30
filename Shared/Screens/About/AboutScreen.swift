@@ -8,14 +8,24 @@
 import SwiftUI
 
 struct AboutScreen: View {
+    
+    let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown"
+    let longVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Unknown"
+    
     var body: some View {
-        VStack {
-            HStack {
-                Text("ShoppingManiac V2").padding()
+        NavigationView {
+            VStack {
+                HStack {
+                    Text("\(shortVersion) build \(longVersion)").padding().font(.headline)
+                    Spacer()
+                }
+                HStack {
+                    Text("Simple application to organize your shopping lists").padding()
+                    Spacer()
+                }
                 Spacer()
-            }            
-            Spacer()
-        }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all)).navigationTitle("ShoppingManiac")
+        }
     }
 }
 
