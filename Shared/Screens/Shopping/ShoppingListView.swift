@@ -26,6 +26,15 @@ struct ShoppingListView: View {
                         Task {
                             try await model.togglePurchased(item: item)
                         }
+                    }.swipeActions {
+                        Button("Delete") {
+                            Task {
+                                try await model.removeShoppingListItem(item: item)
+                            }
+                        }.tint(.red)
+                        Button("Edit") {
+                            model.itemToShow = item
+                        }                        
                     }
                 }.onDelete(perform: {indexSet in
                     Task {
@@ -48,8 +57,10 @@ struct ShoppingListView: View {
             .navigationTitle(Text(listModel.title))
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
-                AddShoppingListItemView(model: model)
-            })
+                EditShoppingListItemView(model: model, item: nil)
+            }).sheet(item: $model.itemToShow) { item in
+                EditShoppingListItemView(model: model, item: item)
+            }
     }
 }
 

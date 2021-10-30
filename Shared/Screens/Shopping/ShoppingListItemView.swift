@@ -29,13 +29,31 @@ struct ShoppingListItemView: View {
 
 struct ShoppingListItemView_Previews: PreviewProvider {
     static var previews: some View {
-        DIProvider.shared
-            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
-                                                                       title: "Test title",
-                                                                       store: "Test store",
-                                                                       category: "Test category",
-                                                                       isPurchased: false,
-                                                                       amount: "15")))
+        Group {
+            DIProvider.shared
+                .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+                .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                           title: "Test title",
+                                                                           store: "Test store",
+                                                                           category: "Test category",
+                                                                           isPurchased: false,
+                                                                           amount: "15",
+                                                                           isWeight: false,
+                                                                           price: "25",
+                                                                           isImportant: false,
+                                                                       rating: 5)).previewLayout(.fixed(width: 375, height: 50)))
+            DIProvider.shared
+                .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+                .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                           title: "Test title",
+                                                                           store: "Test store",
+                                                                           category: "Test category",
+                                                                           isPurchased: true,
+                                                                           amount: "15",
+                                                                           isWeight: false,
+                                                                           price: "25",
+                                                                           isImportant: false,
+                                                                           rating: 5)).previewLayout(.fixed(width: 375, height: 50)))
+        }
     }
 }
