@@ -20,13 +20,14 @@ struct CategoriesScreen: View {
                         NavigationLazyView(EditCategoryView(model: model, item: item))
                     }, label: {
                         Text(item.name)
-                    })
+                    }).listRowBackground(Color("backgroundColor"))
                 }.onDelete(perform: {indexSet in
                     Task {
                         try await model.removeStore(offsets: indexSet)
                     }
                 })
-            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            }.listStyle(.grouped)
+                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
                 .toolbar {
                     Button(action: {
                         model.showAddSheet = true

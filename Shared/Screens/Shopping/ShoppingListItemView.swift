@@ -24,6 +24,7 @@ struct ShoppingListItemView: View {
             Spacer()
             Text(item.amount)
         }.contentShape(Rectangle())
+            .listRowBackground(Color("backgroundColor"))
     }
 }
 

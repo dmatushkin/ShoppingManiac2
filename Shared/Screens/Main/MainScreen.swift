@@ -13,7 +13,6 @@ struct MainScreen: View {
     init() {
         #if os(iOS)
         UITableView.appearance().backgroundColor = .clear
-        UITableViewCell.appearance().backgroundColor = .clear
         #endif
     }
     

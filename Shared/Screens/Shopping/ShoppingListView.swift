@@ -37,7 +37,7 @@ struct ShoppingListView: View {
                         }
                     }
                 }
-            }
+            }.listStyle(.grouped)
         }.onAppear(perform: { model.listModel = listModel })
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {

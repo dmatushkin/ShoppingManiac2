@@ -21,14 +21,15 @@ struct ShoppingScreen: View {
                         NavigationLazyView(ShoppingListView(listModel: item))
                     }, label: {
                         Text(item.title)
-                    })
+                    }).listRowBackground(Color("backgroundColor"))
                 }
                 .onDelete(perform: {indexSet in
                     Task {
                         try await model.deleteItems(offsets: indexSet)
                     }
                 })
-            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            }.listStyle(.grouped)
+                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
                 .toolbar {
                     Button(action: {
                         model.showAddSheet = true
