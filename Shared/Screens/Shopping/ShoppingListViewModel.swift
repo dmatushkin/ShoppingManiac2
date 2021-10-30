@@ -71,16 +71,7 @@ final class ShoppingListViewModel: ObservableObject {
         showAddSheet = false
         itemToShow = nil
     }
-    
-    func removeShoppingListItem(offsets: IndexSet) async throws {
-        guard let listModel = listModel else { return }
-        let itemsToDelete = listItems.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
-        for item in itemsToDelete {
-            try await dao.removeShoppingListItem(item: item)
-        }
-        listItems = try await dao.getShoppingListItems(list: listModel)
-    }
-    
+        
     func removeShoppingListItem(item: ShoppingListItemModel) async throws {
         guard let listModel = listModel else { return }
         try await dao.removeShoppingListItem(item: item)

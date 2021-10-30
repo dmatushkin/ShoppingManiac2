@@ -36,11 +36,7 @@ struct ShoppingListView: View {
                             model.itemToShow = item
                         }                        
                     }
-                }.onDelete(perform: {indexSet in
-                    Task {
-                        try await model.removeShoppingListItem(offsets: indexSet)
-                    }
-                })
+                }
             }
             HStack {
                 Spacer()
