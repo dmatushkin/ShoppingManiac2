@@ -194,7 +194,7 @@ final class DAOTest: XCTestCase {
         let dao = DAO()
         
         // act
-        try await dao.addShoppingListItem(list: model, name: "test", amount: "15")
+        try await dao.addShoppingListItem(list: model, name: "test", amount: "15", store: "test store", isWeight: false, price: "25", isImportant: false, rating: 5)
         
         // assert
         let request: NSFetchRequest<ShoppingListItem> = ShoppingListItem.fetchRequest()
@@ -203,6 +203,11 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(items.first?.list, list1)
         XCTAssertEqual(items.first?.good?.name, "test")
         XCTAssertEqual(items.first?.quantity, 15)
+        XCTAssertEqual(items.first?.store?.name, "test store")
+        XCTAssertEqual(items.first?.isWeight, false)
+        XCTAssertEqual(items.first?.price, 25)
+        XCTAssertEqual(items.first?.isImportant, false)
+        XCTAssertEqual(items.first?.good?.personalRating, 5)
     }
     
     func testRemoveShoppingListItem() async throws {

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DependencyInjection
 
 struct CategoriesScreen: View {
     
@@ -41,6 +42,8 @@ struct CategoriesScreen: View {
 
 struct CategoriesScreen_Previews: PreviewProvider {
     static var previews: some View {
-        CategoriesScreen()
+        DIProvider.shared
+            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+            .showView(CategoriesScreen())
     }
 }

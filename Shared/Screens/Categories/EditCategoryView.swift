@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import DependencyInjection
+import CoreData
 
 struct EditCategoryView: View {
     
@@ -29,5 +31,13 @@ struct EditCategoryView: View {
             .onAppear(perform: {
                 name = item?.name ?? ""
             }).navigationTitle("Edit category")
+    }
+}
+
+struct EditCategoryView_Previews: PreviewProvider {
+    static var previews: some View {
+        DIProvider.shared
+            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+            .showView(EditCategoryView(model: CategoriesModel(), item: CategoriesItemModel(id: NSManagedObjectID(), name: "Test category")))
     }
 }

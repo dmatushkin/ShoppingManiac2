@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import DependencyInjection
 
 struct ShoppingScreen: View {
     
@@ -43,6 +44,8 @@ struct ShoppingScreen: View {
 
 struct ShoppingScreen_Previews: PreviewProvider {
     static var previews: some View {
-        ShoppingScreen()
+        DIProvider.shared
+            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+            .showView(ShoppingScreen())
     }
 }

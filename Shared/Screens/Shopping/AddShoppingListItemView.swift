@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DependencyInjection
 
 struct AddShoppingListItemView: View {
     
@@ -58,5 +59,13 @@ struct AddShoppingListItemView: View {
             }.padding([.top])            
             Spacer()
         }.padding().background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+    }
+}
+
+struct AddShoppingListItemView_Previews: PreviewProvider {
+    static var previews: some View {
+        DIProvider.shared
+            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+            .showView(AddShoppingListItemView(model: ShoppingListViewModel()))
     }
 }

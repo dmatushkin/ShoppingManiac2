@@ -329,3 +329,134 @@ final class DAO: DAOProtocol, DIDependency {
         })
     }
 }
+
+final class DAOStub: DAOProtocol, DIDependency {
+    
+    var shoppingLists: [ShoppingListModel] = [
+        ShoppingListModel(id: NSManagedObjectID(), title: "test1"),
+        ShoppingListModel(id: NSManagedObjectID(), title: "test2"),
+        ShoppingListModel(id: NSManagedObjectID(), title: "test3"),
+        ShoppingListModel(id: NSManagedObjectID(), title: "test4"),
+        ShoppingListModel(id: NSManagedObjectID(), title: "test5"),
+        ShoppingListModel(id: NSManagedObjectID(), title: "test6"),
+        ShoppingListModel(id: NSManagedObjectID(), title: "test7")
+    ]
+    
+    func getShoppingLists() async throws -> [ShoppingListModel] {
+        return shoppingLists
+    }
+    
+    func addShoppingList(name: String) async throws -> ShoppingListModel {
+        return ShoppingListModel(id: NSManagedObjectID(), title: "test")
+    }
+    
+    func removeShoppingList(_ item: ShoppingListModel) async throws {
+    }
+    
+    var shoppingItems: [ShoppingListItemModel] = [
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title1", store: "store1", category: "category1", isPurchased: false, amount: "15"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title2", store: "store1", category: "category1", isPurchased: false, amount: "1"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title3", store: "store1", category: "category2", isPurchased: false, amount: "3"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title4", store: "store1", category: "category2", isPurchased: false, amount: "2"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title5", store: "store2", category: "category2", isPurchased: true, amount: "7"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title6", store: "store2", category: "category3", isPurchased: false, amount: "5"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title7", store: "store2", category: "category3", isPurchased: false, amount: "20"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title8", store: "store2", category: "category3", isPurchased: false, amount: "4"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title9", store: "store2", category: "category4", isPurchased: true, amount: "8"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title10", store: "store2", category: "category4", isPurchased: false, amount: "24"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title11", store: "store3", category: "category4", isPurchased: false, amount: "1"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title12", store: "store3", category: "category5", isPurchased: false, amount: "6"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title13", store: "store3", category: "category5", isPurchased: false, amount: "18"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title14", store: "store3", category: "category5", isPurchased: true, amount: "9"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title15", store: "store3", category: "category6", isPurchased: false, amount: "19"),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title16", store: "store3", category: "category6", isPurchased: false, amount: "10"),
+    ]
+    
+    func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel] {
+        return shoppingItems
+    }
+    
+    func addShoppingListItem(list: ShoppingListModel, name: String, amount: String, store: String, isWeight: Bool, price: String, isImportant: Bool, rating: Int) async throws {
+    }
+    
+    func removeShoppingListItem(item: ShoppingListItemModel) async throws {
+    }
+    
+    func togglePurchasedShoppingListItem(item: ShoppingListItemModel) async throws {
+    }
+    
+    var goods: [GoodsItemModel] = [
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good1", category: "Test category1"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good2", category: "Test category1"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good3", category: "Test category1"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good4", category: "Test category2"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good5", category: "Test category2"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good6", category: "Test category2"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good7", category: "Test category3"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good8", category: "Test category3"),
+        GoodsItemModel(id: NSManagedObjectID(), name: "Test good9", category: "Test category3")
+    ]
+    
+    func getGoods() async throws -> [GoodsItemModel] {
+        return goods
+    }
+    
+    func addGood(name: String, category: String) async throws -> GoodsItemModel {
+        return GoodsItemModel(id: NSManagedObjectID(), name: "Test good", category: "Test category")
+    }
+    
+    func editGood(item: GoodsItemModel, name: String, category: String) async throws -> GoodsItemModel {
+        return GoodsItemModel(id: NSManagedObjectID(), name: name, category: category)
+    }
+    
+    func removeGood(item: GoodsItemModel) async throws {
+    }
+    
+    var categories: [CategoriesItemModel] = [
+        CategoriesItemModel(id: NSManagedObjectID(), name: "Test category 1"),
+        CategoriesItemModel(id: NSManagedObjectID(), name: "Test category 2"),
+        CategoriesItemModel(id: NSManagedObjectID(), name: "Test category 3"),
+        CategoriesItemModel(id: NSManagedObjectID(), name: "Test category 4")
+    ]
+    
+    func getCategories() async throws -> [CategoriesItemModel] {
+        return categories
+    }
+    
+    func addCategory(name: String) async throws -> CategoriesItemModel {
+        return CategoriesItemModel(id: NSManagedObjectID(), name: "Test category")
+    }
+    
+    func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel {
+        return CategoriesItemModel(id: NSManagedObjectID(), name: name)
+    }
+    
+    func removeCategory(item: CategoriesItemModel) async throws {
+    }
+    
+    var stores: [StoresItemModel] = [
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 1"),
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 2"),
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 3"),
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 4"),
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 5"),
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 6"),
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 7"),
+        StoresItemModel(id: NSManagedObjectID(), name: "Test store 8")
+    ]
+    
+    func getStores() async throws -> [StoresItemModel] {
+        return stores
+    }
+    
+    func addStore(name: String) async throws -> StoresItemModel {
+        return StoresItemModel(id: NSManagedObjectID(), name: "Test store")
+    }
+    
+    func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel {
+        return StoresItemModel(id: NSManagedObjectID(), name: name)
+    }
+    
+    func removeStore(item: StoresItemModel) async throws {
+    }
+}

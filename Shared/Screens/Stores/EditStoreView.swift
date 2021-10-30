@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import DependencyInjection
+import CoreData
 
 struct EditStoreView: View {
     
@@ -29,5 +31,13 @@ struct EditStoreView: View {
             .onAppear(perform: {
                 name = item?.name ?? ""
             }).navigationTitle("Edit store")
+    }
+}
+
+struct EditStoreView_Previews: PreviewProvider {
+    static var previews: some View {
+        DIProvider.shared
+            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+            .showView(EditStoreView(model: StoresModel(), item: StoresItemModel(id: NSManagedObjectID(), name: "Test store")))
     }
 }

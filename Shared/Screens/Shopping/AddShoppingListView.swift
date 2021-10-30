@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import DependencyInjection
 
 struct AddShoppingListView: View {
     
@@ -19,12 +20,27 @@ struct AddShoppingListView: View {
     var body: some View {
         VStack {
             TextField("Shopping list name", text: $listName).textFieldStyle(.roundedBorder)
-            Button("Create", action: {
-                Task {
-                    try await model.addItem(name: listName)
-                }
-            }).padding([.top])
+            HStack {
+                LargeCancelButton(title: "Cancel", action: {
+                    Task {
+                        try await model.cancelAddingItem()
+                    }
+                })
+                LargeAcceptButton(title: "Create", action: {
+                    Task {
+                        try await model.addItem(name: listName)
+                    }
+                })
+            }.padding([.top])
             Spacer()
         }.padding().background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+    }
+}
+
+struct AddShoppingListView_Previews: PreviewProvider {
+    static var previews: some View {
+        DIProvider.shared
+            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+            .showView(AddShoppingListView(model: ShoppingModel()))
     }
 }

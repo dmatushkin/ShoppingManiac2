@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import DependencyInjection
+import CoreData
 
 struct ShoppingListItemView: View {
     
@@ -22,5 +24,18 @@ struct ShoppingListItemView: View {
             Spacer()
             Text(item.amount)
         }.contentShape(Rectangle())
+    }
+}
+
+struct ShoppingListItemView_Previews: PreviewProvider {
+    static var previews: some View {
+        DIProvider.shared
+            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
+            .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                       title: "Test title",
+                                                                       store: "Test store",
+                                                                       category: "Test category",
+                                                                       isPurchased: false,
+                                                                       amount: "15")))
     }
 }

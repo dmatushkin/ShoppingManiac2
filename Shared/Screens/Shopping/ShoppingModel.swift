@@ -30,6 +30,10 @@ final class ShoppingModel: ObservableObject {
         items = try await dao.getShoppingLists()
         itemToOpen = item
     }
+    
+    func cancelAddingItem() async throws {
+        showAddSheet = false
+    }
 
     func deleteItems(offsets: IndexSet) async throws {
         let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
