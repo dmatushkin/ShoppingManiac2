@@ -19,12 +19,18 @@ struct EditCategoryView: View {
     var body: some View {
         VStack {
             TextField("Category name", text: $name).textFieldStyle(.roundedBorder)
-            Button(item == nil ? "Add" : "Save", action: {
-                Task {
-                    try await model.editCategory(item: item, name: name)
+            HStack {
+                LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
-                }
-            }).padding([.top])
+                })
+                LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
+                    if name.isEmpty { return }
+                    Task {
+                        try await model.editCategory(item: item, name: name)
+                        presentation.wrappedValue.dismiss()
+                    }
+                })
+            }.padding([.top])
             Spacer()
         }.padding()
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))

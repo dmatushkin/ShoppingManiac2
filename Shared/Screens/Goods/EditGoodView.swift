@@ -21,12 +21,18 @@ struct EditGoodView: View {
         VStack {
             TextField("Good name", text: $name).textFieldStyle(.roundedBorder)
             TextField("Category name", text: $category).textFieldStyle(.roundedBorder)
-            Button(item == nil ? "Add" : "Save", action: {
-                Task {
-                    try await model.editGood(item: item, name: name, category: category)
+            HStack {
+                LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
-                }
-            }).padding([.top])
+                })
+                LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
+                    if name.isEmpty { return }
+                    Task {
+                        try await model.editGood(item: item, name: name, category: category)
+                        presentation.wrappedValue.dismiss()
+                    }
+                })
+            }.padding([.top])
             Spacer()
         }.padding()
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
