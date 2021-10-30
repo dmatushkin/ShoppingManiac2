@@ -10,13 +10,25 @@ import SwiftUI
 struct LargeButton: View {
     
     let title: String
-    let backroundColor: Color
+    let backgroundColor: Color
     let action: () -> Void
     
+    init(title: String, backgroundColor: Color, action: @escaping () -> Void) {
+        self.title = title
+        self.backgroundColor = backgroundColor
+        self.action = action
+    }
+    
     var body: some View {
-        Text(title).padding(8).frame(maxWidth: .infinity).foregroundColor(.white).background(content: { backroundColor }).cornerRadius(15).onTapGesture {
-            action()
-        }
+        Text(title)
+            .padding(8)
+            .frame(maxWidth: .infinity)
+            .foregroundColor(.white)
+            .background(content: { backgroundColor })
+            .cornerRadius(15)
+            .onTapGesture {
+                action()
+            }
     }
 }
 
@@ -26,7 +38,7 @@ struct LargeAcceptButton: View {
     let action: () -> Void
     
     var body: some View {
-        LargeButton(title: title, backroundColor: Color("acceptColor"), action: action)
+        LargeButton(title: title, backgroundColor: Color("acceptColor"), action: action)
     }
 }
 
@@ -36,6 +48,6 @@ struct LargeCancelButton: View {
     let action: () -> Void
     
     var body: some View {
-        LargeButton(title: title, backroundColor: Color("cancelColor"), action: action)
+        LargeButton(title: title, backgroundColor: Color("cancelColor"), action: action)
     }
 }
