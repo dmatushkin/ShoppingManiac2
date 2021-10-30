@@ -12,9 +12,11 @@ import CoreData
 struct ShoppingListItemView: View {
     
     private let item: ShoppingListItemModel
+    @ObservedObject private var model: ShoppingListViewModel
     
-    init(item: ShoppingListItemModel) {
+    init(item: ShoppingListItemModel, model: ShoppingListViewModel) {
         self.item = item
+        self.model = model
     }
     
     var body: some View {
@@ -25,6 +27,20 @@ struct ShoppingListItemView: View {
             Text(item.amount)
         }.contentShape(Rectangle())
             .listRowBackground(Color("backgroundColor"))
+            .onTapGesture {
+                Task {
+                    try await model.togglePurchased(item: item)
+                }
+            }.swipeActions {
+                Button("Delete") {
+                    Task {
+                        try await model.removeShoppingListItem(item: item)
+                    }
+                }.tint(.red)
+                Button("Edit") {
+                    model.itemToShow = item
+                }
+            }
     }
 }
 
@@ -37,24 +53,26 @@ struct ShoppingListItemView_Previews: PreviewProvider {
                                                                            title: "Test title",
                                                                            store: "Test store",
                                                                            category: "Test category",
+                                                                           categoryStoreOrder: 0,
                                                                            isPurchased: false,
                                                                            amount: "15",
                                                                            isWeight: false,
                                                                            price: "25",
                                                                            isImportant: false,
-                                                                       rating: 5)).previewLayout(.fixed(width: 375, height: 50)))
+                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
             DIProvider.shared
                 .register(forType: DAOProtocol.self, dependency: DAOStub.self)
                 .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
                                                                            title: "Test title",
                                                                            store: "Test store",
                                                                            category: "Test category",
+                                                                           categoryStoreOrder: 0,
                                                                            isPurchased: true,
                                                                            amount: "15",
                                                                            isWeight: false,
                                                                            price: "25",
                                                                            isImportant: false,
-                                                                           rating: 5)).previewLayout(.fixed(width: 375, height: 50)))
+                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
         }
     }
 }

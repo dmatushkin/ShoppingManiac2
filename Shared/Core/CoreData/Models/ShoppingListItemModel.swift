@@ -13,6 +13,7 @@ struct ShoppingListItemModel: Identifiable {
     let title: String
     let store: String
     let category: String
+    let categoryStoreOrder: Int?
     let isPurchased: Bool
     let amount: String
     let isWeight: Bool

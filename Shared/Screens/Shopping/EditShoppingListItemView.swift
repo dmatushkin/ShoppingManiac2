@@ -106,6 +106,7 @@ struct AddShoppingListItemView_Previews: PreviewProvider {
                                                                                                            title: "test 1",
                                                                                                            store: "test 2",
                                                                                                            category: "test category",
+                                                                                                           categoryStoreOrder: 0,
                                                                                                            isPurchased: false,
                                                                                                            amount: "10",
                                                                                                            isWeight: false,

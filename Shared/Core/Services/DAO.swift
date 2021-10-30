@@ -113,10 +113,13 @@ final class DAO: DAOProtocol, DIDependency {
             request.predicate = NSPredicate(format: "list == %@ AND isRemoved == 0", item)
             let items: [ShoppingListItem] = try context.fetch(request)
             return items.map({ item in
-                ShoppingListItemModel(id: item.objectID,
+                let orders: [CategoryStoreOrder] = item.good?.category?.orders.getArray() ?? []
+                let order = (orders.first(where: { $0.store?.objectID == item.store?.objectID })?.order).map({ Int($0) })
+                return ShoppingListItemModel(id: item.objectID,
                                       title: item.good?.name ?? "",
                                       store: item.store?.name ?? "",
                                       category: item.good?.category?.name ?? "",
+                                      categoryStoreOrder: order,
                                       isPurchased: item.purchased,
                                       amount: "\(item.quantity)",
                                       isWeight: item.isWeight,
@@ -390,22 +393,22 @@ final class DAOStub: DAOProtocol, DIDependency {
     }
     
     var shoppingItems: [ShoppingListItemModel] = [
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title1", store: "store1", category: "category1", isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title2", store: "store1", category: "category1", isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title3", store: "store1", category: "category2", isPurchased: false, amount: "3", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title4", store: "store1", category: "category2", isPurchased: false, amount: "2", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title5", store: "store2", category: "category2", isPurchased: true, amount: "7", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title6", store: "store2", category: "category3", isPurchased: false, amount: "5", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title7", store: "store2", category: "category3", isPurchased: false, amount: "20", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title8", store: "store2", category: "category3", isPurchased: false, amount: "4", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title9", store: "store2", category: "category4", isPurchased: true, amount: "8", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title10", store: "store2", category: "category4", isPurchased: false, amount: "24", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title11", store: "store3", category: "category4", isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title12", store: "store3", category: "category5", isPurchased: false, amount: "6", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title13", store: "store3", category: "category5", isPurchased: false, amount: "18", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title14", store: "store3", category: "category5", isPurchased: true, amount: "9", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title15", store: "store3", category: "category6", isPurchased: false, amount: "19", isWeight: false, price: "15", isImportant: false, rating: 5),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title16", store: "store3", category: "category6", isPurchased: false, amount: "10", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title1", store: "store1", category: "category1", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title2", store: "store1", category: "category1", categoryStoreOrder: 0, isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title3", store: "store1", category: "category2", categoryStoreOrder: 0, isPurchased: true, amount: "3", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title4", store: "store1", category: "category2", categoryStoreOrder: 0, isPurchased: false, amount: "2", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title5", store: "store2", category: "category2", categoryStoreOrder: 0, isPurchased: true, amount: "7", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title6", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "5", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title7", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "20", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title8", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "4", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title9", store: "store2", category: "category4", categoryStoreOrder: 0, isPurchased: true, amount: "8", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title10", store: "store2", category: "category4", categoryStoreOrder: 0, isPurchased: false, amount: "24", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title11", store: "store3", category: "category4", categoryStoreOrder: 0, isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title12", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: false, amount: "6", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title13", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: false, amount: "18", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title14", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: true, amount: "9", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title15", store: "store3", category: "category6", categoryStoreOrder: 0, isPurchased: false, amount: "19", isWeight: false, price: "15", isImportant: false, rating: 5),
+        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title16", store: "store3", category: "category6", categoryStoreOrder: 0, isPurchased: false, amount: "10", isWeight: false, price: "15", isImportant: false, rating: 5),
     ]
     
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel] {

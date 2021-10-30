@@ -21,23 +21,24 @@ struct ShoppingListView: View {
     var body: some View {
         VStack {
             List {
-                ForEach(model.listItems) {item in
-                    ShoppingListItemView(item: item).onTapGesture {
-                        Task {
-                            try await model.togglePurchased(item: item)
+                ForEach(model.output.sections) { section in
+                    Section(section.title) {
+                        ForEach(section.subsections) { subsection in
+                            Section(subsection.title) {
+                                ForEach(subsection.items) { item in
+                                    ShoppingListItemView(item: item, model: model)
+                                }
+                            }.listRowBackground(Color("backgroundColor"))
                         }
-                    }.swipeActions {
-                        Button("Delete") {
-                            Task {
-                                try await model.removeShoppingListItem(item: item)
-                            }
-                        }.tint(.red)
-                        Button("Edit") {
-                            model.itemToShow = item
+                        ForEach(section.items) { item in
+                            ShoppingListItemView(item: item, model: model)
                         }
+                    }.listRowBackground(Color("backgroundColor"))
+                    ForEach(model.output.items) { item in
+                        ShoppingListItemView(item: item, model: model)
                     }
                 }
-            }.listStyle(.grouped)
+            }.listStyle(.sidebar)
         }.onAppear(perform: { model.listModel = listModel })
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {

@@ -214,7 +214,7 @@ final class DAOTest: XCTestCase {
         // arrange
         let context = contextProvider.getContext()
         let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
+        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
         let dao = DAO()
         
         // act
@@ -232,7 +232,7 @@ final class DAOTest: XCTestCase {
         let context = contextProvider.getContext()
         let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         item1?.purchased = true
-        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
+        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
         let dao = DAO()
         
         // act
@@ -250,7 +250,7 @@ final class DAOTest: XCTestCase {
         let context = contextProvider.getContext()
         let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         item1?.purchased = false
-        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
+        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
         let dao = DAO()
         
         // act
