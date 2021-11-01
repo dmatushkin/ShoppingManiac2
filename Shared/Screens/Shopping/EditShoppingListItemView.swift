@@ -18,6 +18,8 @@ struct EditShoppingListItemView: View {
     @State private var price: String = ""
     @State private var isImportant: Bool = false
     @State private var rating: Int = 0
+    @State private var shouldShowGoodsPanel: Bool = false
+    @State private var shouldShowStoresPanel: Bool = false
     let model: ShoppingListViewModel
     let item: ShoppingListItemModel?
     
@@ -28,17 +30,21 @@ struct EditShoppingListItemView: View {
     
     var body: some View {
         VStack {
-            TextField("Item name", text: $itemName).textFieldStyle(.roundedBorder)
-            TextField("Store name", text: $storeName).textFieldStyle(.roundedBorder)
+            TextField("Item name", text: $itemName).textFieldStyle(.roundedBorder).onTapGesture {
+                shouldShowGoodsPanel = true
+            }
+            TextField("Store name", text: $storeName).textFieldStyle(.roundedBorder).onTapGesture {
+                shouldShowStoresPanel = true
+            }
             HStack {
-                TextField("Amount", text: $amount).textFieldStyle(.roundedBorder)
+                TextField("Amount", text: $amount).textFieldStyle(.roundedBorder).keyboardType(.decimalPad)
                 Picker("", selection: $amountType) {
                     Text("Quantity").tag(0)
                     Text("Weight").tag(1)
                 }.pickerStyle(MenuPickerStyle())
             }
             HStack {
-                TextField("Price", text: $price).textFieldStyle(.roundedBorder)
+                TextField("Price", text: $price).textFieldStyle(.roundedBorder).keyboardType(.decimalPad)
                 RatingView(rating: $rating)
             }
             Toggle("Is important", isOn: $isImportant)
@@ -76,6 +82,12 @@ struct EditShoppingListItemView: View {
             Spacer()
         }.padding()
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            .sheet(isPresented: $shouldShowGoodsPanel, onDismiss: nil) {
+                AutocompletionPanel(textInput: $itemName, mode: .good)
+            }
+            .sheet(isPresented: $shouldShowStoresPanel, onDismiss: nil) {
+                AutocompletionPanel(textInput: $storeName, mode: .store)
+            }
             .onAppear(perform: {
                 if let item = item {
                     itemName = item.title
