@@ -34,6 +34,7 @@ protocol DAOProtocol {
     func removeShoppingListItem(item: ShoppingListItemModel) async throws
     func togglePurchasedShoppingListItem(item: ShoppingListItemModel) async throws
     func getGoods() async throws -> [GoodsItemModel]
+    func getGoods(search: String) async throws -> [GoodsItemModel]
     func addGood(name: String, category: String) async throws -> GoodsItemModel
     func editGood(item: GoodsItemModel, name: String, category: String) async throws -> GoodsItemModel
     func removeGood(item: GoodsItemModel) async throws
@@ -42,6 +43,7 @@ protocol DAOProtocol {
     func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel
     func removeCategory(item: CategoriesItemModel) async throws
     func getStores() async throws -> [StoresItemModel]
+    func getStores(search: String) async throws -> [StoresItemModel]
     func addStore(name: String) async throws -> StoresItemModel
     func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel
     func removeStore(item: StoresItemModel) async throws
@@ -232,6 +234,19 @@ final class DAO: DAOProtocol, DIDependency {
         })
     }
     
+    func getGoods(search: String) async throws -> [GoodsItemModel] {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            let request = NSFetchRequest<Good>(entityName: "Good")
+            request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+            request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+            let items: [Good] = try context.fetch(request)
+            return items.map({ good in
+                GoodsItemModel(id: good.objectID, name: good.name ?? "", category: good.category?.name ?? "")
+            })
+        })
+    }
+    
     func addGood(name: String, category: String) async throws -> GoodsItemModel {
         let context = contextProvider.getContext()
         return try await context.perform({[weak self] in
@@ -332,6 +347,19 @@ final class DAO: DAOProtocol, DIDependency {
         return try await context.perform({
             let request = NSFetchRequest<Store>(entityName: "Store")
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+            let items: [Store] = try context.fetch(request)
+            return items.filter({ $0.name?.isEmpty == false }).map({ store in
+                StoresItemModel(id: store.objectID, name: store.name ?? "")
+            })
+        })
+    }
+    
+    func getStores(search: String) async throws -> [StoresItemModel] {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            let request = NSFetchRequest<Store>(entityName: "Store")
+            request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+            request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
             let items: [Store] = try context.fetch(request)
             return items.filter({ $0.name?.isEmpty == false }).map({ store in
                 StoresItemModel(id: store.objectID, name: store.name ?? "")
@@ -443,6 +471,11 @@ final class DAOStub: DAOProtocol, DIDependency {
         return goods
     }
     
+    func getGoods(search: String) async throws -> [GoodsItemModel] {
+        guard !search.isEmpty else { return goods }
+        return goods.filter({ $0.name.lowercased().contains(search.lowercased())})
+    }
+    
     func addGood(name: String, category: String) async throws -> GoodsItemModel {
         return GoodsItemModel(id: NSManagedObjectID(), name: "Test good", category: "Test category")
     }
@@ -489,6 +522,11 @@ final class DAOStub: DAOProtocol, DIDependency {
     
     func getStores() async throws -> [StoresItemModel] {
         return stores
+    }
+    
+    func getStores(search: String) async throws -> [StoresItemModel] {
+        guard !search.isEmpty else { return stores }
+        return stores.filter({ $0.name.lowercased().contains(search.lowercased()) })
     }
     
     func addStore(name: String) async throws -> StoresItemModel {

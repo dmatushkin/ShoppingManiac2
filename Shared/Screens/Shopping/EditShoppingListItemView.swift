@@ -10,16 +10,10 @@ import DependencyInjection
 import CoreData
 
 struct EditShoppingListItemView: View {
-    
-    @State private var itemName: String = ""
-    @State private var storeName: String = ""
-    @State private var amount: String = ""
-    @State private var amountType: Int = 0
-    @State private var price: String = ""
-    @State private var isImportant: Bool = false
-    @State private var rating: Int = 0
-    @State private var shouldShowGoodsPanel: Bool = false
-    @State private var shouldShowStoresPanel: Bool = false
+    @StateObject private var dataModel = EditShoppingListItemViewModel()
+    @FocusState private var itemNameFocused: Bool
+    @FocusState private var storeNameFocused: Bool
+    private let geometryStorage = GeometryStorage(coordinateSpace: "zstackCoordinateSpace")
     let model: ShoppingListViewModel
     let item: ShoppingListItemModel?
     
@@ -29,83 +23,70 @@ struct EditShoppingListItemView: View {
     }
     
     var body: some View {
-        VStack {
-            TextField("Item name", text: $itemName).textFieldStyle(.roundedBorder).onTapGesture {
-                shouldShowGoodsPanel = true
-            }
-            TextField("Store name", text: $storeName).textFieldStyle(.roundedBorder).onTapGesture {
-                shouldShowStoresPanel = true
-            }
-            HStack {
-                TextField("Amount", text: $amount).textFieldStyle(.roundedBorder).keyboardType(.decimalPad)
-                Picker("", selection: $amountType) {
-                    Text("Quantity").tag(0)
-                    Text("Weight").tag(1)
-                }.pickerStyle(MenuPickerStyle())
-            }
-            HStack {
-                TextField("Price", text: $price).textFieldStyle(.roundedBorder).keyboardType(.decimalPad)
-                RatingView(rating: $rating)
-            }
-            Toggle("Is important", isOn: $isImportant)
-            HStack {
-                LargeCancelButton(title: "Cancel", action: {
-                    Task {
-                        try await model.cancelAddingItem()
-                    }
-                })
-                LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
-                    if itemName.isEmpty { return }
-                    Task {
-                        if let item = item {
-                            try await model.editShoppingListItem(item: item,
-                                                                 name: itemName,
-                                                                 amount: amount,
-                                                                 store: storeName,
-                                                                 isWeight: amountType == 1,
-                                                                 price: price,
-                                                                 isImportant: isImportant,
-                                                                 rating: rating)
-                        } else {
-                            try await model.addShoppingListItem(name: itemName,
-                                                                amount: amount,
-                                                                store: storeName,
-                                                                isWeight: amountType == 1,
-                                                                price: price,
-                                                                isImportant: isImportant,
-                                                                rating: rating)
-                        }
-                        
-                    }
-                })
-            }.padding([.top])
-            Spacer()
-        }.padding()
-            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
-            .sheet(isPresented: $shouldShowGoodsPanel, onDismiss: nil) {
-                AutocompletionPanel(textInput: $itemName, mode: .good)
-            }
-            .sheet(isPresented: $shouldShowStoresPanel, onDismiss: nil) {
-                AutocompletionPanel(textInput: $storeName, mode: .store)
-            }
-            .onAppear(perform: {
-                if let item = item {
-                    itemName = item.title
-                    storeName = item.store
-                    amount = item.amount
-                    amountType = item.isWeight ? 1 : 0
-                    price = item.price
-                    isImportant = item.isImportant
-                    rating = item.rating
-                } else {
-                    itemName = ""
-                    storeName = ""
-                    amount = ""
-                    amountType = 0
-                    price = ""
-                    isImportant = false
-                    rating = 0
+        ZStack(alignment: .topLeading) {
+            VStack {
+                TextField("Item name", text: $dataModel.itemName)
+                    .focused($itemNameFocused)
+                    .textFieldStyle(.roundedBorder)
+                    .geometryAware(viewName: "goods", geometryStorage: geometryStorage)
+                TextField("Store name", text: $dataModel.storeName)
+                    .focused($storeNameFocused)
+                    .textFieldStyle(.roundedBorder)
+                    .geometryAware(viewName: "store", geometryStorage: geometryStorage)
+                HStack {
+                    TextField("Amount", text: $dataModel.amount).textFieldStyle(.roundedBorder).keyboardType(.decimalPad)
+                    Picker("", selection: $dataModel.amountType) {
+                        Text("Quantity").tag(0)
+                        Text("Weight").tag(1)
+                    }.pickerStyle(MenuPickerStyle())
                 }
+                HStack {
+                    TextField("Price", text: $dataModel.price).textFieldStyle(.roundedBorder).keyboardType(.decimalPad)
+                    RatingView(rating: $dataModel.rating)
+                }
+                Toggle("Is important", isOn: $dataModel.isImportant)
+                HStack {
+                    LargeCancelButton(title: "Cancel", action: {
+                        Task {
+                            try await model.cancelAddingItem()
+                        }
+                    })
+                    LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
+                        if dataModel.itemName.isEmpty { return }
+                        Task {
+                            if let item = item {
+                                try await model.editShoppingListItem(item: item,
+                                                                     name: dataModel.itemName,
+                                                                     amount: dataModel.amount,
+                                                                     store: dataModel.storeName,
+                                                                     isWeight: dataModel.amountType == 1,
+                                                                     price: dataModel.price,
+                                                                     isImportant: dataModel.isImportant,
+                                                                     rating: dataModel.rating)
+                            } else {
+                                try await model.addShoppingListItem(name: dataModel.itemName,
+                                                                    amount: dataModel.amount,
+                                                                    store: dataModel.storeName,
+                                                                    isWeight: dataModel.amountType == 1,
+                                                                    price: dataModel.price,
+                                                                    isImportant: dataModel.isImportant,
+                                                                    rating: dataModel.rating)
+                            }
+                            
+                        }
+                    })
+                }.padding([.top])
+                Spacer()
+            }
+            AutocompletionList(items: $dataModel.goodsNames, search: $dataModel.itemName, focus: $itemNameFocused)
+                .offset(geometryStorage.getFrame(viewName: "goods").offset)
+            AutocompletionList(items: $dataModel.storesNames, search: $dataModel.storeName, focus: $storeNameFocused)
+                .offset(geometryStorage.getFrame(viewName: "store").offset)
+        }.coordinateSpace(name: geometryStorage.coordinateSpace)
+            .padding()
+            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            .onAppear(perform: {
+                dataModel.setItem(item)
             })
     }
 }
@@ -114,16 +95,17 @@ struct AddShoppingListItemView_Previews: PreviewProvider {
     static var previews: some View {
         DIProvider.shared
             .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(EditShoppingListItemView(model: ShoppingListViewModel(), item: ShoppingListItemModel(id: NSManagedObjectID(),
-                                                                                                           title: "test 1",
-                                                                                                           store: "test 2",
-                                                                                                           category: "test category",
-                                                                                                           categoryStoreOrder: 0,
-                                                                                                           isPurchased: false,
-                                                                                                           amount: "10",
-                                                                                                           isWeight: false,
-                                                                                                           price: "20",
-                                                                                                           isImportant: false,
-                                                                                                           rating: 3)))
+            .showView(EditShoppingListItemView(model: ShoppingListViewModel(),
+                                               item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                           title: "test 1",
+                                                                           store: "test 2",
+                                                                           category: "test category",
+                                                                           categoryStoreOrder: 0,
+                                                                           isPurchased: false,
+                                                                           amount: "10",
+                                                                           isWeight: false,
+                                                                           price: "20",
+                                                                           isImportant: false,
+                                                                           rating: 3)))
     }
 }
