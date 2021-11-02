@@ -64,22 +64,9 @@ struct EditShoppingListItemView: View {
                             if dataModel.itemName.isEmpty { return }
                             Task {
                                 if let item = item {
-                                    try await model.editShoppingListItem(item: item,
-                                                                         name: dataModel.itemName,
-                                                                         amount: dataModel.amount,
-                                                                         store: dataModel.storeName,
-                                                                         isWeight: dataModel.amountType == 1,
-                                                                         price: dataModel.price,
-                                                                         isImportant: dataModel.isImportant,
-                                                                         rating: dataModel.rating)
+                                    try await model.editShoppingListItem(item: item, model: dataModel)
                                 } else {
-                                    try await model.addShoppingListItem(name: dataModel.itemName,
-                                                                        amount: dataModel.amount,
-                                                                        store: dataModel.storeName,
-                                                                        isWeight: dataModel.amountType == 1,
-                                                                        price: dataModel.price,
-                                                                        isImportant: dataModel.isImportant,
-                                                                        rating: dataModel.rating)
+                                    try await model.addShoppingListItem(model: dataModel)
                                 }
                                 
                             }

@@ -28,44 +28,31 @@ final class ShoppingListViewModel: ObservableObject {
         }
     }
     
-    func addShoppingListItem(name: String,
-                             amount: String,
-                             store: String,
-                             isWeight: Bool,
-                             price: String,
-                             isImportant: Bool,
-                             rating: Int) async throws {
+    func addShoppingListItem(model: EditShoppingListItemViewModel) async throws {
         showAddSheet = false
         guard let listModel = listModel else { return }
         try await dao.addShoppingListItem(list: listModel,
-                                          name: name,
-                                          amount: amount,
-                                          store: store,
-                                          isWeight: isWeight,
-                                          price: price,
-                                          isImportant: isImportant,
-                                          rating: rating)
+                                          name: model.itemName,
+                                          amount: model.amount,
+                                          store: model.storeName,
+                                          isWeight: model.amountType == 1,
+                                          price: model.price,
+                                          isImportant: model.isImportant,
+                                          rating: model.rating)
         output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
     }
     
-    func editShoppingListItem(item: ShoppingListItemModel,
-                              name: String,
-                              amount: String,
-                              store: String,
-                              isWeight: Bool,
-                              price: String,
-                              isImportant: Bool,
-                              rating: Int) async throws {
+    func editShoppingListItem(item: ShoppingListItemModel, model: EditShoppingListItemViewModel) async throws {
         
         guard let listModel = listModel else { return }
         try await dao.editShoppingListItem(item: item,
-                                           name: name,
-                                           amount: amount,
-                                           store: store,
-                                           isWeight: isWeight,
-                                           price: price,
-                                           isImportant: isImportant,
-                                           rating: rating)
+                                           name: model.itemName,
+                                           amount: model.amount,
+                                           store: model.storeName,
+                                           isWeight: model.amountType == 1,
+                                           price: model.price,
+                                           isImportant: model.isImportant,
+                                           rating: model.rating)
         output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
         itemToShow = nil
     }
