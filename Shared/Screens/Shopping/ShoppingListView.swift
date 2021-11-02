@@ -24,11 +24,13 @@ struct ShoppingListView: View {
                 ForEach(model.output.sections) { section in
                     Section(section.title) {
                         ForEach(section.subsections) { subsection in
-                            Section(subsection.title) {
+                            Section(content: {
                                 ForEach(subsection.items) { item in
                                     ShoppingListItemView(item: item, model: model)
                                 }
-                            }.listRowBackground(Color("backgroundColor"))
+                            }, header: {
+                                Text(subsection.title).font(Font.caption)                                
+                            }).listRowBackground(Color("backgroundColor"))
                         }
                         ForEach(section.items) { item in
                             ShoppingListItemView(item: item, model: model)
