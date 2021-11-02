@@ -29,10 +29,12 @@ struct StoresScreen: View {
             }.listStyle(.grouped)
                 .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
                 .toolbar {
-                    Button(action: {
-                        model.showAddSheet = true
-                    }) {
-                        Label("Add Item", systemImage: "plus")
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            model.showAddSheet = true
+                        }) {
+                            Label("Add Item", systemImage: "plus")
+                        }
                     }
                 }.navigationTitle("Stores")
         }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
