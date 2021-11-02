@@ -28,18 +28,12 @@ struct EditShoppingListItemView: View {
         NavigationView {
             ZStack(alignment: .topLeading) {
                 VStack {
-                    TextField("Item name", text: $dataModel.itemName)
-                        .focused($itemNameFocused)
-                        .textFieldStyle(.roundedBorder)
+                    RoundRectTextField(title: "Item name", input: $dataModel.itemName, focus: $itemNameFocused)
                         .geometryAware(viewName: "goods", geometryStorage: geometryStorage)
-                    TextField("Store name", text: $dataModel.storeName)
-                        .focused($storeNameFocused)
-                        .textFieldStyle(.roundedBorder)
+                    RoundRectTextField(title: "Store name", input: $dataModel.storeName, focus: $storeNameFocused)
                         .geometryAware(viewName: "store", geometryStorage: geometryStorage)
                     HStack {
-                        TextField("Amount", text: $dataModel.amount)
-                            .focused($amountFocused)
-                            .textFieldStyle(.roundedBorder)
+                        RoundRectTextField(title: "Amount", input: $dataModel.amount, focus: $amountFocused)
                             .keyboardType(.decimalPad)
                         Picker("", selection: $dataModel.amountType) {
                             Text("Quantity").tag(0)
@@ -47,9 +41,7 @@ struct EditShoppingListItemView: View {
                         }.pickerStyle(MenuPickerStyle())
                     }
                     HStack {
-                        TextField("Price", text: $dataModel.price)
-                            .focused($priceFocused)
-                            .textFieldStyle(.roundedBorder)
+                        RoundRectTextField(title: "Price", input: $dataModel.price, focus: $priceFocused)
                             .keyboardType(.decimalPad)
                         RatingView(rating: $dataModel.rating)
                     }

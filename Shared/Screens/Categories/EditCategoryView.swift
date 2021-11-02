@@ -19,9 +19,7 @@ struct EditCategoryView: View {
     
     var body: some View {
         VStack {
-            TextField("Category name", text: $name)
-                .focused($editFocused)
-                .textFieldStyle(.roundedBorder)
+            RoundRectTextField(title: "Category name", input: $name, focus: $editFocused)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()

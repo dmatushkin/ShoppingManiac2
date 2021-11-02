@@ -21,9 +21,7 @@ struct AddShoppingListView: View {
     var body: some View {
         NavigationView {
             VStack {
-                TextField("Shopping list name", text: $listName)
-                    .focused($editFocused)
-                    .textFieldStyle(.roundedBorder)
+                RoundRectTextField(title: "Shopping list name", input: $listName, focus: $editFocused)
                 HStack {
                     LargeCancelButton(title: "Cancel", action: {
                         Task {

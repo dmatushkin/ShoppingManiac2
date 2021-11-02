@@ -21,12 +21,8 @@ struct EditGoodView: View {
     
     var body: some View {
         VStack {
-            TextField("Good name", text: $name)
-                .focused($goodFocused)
-                .textFieldStyle(.roundedBorder)
-            TextField("Category name", text: $category)
-                .focused($categoryFocused)
-                .textFieldStyle(.roundedBorder)
+            RoundRectTextField(title: "Good name", input: $name, focus: $goodFocused)
+            RoundRectTextField(title: "Category name", input: $category, focus: $categoryFocused)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
