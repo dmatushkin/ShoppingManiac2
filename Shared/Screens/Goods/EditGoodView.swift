@@ -15,12 +15,18 @@ struct EditGoodView: View {
     let item: GoodsItemModel?
     @State private var name: String = ""
     @State private var category: String = ""
+    @FocusState private var goodFocused: Bool
+    @FocusState private var categoryFocused: Bool
     @Environment(\.presentationMode) var presentation
     
     var body: some View {
         VStack {
-            TextField("Good name", text: $name).textFieldStyle(.roundedBorder)
-            TextField("Category name", text: $category).textFieldStyle(.roundedBorder)
+            TextField("Good name", text: $name)
+                .focused($goodFocused)
+                .textFieldStyle(.roundedBorder)
+            TextField("Category name", text: $category)
+                .focused($categoryFocused)
+                .textFieldStyle(.roundedBorder)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
@@ -34,6 +40,14 @@ struct EditGoodView: View {
                 })
             }.padding([.top])
             Spacer()
+        }.toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                    goodFocused = false
+                    categoryFocused = false
+                }
+            }
         }.padding()
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
             .onAppear(perform: {

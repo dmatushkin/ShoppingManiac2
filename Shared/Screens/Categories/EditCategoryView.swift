@@ -14,11 +14,14 @@ struct EditCategoryView: View {
     let model: CategoriesModel
     let item: CategoriesItemModel?
     @State private var name: String = ""
+    @FocusState private var editFocused: Bool
     @Environment(\.presentationMode) var presentation
     
     var body: some View {
         VStack {
-            TextField("Category name", text: $name).textFieldStyle(.roundedBorder)
+            TextField("Category name", text: $name)
+                .focused($editFocused)
+                .textFieldStyle(.roundedBorder)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
@@ -32,6 +35,13 @@ struct EditCategoryView: View {
                 })
             }.padding([.top])
             Spacer()
+        }.toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                    editFocused = false
+                }
+            }
         }.padding()
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
             .onAppear(perform: {

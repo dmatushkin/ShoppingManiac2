@@ -14,11 +14,14 @@ struct EditStoreView: View {
     let model: StoresModel
     let item: StoresItemModel?
     @State private var name: String = ""
+    @FocusState private var editFocused: Bool
     @Environment(\.presentationMode) var presentation
     
     var body: some View {
         VStack {
-            TextField("Store name", text: $name).textFieldStyle(.roundedBorder)
+            TextField("Store name", text: $name)
+                .focused($editFocused)
+                .textFieldStyle(.roundedBorder)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
@@ -30,6 +33,13 @@ struct EditStoreView: View {
                         presentation.wrappedValue.dismiss()
                     }
                 })
+            }.toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                        editFocused = false
+                    }
+                }
             }.padding([.top])
             Spacer()
         }.padding()

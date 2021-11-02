@@ -11,6 +11,7 @@ import DependencyInjection
 struct AddShoppingListView: View {
     
     @State private var listName: String = ""
+    @FocusState private var editFocused: Bool
     let model: ShoppingModel
     
     init(model: ShoppingModel) {
@@ -18,22 +19,35 @@ struct AddShoppingListView: View {
     }
     
     var body: some View {
-        VStack {
-            TextField("Shopping list name", text: $listName).textFieldStyle(.roundedBorder)
-            HStack {
-                LargeCancelButton(title: "Cancel", action: {
-                    Task {
-                        try await model.cancelAddingItem()
+        NavigationView {
+            VStack {
+                TextField("Shopping list name", text: $listName)
+                    .focused($editFocused)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    LargeCancelButton(title: "Cancel", action: {
+                        Task {
+                            try await model.cancelAddingItem()
+                        }
+                    })
+                    LargeAcceptButton(title: "Create", action: {
+                        Task {
+                            try await model.addItem(name: listName)
+                        }
+                    })
+                }.padding([.top])
+                Spacer()
+            }.toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                        editFocused = false
                     }
-                })
-                LargeAcceptButton(title: "Create", action: {
-                    Task {
-                        try await model.addItem(name: listName)
-                    }
-                })
-            }.padding([.top])
-            Spacer()
-        }.padding().background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                }
+            }.navigationBarHidden(true)
+                .padding()
+                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+        }        
     }
 }
 
