@@ -11,23 +11,26 @@ import DependencyInjection
 struct GoodsScreen: View {
     
     @StateObject private var model = GoodsModel()
+    @FocusState private var editFocused: Bool
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(model.items) { item in
-                    NavigationLink(destination: {
-                        NavigationLazyView(EditGoodView(model: model, item: item))
-                    }, label: {
-                        Text(item.name)
-                    }).listRowBackground(Color("backgroundColor"))
-                }.onDelete(perform: {indexSet in
-                    Task {
-                        try await model.removeGood(offsets: indexSet)
-                    }
-                })
-            }.listStyle(.grouped)
-                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            VStack {
+                RoundRectTextField(title: "Search", input: $model.searchString, focus: $editFocused).padding()
+                List {
+                    ForEach(model.items) { item in
+                        NavigationLink(destination: {
+                            NavigationLazyView(EditGoodView(model: model, item: item))
+                        }, label: {
+                            Text(item.name)
+                        }).listRowBackground(Color("backgroundColor"))
+                    }.onDelete(perform: {indexSet in
+                        Task {
+                            try await model.removeGood(offsets: indexSet)
+                        }
+                    })
+                }.listStyle(.plain)
+            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Button(action: {
@@ -35,7 +38,13 @@ struct GoodsScreen: View {
                         }) {
                             Label("Add Item", systemImage: "plus")
                         }
-                    }                    
+                    }
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                            editFocused = false
+                        }
+                    }
                 }.navigationTitle("Goods")
         }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
             EditGoodView(model: model, item: nil)

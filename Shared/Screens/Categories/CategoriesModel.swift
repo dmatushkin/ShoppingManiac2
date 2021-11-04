@@ -16,11 +16,19 @@ final class CategoriesModel: ObservableObject {
     
     @Published var items: [CategoriesItemModel] = []
     @Published var showAddSheet: Bool = false
+    @Published var searchString: String = ""
+    private var cancellables = Set<AnyCancellable>()
     
     init() {
         Task {
-            items = try await dao.getCategories()
+            items = try await dao.getCategories(search: "")
         }
+        $searchString.sink(receiveValue: {[weak self] value in
+            guard let self = self else { return }
+            Task {
+                self.items = try await self.dao.getCategories(search: value)
+            }
+        }).store(in: &cancellables)
     }
         
     func editCategory(item: CategoriesItemModel?, name: String) async throws {
@@ -29,7 +37,7 @@ final class CategoriesModel: ObservableObject {
         } else {
             _ = try await dao.addCategory(name: name)
         }        
-        items = try await dao.getCategories()
+        items = try await dao.getCategories(search: searchString)
     }
     
     func removeStore(offsets: IndexSet) async throws {
@@ -37,6 +45,6 @@ final class CategoriesModel: ObservableObject {
         for item in itemsToDelete {
             try await dao.removeCategory(item: item)
         }
-        items = try await dao.getCategories()
+        items = try await dao.getCategories(search: searchString)
     }
 }

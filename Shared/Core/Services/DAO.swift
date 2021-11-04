@@ -33,16 +33,14 @@ protocol DAOProtocol {
                              rating: Int) async throws
     func removeShoppingListItem(item: ShoppingListItemModel) async throws
     func togglePurchasedShoppingListItem(item: ShoppingListItemModel) async throws
-    func getGoods() async throws -> [GoodsItemModel]
     func getGoods(search: String) async throws -> [GoodsItemModel]
     func addGood(name: String, category: String) async throws -> GoodsItemModel
     func editGood(item: GoodsItemModel, name: String, category: String) async throws -> GoodsItemModel
     func removeGood(item: GoodsItemModel) async throws
-    func getCategories() async throws -> [CategoriesItemModel]
+    func getCategories(search: String) async throws -> [CategoriesItemModel]
     func addCategory(name: String) async throws -> CategoriesItemModel
     func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel
     func removeCategory(item: CategoriesItemModel) async throws
-    func getStores() async throws -> [StoresItemModel]
     func getStores(search: String) async throws -> [StoresItemModel]
     func addStore(name: String) async throws -> StoresItemModel
     func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel
@@ -221,25 +219,15 @@ final class DAO: DAOProtocol, DIDependency {
             try context.save()
         })
     }
-    
-    func getGoods() async throws -> [GoodsItemModel] {
-        let context = contextProvider.getContext()
-        return try await context.perform({
-            let request = NSFetchRequest<Good>(entityName: "Good")
-            request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-            let items: [Good] = try context.fetch(request)
-            return items.map({ good in
-                GoodsItemModel(id: good.objectID, name: good.name ?? "", category: good.category?.name ?? "")
-            })
-        })
-    }
-    
+        
     func getGoods(search: String) async throws -> [GoodsItemModel] {
         let context = contextProvider.getContext()
         return try await context.perform({
             let request = NSFetchRequest<Good>(entityName: "Good")
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-            request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+            if !search.isEmpty {
+                request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+            }
             let items: [Good] = try context.fetch(request)
             return items.map({ good in
                 GoodsItemModel(id: good.objectID, name: good.name ?? "", category: good.category?.name ?? "")
@@ -300,12 +288,15 @@ final class DAO: DAOProtocol, DIDependency {
             try context.save()
         })
     }
-    
-    func getCategories() async throws -> [CategoriesItemModel] {
+        
+    func getCategories(search: String) async throws -> [CategoriesItemModel] {
         let context = contextProvider.getContext()
         return try await context.perform({
             let request = NSFetchRequest<Category>(entityName: "Category")
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+            if !search.isEmpty {
+                request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+            }
             let items: [Category] = try context.fetch(request)
             return items.filter({ $0.name?.isEmpty == false }).map({ category in
                 CategoriesItemModel(id: category.objectID, name: category.name ?? "")
@@ -342,24 +333,14 @@ final class DAO: DAOProtocol, DIDependency {
         })
     }
     
-    func getStores() async throws -> [StoresItemModel] {
-        let context = contextProvider.getContext()
-        return try await context.perform({
-            let request = NSFetchRequest<Store>(entityName: "Store")
-            request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-            let items: [Store] = try context.fetch(request)
-            return items.filter({ $0.name?.isEmpty == false }).map({ store in
-                StoresItemModel(id: store.objectID, name: store.name ?? "")
-            })
-        })
-    }
-    
     func getStores(search: String) async throws -> [StoresItemModel] {
         let context = contextProvider.getContext()
         return try await context.perform({
             let request = NSFetchRequest<Store>(entityName: "Store")
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-            request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+            if !search.isEmpty {
+                request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+            }
             let items: [Store] = try context.fetch(request)
             return items.filter({ $0.name?.isEmpty == false }).map({ store in
                 StoresItemModel(id: store.objectID, name: store.name ?? "")
@@ -467,10 +448,6 @@ final class DAOStub: DAOProtocol, DIDependency {
         GoodsItemModel(id: NSManagedObjectID(), name: "Test good9", category: "Test category3")
     ]
     
-    func getGoods() async throws -> [GoodsItemModel] {
-        return goods
-    }
-    
     func getGoods(search: String) async throws -> [GoodsItemModel] {
         guard !search.isEmpty else { return goods }
         return goods.filter({ $0.name.lowercased().contains(search.lowercased())})
@@ -493,9 +470,10 @@ final class DAOStub: DAOProtocol, DIDependency {
         CategoriesItemModel(id: NSManagedObjectID(), name: "Test category 3"),
         CategoriesItemModel(id: NSManagedObjectID(), name: "Test category 4")
     ]
-    
-    func getCategories() async throws -> [CategoriesItemModel] {
-        return categories
+        
+    func getCategories(search: String) async throws -> [CategoriesItemModel] {
+        guard !search.isEmpty else { return categories }
+        return categories.filter({ $0.name.lowercased().contains(search.lowercased())})
     }
     
     func addCategory(name: String) async throws -> CategoriesItemModel {
@@ -519,10 +497,6 @@ final class DAOStub: DAOProtocol, DIDependency {
         StoresItemModel(id: NSManagedObjectID(), name: "Test store 7"),
         StoresItemModel(id: NSManagedObjectID(), name: "Test store 8")
     ]
-    
-    func getStores() async throws -> [StoresItemModel] {
-        return stores
-    }
     
     func getStores(search: String) async throws -> [StoresItemModel] {
         guard !search.isEmpty else { return stores }

@@ -275,7 +275,7 @@ final class DAOTest: XCTestCase {
         let dao = DAO()
         
         // act
-        let items = try await dao.getGoods()
+        let items = try await dao.getGoods(search: "")
         
         // assert
         XCTAssertEqual(items.count, 3)
@@ -285,6 +285,26 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(items[1].name, "test2")
         XCTAssertEqual(items[2].id, good3?.objectID)
         XCTAssertEqual(items[2].name, "test3")
+    }
+    
+    func testGetGoodsSearch() async throws {
+        // arrange
+        let context = contextProvider.getContext()
+        let good1 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
+        good1?.name = "test1"
+        let good2 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
+        good2?.name = "test2"
+        let good3 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
+        good3?.name = "test3"
+        let dao = DAO()
+        
+        // act
+        let items = try await dao.getGoods(search: "2")
+        
+        // assert
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items[0].id, good2?.objectID)
+        XCTAssertEqual(items[0].name, "test2")
     }
     
     func testAddGood() async throws {
@@ -364,7 +384,7 @@ final class DAOTest: XCTestCase {
         let dao = DAO()
         
         // act
-        let items = try await dao.getCategories()
+        let items = try await dao.getCategories(search: "")
         
         // assert
         XCTAssertEqual(items.count, 3)
@@ -374,6 +394,26 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(items[1].name, "test2")
         XCTAssertEqual(items[2].id, category3?.objectID)
         XCTAssertEqual(items[2].name, "test3")
+    }
+    
+    func testGetCategoriesSearch() async throws {
+        // arrange
+        let context = contextProvider.getContext()
+        let category1 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
+        category1?.name = "test1"
+        let category2 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
+        category2?.name = "test2"
+        let category3 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
+        category3?.name = "test3"
+        let dao = DAO()
+        
+        // act
+        let items = try await dao.getCategories(search: "2")
+        
+        // assert
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items[0].id, category2?.objectID)
+        XCTAssertEqual(items[0].name, "test2")
     }
     
     func testAddCategory() async throws {
@@ -443,7 +483,7 @@ final class DAOTest: XCTestCase {
         let dao = DAO()
         
         // act
-        let items = try await dao.getStores()
+        let items = try await dao.getStores(search: "")
         
         // assert
         XCTAssertEqual(items.count, 3)
@@ -453,6 +493,26 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(items[1].name, "test2")
         XCTAssertEqual(items[2].id, store3?.objectID)
         XCTAssertEqual(items[2].name, "test3")
+    }
+    
+    func testGetStoresSearch() async throws {
+        // arrange
+        let context = contextProvider.getContext()
+        let store1 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
+        store1?.name = "test1"
+        let store2 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
+        store2?.name = "test2"
+        let store3 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
+        store3?.name = "test3"
+        let dao = DAO()
+        
+        // act
+        let items = try await dao.getStores(search: "2")
+        
+        // assert
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items[0].id, store2?.objectID)
+        XCTAssertEqual(items[0].name, "test2")
     }
     
     func testAddStore() async throws {
