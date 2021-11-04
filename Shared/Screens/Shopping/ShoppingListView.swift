@@ -24,13 +24,10 @@ struct ShoppingListView: View {
                 ForEach(model.output.sections) { section in
                     Section(section.title) {
                         ForEach(section.subsections) { subsection in
-                            Section(content: {
-                                ForEach(subsection.items) { item in
-                                    ShoppingListItemView(item: item, model: model)
-                                }
-                            }, header: {
-                                Text(subsection.title).font(Font.caption)                                
-                            }).listRowBackground(Color("backgroundColor"))
+                            Text(subsection.title).font(Font.caption).listRowSeparator(.hidden)
+                            ForEach(subsection.items) { item in
+                                ShoppingListItemView(item: item, model: model)
+                            }
                         }
                         ForEach(section.items) { item in
                             ShoppingListItemView(item: item, model: model)
@@ -40,7 +37,7 @@ struct ShoppingListView: View {
                         ShoppingListItemView(item: item, model: model)
                     }
                 }
-            }.listStyle(.sidebar)
+            }.listStyle(.grouped)
         }.onAppear(perform: { model.listModel = listModel })
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
