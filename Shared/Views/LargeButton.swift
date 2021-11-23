@@ -20,15 +20,12 @@ struct LargeButton: View {
     }
     
     var body: some View {
-        Text(title)
-            .padding(8)
+        Button(title, action: {
+            action()
+        }).padding(8)
             .frame(maxWidth: .infinity)
-            .foregroundColor(.white)
-            .background(content: { backgroundColor })
-            .cornerRadius(15)
-            .onTapGesture {
-                action()
-            }
+            .background(Capsule().fill(backgroundColor)).tint(.white)
+            .northWestShadow()
     }
 }
 
@@ -49,5 +46,20 @@ struct LargeCancelButton: View {
     
     var body: some View {
         LargeButton(title: title, backgroundColor: Color("cancelColor"), action: action)
+    }
+}
+
+struct Large_Buttons_Previews: PreviewProvider {
+    static var previews: some View {
+        LargeAcceptButton(title: "Save", action: {})
+            .padding()
+            .frame(width: 375, height: 50).previewLayout(.sizeThatFits)
+        LargeCancelButton(title: "Cancel", action: {})
+            .padding()
+            .frame(width: 375, height: 50).previewLayout(.sizeThatFits)
+        HStack {
+            LargeCancelButton(title: "Cancel", action: {})
+            LargeAcceptButton(title: "Save", action: {})
+        }.padding().frame(width: 375, height: 50).previewLayout(.sizeThatFits)
     }
 }
