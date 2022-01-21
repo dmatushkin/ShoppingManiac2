@@ -30,6 +30,12 @@ final class GoodsModel: ObservableObject {
             }
         }).store(in: &cancellables)
     }
+    
+    func reload() {
+        Task {
+            items = try await dao.getGoods(search: searchString)
+        }
+    }
         
     func editGood(item: GoodsItemModel?, name: String, category: String) async throws {
         if let item = item {

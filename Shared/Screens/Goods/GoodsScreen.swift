@@ -46,7 +46,9 @@ struct GoodsScreen: View {
                         }
                     }
                 }.navigationTitle("Goods")
-        }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
+        }.onAppear(perform: {
+            model.reload()
+        }).sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
             EditGoodView(model: model, item: nil)
         })
     }

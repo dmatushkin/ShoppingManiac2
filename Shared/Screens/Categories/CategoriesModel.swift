@@ -30,6 +30,12 @@ final class CategoriesModel: ObservableObject {
             }
         }).store(in: &cancellables)
     }
+    
+    func reload() {
+        Task {
+            items = try await self.dao.getCategories(search: searchString)
+        }
+    }
         
     func editCategory(item: CategoriesItemModel?, name: String) async throws {
         if let item = item {

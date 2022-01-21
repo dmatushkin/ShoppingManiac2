@@ -46,7 +46,9 @@ struct CategoriesScreen: View {
                         }
                     }
                 }.navigationTitle("Categories")
-        }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
+        }.onAppear(perform: {
+            model.reload()
+        }).sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
             EditCategoryView(model: model, item: nil)
         })
     }

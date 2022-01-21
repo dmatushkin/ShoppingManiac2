@@ -46,7 +46,9 @@ struct StoresScreen: View {
                         }
                     }
                 }.navigationTitle("Stores")
-        }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
+        }.onAppear(perform: {
+            model.reload()
+        }).sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
             EditStoreView(model: model, item: nil)
         })
     }
