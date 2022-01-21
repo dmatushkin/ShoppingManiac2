@@ -37,11 +37,13 @@ final class CategoriesModel: ObservableObject {
         }
     }
         
-    func editCategory(item: CategoriesItemModel?, name: String) async throws {
+    func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async throws {
         if let item = item {
-            _ = try await dao.editCategory(item: item, name: name)
+            let category = try await dao.editCategory(item: item, name: name)
+            try await dao.syncCategoryGoods(item: category, items: goods)
         } else {
-            _ = try await dao.addCategory(name: name)
+            let category = try await dao.addCategory(name: name)
+            try await dao.syncCategoryGoods(item: category, items: goods)
         }        
         items = try await dao.getCategories(search: searchString)
     }
@@ -52,5 +54,9 @@ final class CategoriesModel: ObservableObject {
             try await dao.removeCategory(item: item)
         }
         items = try await dao.getCategories(search: searchString)
+    }
+    
+    func getCategoryGoods(category: CategoriesItemModel) async throws -> [GoodsItemModel] {
+        return try await dao.getCategoryGoods(item: category)
     }
 }

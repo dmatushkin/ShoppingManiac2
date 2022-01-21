@@ -41,6 +41,8 @@ protocol DAOProtocol {
     func addCategory(name: String) async throws -> CategoriesItemModel
     func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel
     func removeCategory(item: CategoriesItemModel) async throws
+    func getCategoryGoods(item: CategoriesItemModel) async throws -> [GoodsItemModel]
+    func syncCategoryGoods(item: CategoriesItemModel, items: [String]) async throws
     func getStores(search: String) async throws -> [StoresItemModel]
     func addStore(name: String) async throws -> StoresItemModel
     func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel
@@ -333,6 +335,28 @@ final class DAO: DAOProtocol, DIDependency {
         })
     }
     
+    func getCategoryGoods(item: CategoriesItemModel) async throws -> [GoodsItemModel] {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard let category = try context.existingObject(with: item.id) as? Category else { throw DBError.unableToGetCategory }
+            
+            let items: [Good] = category.goods.getArray().sorted(by: { ($0.name ?? "") < ($1.name ?? "") })
+            return items.map({ good in
+                GoodsItemModel(id: good.objectID, name: good.name ?? "", category: good.category?.name ?? "")
+            })
+        })
+    }
+    
+    func syncCategoryGoods(item: CategoriesItemModel, items: [String]) async throws {
+        let context = contextProvider.getContext()
+        return try await context.perform({ [weak self] in
+            guard let self = self, let category = try context.existingObject(with: item.id) as? Category else { throw DBError.unableToGetCategory }
+            let goods = try items.map({ try self.createOrGetGood(name: $0, context: context) })
+            category.goods = NSSet(array: goods)
+            try context.save()
+        })
+    }
+    
     func getStores(search: String) async throws -> [StoresItemModel] {
         let context = contextProvider.getContext()
         return try await context.perform({
@@ -485,6 +509,14 @@ final class DAOStub: DAOProtocol, DIDependency {
     }
     
     func removeCategory(item: CategoriesItemModel) async throws {
+    }
+    
+    func getCategoryGoods(item: CategoriesItemModel) async throws -> [GoodsItemModel] {
+        return []
+    }
+    
+    func syncCategoryGoods(item: CategoriesItemModel, items: [String]) async throws {
+        
     }
     
     var stores: [StoresItemModel] = [

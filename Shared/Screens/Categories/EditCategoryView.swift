@@ -14,12 +14,50 @@ struct EditCategoryView: View {
     let model: CategoriesModel
     let item: CategoriesItemModel?
     @State private var name: String = ""
+    @State private var goodName: String = ""
+    @State private var goods: [String] = []
+    @State private var showingPopover = false
     @FocusState private var editFocused: Bool
+    @FocusState private var goodFocused: Bool
     @Environment(\.presentationMode) var presentation
     
     var body: some View {
         VStack {
             RoundRectTextField(title: "Category name", input: $name, focus: $editFocused)
+            HStack {
+                Text("Goods")
+                Spacer()
+                Button("Add") {
+                    showingPopover = true
+                    goodFocused = true
+                }.popover(isPresented: $showingPopover) {
+                    VStack {
+                        RoundRectTextField(title: "Good name", input: $goodName, focus: $goodFocused)
+                        HStack {
+                            LargeCancelButton(title: "Cancel", action: {
+                                showingPopover = false
+                            })
+                            LargeAcceptButton(title: "Add", action: {
+                                if goodName.isEmpty { return }
+                                goods = (goods + [goodName]).sorted()
+                                goodName = ""
+                                showingPopover = false
+                            })
+                        }.padding([.top])
+                        Spacer()
+                    }.padding()
+                        .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                }
+            }
+            List {
+                ForEach(goods, id: \.self) { item in
+                    Text(item)
+                }.onDelete(perform: { indexSet in
+                    if let index = indexSet.first {
+                        goods.remove(at: index)
+                    }
+                })
+            }.listStyle(.plain)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
@@ -27,7 +65,7 @@ struct EditCategoryView: View {
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
-                        try await model.editCategory(item: item, name: name)
+                        try await model.editCategory(item: item, name: name, goods: goods)
                         presentation.wrappedValue.dismiss()
                     }
                 })
@@ -38,12 +76,18 @@ struct EditCategoryView: View {
                 Spacer()
                 Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
                     editFocused = false
+                    goodFocused = false
                 }
             }
         }.padding()
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
             .onAppear(perform: {
                 name = item?.name ?? ""
+                if let item = item {
+                    Task {
+                        goods = try await model.getCategoryGoods(category: item).map({ $0.name })
+                    }
+                }
             }).navigationTitle("Edit category")
     }
 }
