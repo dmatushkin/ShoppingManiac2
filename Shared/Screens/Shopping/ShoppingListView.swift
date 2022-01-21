@@ -22,9 +22,9 @@ struct ShoppingListView: View {
         VStack {
             List {
                 ForEach(model.output.sections) { section in
-                    Section(section.title) {
+                    Section(content: {
                         ForEach(section.subsections) { subsection in
-                            Text(subsection.title).font(Font.caption).listRowSeparator(.hidden)
+                            Text(subsection.title.uppercased()).font(Font.caption).foregroundColor(.gray).listRowSeparator(.hidden)
                             ForEach(subsection.items) { item in
                                 ShoppingListItemView(item: item, model: model)
                             }
@@ -32,7 +32,9 @@ struct ShoppingListView: View {
                         ForEach(section.items) { item in
                             ShoppingListItemView(item: item, model: model)
                         }
-                    }.listRowBackground(Color("backgroundColor"))
+                    }, header: {
+                        Text(section.title).font(section.isStore ? Font.title3 : Font.caption).foregroundColor(.gray)
+                    }).listRowBackground(Color("backgroundColor"))
                 }
                 ForEach(model.output.items) { item in
                     ShoppingListItemView(item: item, model: model)

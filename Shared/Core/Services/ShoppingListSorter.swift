@@ -11,6 +11,7 @@ import DependencyInjection
 struct ShoppingListSection: Identifiable {
     var id: String { title }
     let title: String
+    let isStore: Bool
     let subsections: [ShoppingListSection]
     let items: [ShoppingListItemModel]
 }
@@ -55,10 +56,10 @@ final class ShoppingListSorter: DIDependency, ShoppingListSorterProtocol {
             }
         })
         let subsections = categories.map({ category in
-            ShoppingListSection(title: category.name, subsections: [], items: nameAndPurchaseSort(items.filter({ $0.category == category.name })))
+            ShoppingListSection(title: category.name, isStore: false, subsections: [], items: nameAndPurchaseSort(items.filter({ $0.category == category.name })))
         })
         let noCategoryItems = nameAndPurchaseSort(items.filter({ $0.category.isEmpty }))
-        return ShoppingListSection(title: title, subsections: subsections, items: noCategoryItems)
+        return ShoppingListSection(title: title, isStore: true, subsections: subsections, items: noCategoryItems)
     }
     
     private func nameAndPurchaseSort(_ items: [ShoppingListItemModel]) -> [ShoppingListItemModel] {
