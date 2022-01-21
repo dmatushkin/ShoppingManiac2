@@ -13,8 +13,11 @@ struct RoundRectTextField: View {
     let focus: FocusState<Bool>.Binding
     
     var body: some View {
-        TextField(title, text: $input)
-            .focused(focus)
-            .textFieldStyle(.roundedBorder)
+        VStack(alignment: .leading) {
+            Text(title).font(.caption2).foregroundColor(.gray).opacity(input.isEmpty ? 0 : 1)
+            TextField(title, text: $input)
+                .focused(focus)
+                .textFieldStyle(.roundedBorder)
+        }
     }
 }

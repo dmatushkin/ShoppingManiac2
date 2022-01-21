@@ -32,18 +32,18 @@ struct EditShoppingListItemView: View {
                         .geometryAware(viewName: "goods", geometryStorage: geometryStorage)
                     RoundRectTextField(title: "Store name", input: $dataModel.storeName, focus: $storeNameFocused)
                         .geometryAware(viewName: "store", geometryStorage: geometryStorage)
-                    HStack {
+                    HStack(alignment: .bottom) {
                         RoundRectTextField(title: "Amount", input: $dataModel.amount, focus: $amountFocused)
                             .keyboardType(.decimalPad)
                         Picker("", selection: $dataModel.amountType) {
                             Text("Quantity").tag(0)
                             Text("Weight").tag(1)
-                        }.pickerStyle(MenuPickerStyle())
+                        }.pickerStyle(MenuPickerStyle()).padding([.bottom], 2)
                     }
-                    HStack {
+                    HStack(alignment: .bottom) {
                         RoundRectTextField(title: "Price", input: $dataModel.price, focus: $priceFocused)
                             .keyboardType(.decimalPad)
-                        RatingView(rating: $dataModel.rating)
+                        RatingView(rating: $dataModel.rating).padding([.bottom], 1)
                     }
                     Toggle("Is important", isOn: $dataModel.isImportant)
                     HStack {
