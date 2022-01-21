@@ -127,6 +127,10 @@
 		56D8550427120ADA0073168A /* CommonError in Frameworks */ = {isa = PBXBuildFile; productRef = 56D8550327120ADA0073168A /* CommonError */; };
 		56D8550627120AE20073168A /* CommonError in Frameworks */ = {isa = PBXBuildFile; productRef = 56D8550527120AE20073168A /* CommonError */; };
 		56D8550827120AE80073168A /* CommonError in Frameworks */ = {isa = PBXBuildFile; productRef = 56D8550727120AE80073168A /* CommonError */; };
+		56DC1625279AC8740035FDEC /* AddGoodToCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56DC1624279AC8740035FDEC /* AddGoodToCategoryView.swift */; };
+		56DC1626279AC8740035FDEC /* AddGoodToCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56DC1624279AC8740035FDEC /* AddGoodToCategoryView.swift */; };
+		56DC1628279AC8A70035FDEC /* AddGoodToCategoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56DC1627279AC8A70035FDEC /* AddGoodToCategoryModel.swift */; };
+		56DC1629279AC8A70035FDEC /* AddGoodToCategoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56DC1627279AC8A70035FDEC /* AddGoodToCategoryModel.swift */; };
 		56F5744226B99C50007069D4 /* ShoppingManiac.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 56F5742426B99C50007069D4 /* ShoppingManiac.xcdatamodeld */; };
 		56F5744326B99C50007069D4 /* ShoppingManiac.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 56F5742426B99C50007069D4 /* ShoppingManiac.xcdatamodeld */; };
 /* End PBXBuildFile section */
@@ -195,6 +199,8 @@
 		56D3A06C274D66BF00F84B30 /* ViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtension.swift; sourceTree = "<group>"; };
 		56D3A06F274D66F100F84B30 /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		56D854FD2712068C0073168A /* NSSetExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSSetExtension.swift; sourceTree = "<group>"; };
+		56DC1624279AC8740035FDEC /* AddGoodToCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddGoodToCategoryView.swift; sourceTree = "<group>"; };
+		56DC1627279AC8A70035FDEC /* AddGoodToCategoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddGoodToCategoryModel.swift; sourceTree = "<group>"; };
 		56F5742526B99C50007069D4 /* ShoppingManiac 10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "ShoppingManiac 10.xcdatamodel"; sourceTree = "<group>"; };
 		56F5742626B99C50007069D4 /* ShoppingManiac 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "ShoppingManiac 8.xcdatamodel"; sourceTree = "<group>"; };
 		56F5742726B99C50007069D4 /* ShoppingManiac 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "ShoppingManiac 4.xcdatamodel"; sourceTree = "<group>"; };
@@ -396,6 +402,8 @@
 				56A26C8E267521DB0071BF85 /* CategoriesScreen.swift */,
 				560BD5F3272955940019AB13 /* CategoriesModel.swift */,
 				560BD5F9272955B20019AB13 /* EditCategoryView.swift */,
+				56DC1624279AC8740035FDEC /* AddGoodToCategoryView.swift */,
+				56DC1627279AC8A70035FDEC /* AddGoodToCategoryModel.swift */,
 			);
 			path = Categories;
 			sourceTree = "<group>";
@@ -643,6 +651,7 @@
 				560BD5CA27286E4D0019AB13 /* ShoppingListView.swift in Sources */,
 				560BD5D627292FAC0019AB13 /* EditShoppingListItemView.swift in Sources */,
 				565928C52712C77200B3EDE0 /* ShoppingListItemModel.swift in Sources */,
+				56DC1628279AC8A70035FDEC /* AddGoodToCategoryModel.swift in Sources */,
 				560BD5DC272933F40019AB13 /* GoodsItemModel.swift in Sources */,
 				560BD5F12729544D0019AB13 /* EditStoreView.swift in Sources */,
 				565928BB2712C6B500B3EDE0 /* DAO.swift in Sources */,
@@ -665,6 +674,7 @@
 				56A26C7F26751BAC0071BF85 /* MainScreen.swift in Sources */,
 				56CA0A4C272C6EA2007AE1F1 /* LargeButton.swift in Sources */,
 				565928CA2712C82500B3EDE0 /* ContextProvider.swift in Sources */,
+				56DC1625279AC8740035FDEC /* AddGoodToCategoryView.swift in Sources */,
 				560BD5FA272955B20019AB13 /* EditCategoryView.swift in Sources */,
 				567DDE652675138600F59A54 /* ShoppingManiacApp.swift in Sources */,
 				560BD5D327292F810019AB13 /* ShoppingListItemView.swift in Sources */,
@@ -691,6 +701,7 @@
 				560BD5CB27286E4D0019AB13 /* ShoppingListView.swift in Sources */,
 				560BD5D727292FAC0019AB13 /* EditShoppingListItemView.swift in Sources */,
 				565928C62712C77200B3EDE0 /* ShoppingListItemModel.swift in Sources */,
+				56DC1629279AC8A70035FDEC /* AddGoodToCategoryModel.swift in Sources */,
 				560BD5DD272933F40019AB13 /* GoodsItemModel.swift in Sources */,
 				560BD5F22729544D0019AB13 /* EditStoreView.swift in Sources */,
 				565928BC2712C6B500B3EDE0 /* DAO.swift in Sources */,
@@ -713,6 +724,7 @@
 				56A26C8026751BAC0071BF85 /* MainScreen.swift in Sources */,
 				56CA0A4D272C6EA2007AE1F1 /* LargeButton.swift in Sources */,
 				565928CB2712C82500B3EDE0 /* ContextProvider.swift in Sources */,
+				56DC1626279AC8740035FDEC /* AddGoodToCategoryView.swift in Sources */,
 				560BD5FB272955B20019AB13 /* EditCategoryView.swift in Sources */,
 				567DDE662675138600F59A54 /* ShoppingManiacApp.swift in Sources */,
 				560BD5D427292F810019AB13 /* ShoppingListItemView.swift in Sources */,

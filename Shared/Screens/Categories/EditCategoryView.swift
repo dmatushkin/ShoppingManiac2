@@ -14,11 +14,9 @@ struct EditCategoryView: View {
     let model: CategoriesModel
     let item: CategoriesItemModel?
     @State private var name: String = ""
-    @State private var goodName: String = ""
     @State private var goods: [String] = []
     @State private var showingPopover = false
     @FocusState private var editFocused: Bool
-    @FocusState private var goodFocused: Bool
     @Environment(\.presentationMode) var presentation
     
     var body: some View {
@@ -29,24 +27,8 @@ struct EditCategoryView: View {
                 Spacer()
                 Button("Add") {
                     showingPopover = true
-                    goodFocused = true
-                }.popover(isPresented: $showingPopover) {
-                    VStack {
-                        RoundRectTextField(title: "Good name", input: $goodName, focus: $goodFocused)
-                        HStack {
-                            LargeCancelButton(title: "Cancel", action: {
-                                showingPopover = false
-                            })
-                            LargeAcceptButton(title: "Add", action: {
-                                if goodName.isEmpty { return }
-                                goods = (goods + [goodName]).sorted()
-                                goodName = ""
-                                showingPopover = false
-                            })
-                        }.padding([.top])
-                        Spacer()
-                    }.padding()
-                        .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                }.sheet(isPresented: $showingPopover, onDismiss: nil) {
+                    AddGoodToCategoryView(goods: $goods, showingPopover: $showingPopover)
                 }
             }
             List {
@@ -76,7 +58,6 @@ struct EditCategoryView: View {
                 Spacer()
                 Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
                     editFocused = false
-                    goodFocused = false
                 }
             }
         }.padding()
