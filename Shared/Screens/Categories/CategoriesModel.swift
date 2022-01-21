@@ -40,10 +40,10 @@ final class CategoriesModel: ObservableObject {
     func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async throws {
         if let item = item {
             let category = try await dao.editCategory(item: item, name: name)
-            try await dao.syncCategoryGoods(item: category, items: goods)
+            try await dao.syncCategoryGoods(item: category, goods: goods)
         } else {
             let category = try await dao.addCategory(name: name)
-            try await dao.syncCategoryGoods(item: category, items: goods)
+            try await dao.syncCategoryGoods(item: category, goods: goods)
         }        
         items = try await dao.getCategories(search: searchString)
     }

@@ -14,12 +14,46 @@ struct EditStoreView: View {
     let model: StoresModel
     let item: StoresItemModel?
     @State private var name: String = ""
+    @State private var categories: [String] = []
+    @State private var isEditable = false
     @FocusState private var editFocused: Bool
+    @State private var showingPopover = false
     @Environment(\.presentationMode) var presentation
     
     var body: some View {
         VStack {
             RoundRectTextField(title: "Store name", input: $name, focus: $editFocused)
+            HStack {
+                Text("Categories")
+                Spacer()
+                Button("Add") {
+                    showingPopover = true
+                }.sheet(isPresented: $showingPopover, onDismiss: nil) {
+                    AddCategoryToStoreView(categories: $categories, showingPopover: $showingPopover)
+                }
+            }
+            List {
+                ForEach(categories, id: \.self) { item in
+                    Text(item).swipeActions {
+                        Button("Delete") {
+                            if let index = categories.firstIndex(of: item) {
+                                categories.remove(at: index)
+                            }
+                        }.tint(.red)
+                        Button("Reorder") {
+                            self.isEditable = true
+                        }
+                    }
+                }.onMove(perform: {from, to in
+                    categories.move(fromOffsets: from, toOffset: to)
+                    self.isEditable = false
+                }).onLongPressGesture {
+                    withAnimation {
+                        self.isEditable = true
+                    }
+                }
+            }.listStyle(.plain)
+                .environment(\.editMode, isEditable ? .constant(.active) : .constant(.inactive))
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     presentation.wrappedValue.dismiss()
@@ -27,7 +61,7 @@ struct EditStoreView: View {
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
-                        try await model.editStore(item: item, name: name)
+                        try await model.editStore(item: item, name: name, categories: categories)
                         presentation.wrappedValue.dismiss()
                     }
                 })
@@ -44,6 +78,11 @@ struct EditStoreView: View {
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
             .onAppear(perform: {
                 name = item?.name ?? ""
+                if let item = item {
+                    Task {
+                        categories = try await model.getStoreCategories(item: item).map({ $0.name })
+                    }
+                }
             }).navigationTitle("Edit store")
     }
 }

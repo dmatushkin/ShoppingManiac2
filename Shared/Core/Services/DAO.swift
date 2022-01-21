@@ -42,11 +42,13 @@ protocol DAOProtocol {
     func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel
     func removeCategory(item: CategoriesItemModel) async throws
     func getCategoryGoods(item: CategoriesItemModel) async throws -> [GoodsItemModel]
-    func syncCategoryGoods(item: CategoriesItemModel, items: [String]) async throws
+    func syncCategoryGoods(item: CategoriesItemModel, goods: [String]) async throws
     func getStores(search: String) async throws -> [StoresItemModel]
     func addStore(name: String) async throws -> StoresItemModel
     func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel
     func removeStore(item: StoresItemModel) async throws
+    func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel]
+    func syncStoreCategories(item: StoresItemModel, categories: [String]) async throws
 }
 
 final class DAO: DAOProtocol, DIDependency {
@@ -62,6 +64,8 @@ final class DAO: DAOProtocol, DIDependency {
         case unableToGetCategory
         case unableToCreateStore
         case unableToGetStore
+        case unableToCreateOder
+        case unableToGetOrder
     }
     
     @Autowired(cacheType: .share, instantiateOnInit: true) private var contextProvider: ContextProviderProtocol
@@ -347,11 +351,11 @@ final class DAO: DAOProtocol, DIDependency {
         })
     }
     
-    func syncCategoryGoods(item: CategoriesItemModel, items: [String]) async throws {
+    func syncCategoryGoods(item: CategoriesItemModel, goods: [String]) async throws {
         let context = contextProvider.getContext()
         return try await context.perform({ [weak self] in
             guard let self = self, let category = try context.existingObject(with: item.id) as? Category else { throw DBError.unableToGetCategory }
-            let goods = try items.map({ try self.createOrGetGood(name: $0, context: context) })
+            let goods = try goods.map({ try self.createOrGetGood(name: $0, context: context) })
             category.goods = NSSet(array: goods)
             try context.save()
         })
@@ -397,6 +401,47 @@ final class DAO: DAOProtocol, DIDependency {
         return try await context.perform({
             guard let store = try context.existingObject(with: item.id) as? Store else { throw DBError.unableToGetStore }
             context.delete(store)
+            try context.save()
+        })
+    }
+    
+    func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel] {
+        let context = contextProvider.getContext()
+        return try await context.perform({
+            guard let store = try context.existingObject(with: item.id) as? Store else { throw DBError.unableToGetStore }
+            let orders: [CategoryStoreOrder] = store.orders.getArray().sorted(by: { $0.order < $1.order })
+            return orders.compactMap({ $0.category }).map({ category in
+                CategoriesItemModel(id: category.objectID, name: category.name ?? "")
+            })
+        })
+    }
+    
+    func syncStoreCategories(item: StoresItemModel, categories: [String]) async throws {
+        let context = contextProvider.getContext()
+        return try await context.perform({[weak self] in
+            guard let self = self, let store = try context.existingObject(with: item.id) as? Store else { throw DBError.unableToGetStore }
+            let categories = try categories.map({ try self.createOrGetCategory(name: $0, context: context) })
+            let ordersToRemove: [CategoryStoreOrder] = store.orders.getArray().filter({ !($0.category.map({category in categories.contains(category)}) ?? false) })
+            for order in ordersToRemove {
+                context.delete(order)
+            }
+            let orderedCategories = (store.orders.getArray() as [CategoryStoreOrder]).compactMap({ $0.category })
+            for category in categories.filter({ !orderedCategories.contains($0) }) {
+                if let order = NSEntityDescription.insertNewObject(forEntityName: "CategoryStoreOrder", into: context) as? CategoryStoreOrder {
+                    order.category = category
+                    order.store = store
+                } else {
+                    throw DBError.unableToCreateOder
+                }
+            }
+            let allOrders: [CategoryStoreOrder] = store.orders.getArray()
+            for (idx, category) in categories.enumerated() {
+                if let order = allOrders.first(where: { $0.category == category }) {
+                    order.order = Int64(idx)
+                } else {
+                    throw DBError.unableToGetOrder
+                }
+            }
             try context.save()
         })
     }
@@ -515,7 +560,7 @@ final class DAOStub: DAOProtocol, DIDependency {
         return []
     }
     
-    func syncCategoryGoods(item: CategoriesItemModel, items: [String]) async throws {
+    func syncCategoryGoods(item: CategoriesItemModel, goods: [String]) async throws {
         
     }
     
@@ -544,5 +589,12 @@ final class DAOStub: DAOProtocol, DIDependency {
     }
     
     func removeStore(item: StoresItemModel) async throws {
+    }
+    
+    func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel] {
+        return []
+    }
+    
+    func syncStoreCategories(item: StoresItemModel, categories: [String]) async throws {        
     }
 }

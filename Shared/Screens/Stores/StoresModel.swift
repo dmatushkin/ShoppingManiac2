@@ -37,11 +37,13 @@ final class StoresModel: ObservableObject {
         }
     }
         
-    func editStore(item: StoresItemModel?, name: String) async throws {
+    func editStore(item: StoresItemModel?, name: String, categories: [String]) async throws {
         if let item = item {
-            _ = try await dao.editStore(item: item, name: name)
+            let store = try await dao.editStore(item: item, name: name)
+            try await dao.syncStoreCategories(item: store, categories: categories)
         } else {
-            _ = try await dao.addStore(name: name)
+            let store = try await dao.addStore(name: name)
+            try await dao.syncStoreCategories(item: store, categories: categories)
         }        
         items = try await dao.getStores(search: searchString)
     }
@@ -52,5 +54,9 @@ final class StoresModel: ObservableObject {
             try await dao.removeStore(item: item)
         }
         items = try await dao.getStores(search: searchString)
+    }
+    
+    func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel] {
+        return try await dao.getStoreCategories(item: item)
     }
 }
