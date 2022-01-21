@@ -9,6 +9,37 @@ import SwiftUI
 import DependencyInjection
 import CoreData
 
+struct ShoppingListSectionTitle: View {
+    let title: String
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            Text(title.uppercased()).font(Font.caption).foregroundColor(.gray)
+        }
+    }
+}
+
+struct ShoppingListSectionContent: View {
+    @ObservedObject var model: ShoppingListViewModel
+    let section: ShoppingListSection
+    
+    var body: some View {
+        ForEach(section.subsections) { subsection in
+            ShoppingListSectionTitle(title: subsection.title)
+            ForEach(subsection.items) { item in
+                ShoppingListItemView(item: item, model: model)
+            }
+        }
+        if !section.subsections.isEmpty {
+            ShoppingListSectionTitle(title: "No category")
+        }
+        ForEach(section.items) { item in
+            ShoppingListItemView(item: item, model: model)
+        }
+    }
+}
+
 struct ShoppingListView: View {
     
     @StateObject private var model = ShoppingListViewModel()
@@ -23,15 +54,7 @@ struct ShoppingListView: View {
             List {
                 ForEach(model.output.sections) { section in
                     Section(content: {
-                        ForEach(section.subsections) { subsection in
-                            Text(subsection.title.uppercased()).font(Font.caption).foregroundColor(.gray).listRowSeparator(.hidden)
-                            ForEach(subsection.items) { item in
-                                ShoppingListItemView(item: item, model: model)
-                            }
-                        }
-                        ForEach(section.items) { item in
-                            ShoppingListItemView(item: item, model: model)
-                        }
+                        ShoppingListSectionContent(model: model, section: section)
                     }, header: {
                         Text(section.title).font(section.isStore ? Font.title3 : Font.caption).foregroundColor(.gray)
                     }).listRowBackground(Color("backgroundColor"))
