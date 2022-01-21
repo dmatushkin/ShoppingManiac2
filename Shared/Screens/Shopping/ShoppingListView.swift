@@ -33,9 +33,9 @@ struct ShoppingListView: View {
                             ShoppingListItemView(item: item, model: model)
                         }
                     }.listRowBackground(Color("backgroundColor"))
-                    ForEach(model.output.items) { item in
-                        ShoppingListItemView(item: item, model: model)
-                    }
+                }
+                ForEach(model.output.items) { item in
+                    ShoppingListItemView(item: item, model: model)
                 }
             }.listStyle(.grouped)
         }.onAppear(perform: { model.listModel = listModel })
