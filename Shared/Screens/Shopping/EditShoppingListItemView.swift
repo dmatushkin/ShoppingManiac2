@@ -63,7 +63,7 @@ struct EditShoppingListItemView: View {
                                 
                             }
                         })
-                    }.padding([.top])
+                    }
                     Spacer()
                 }
                 AutocompletionList(items: $dataModel.goodsNames,
