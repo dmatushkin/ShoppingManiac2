@@ -67,6 +67,7 @@ struct ShoppingListView: View {
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Image(systemName: "square.and.arrow.up").onTapGesture {
+                        model.shareList(model: listModel)
                     }
                     Image("add_purchase_large").onTapGesture {
                         model.showAddSheet = true
@@ -79,6 +80,8 @@ struct ShoppingListView: View {
                 EditShoppingListItemView(model: model, item: nil)
             }).sheet(item: $model.itemToShow) { item in
                 EditShoppingListItemView(model: model, item: item)
+            }.sheet(item: $model.dataToShare) { item in
+                ShareSheet(activityItems: [item.url])
             }
     }
 }
@@ -89,7 +92,7 @@ struct ShoppingListView_Previews: PreviewProvider {
             .register(forType: DAOProtocol.self, dependency: DAOStub.self)
             .showView(
                 NavigationView {
-                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), title: "test list"))
+                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), name: "test list", date: Date()))
                 }
             )
     }

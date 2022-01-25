@@ -26,7 +26,7 @@ final class ShoppingModel: ObservableObject {
             
     func addItem(name: String) async throws {
         showAddSheet = false
-        let item = try await dao.addShoppingList(name: name)
+        let item = try await dao.addShoppingList(name: name, date: Date())
         items = try await dao.getShoppingLists()
         itemToOpen = item
     }

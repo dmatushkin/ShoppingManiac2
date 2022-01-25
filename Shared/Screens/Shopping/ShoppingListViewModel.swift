@@ -8,14 +8,22 @@
 import SwiftUI
 import Combine
 import DependencyInjection
+import CoreData
+
+struct ExportedList: Identifiable {
+    let id: NSManagedObjectID
+    let url: URL
+}
 
 @MainActor
 final class ShoppingListViewModel: ObservableObject {
     
     @Autowired(cacheType: .share) private var dao: DAOProtocol
+    @Autowired(cacheType: .share) private var serializer: ShoppingListSerializerProtocol
     
     @Published var showAddSheet: Bool = false
     @Published var itemToShow: ShoppingListItemModel?
+    @Published var dataToShare: ExportedList?
     @Published var output: ShoppingListOutput = ShoppingListOutput(sections: [], items: [])
     
     private let sorter = ShoppingListSorter()
@@ -81,5 +89,16 @@ final class ShoppingListViewModel: ObservableObject {
     private func reloadList() async throws {
         guard let listModel = listModel else { return }        
         output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
+    }
+    
+    func shareList(model: ShoppingListModel) {
+        Task {
+            do {
+                let data = try await serializer.exportList(listModel: model)
+                dataToShare = ExportedList(id: model.id, url: try data.store())
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
     }
 }

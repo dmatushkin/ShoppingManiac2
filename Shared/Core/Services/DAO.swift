@@ -12,7 +12,7 @@ import CommonError
 
 protocol DAOProtocol {
     func getShoppingLists() async throws -> [ShoppingListModel]
-    func addShoppingList(name: String) async throws -> ShoppingListModel
+    func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel
     func removeShoppingList(_ item: ShoppingListModel) async throws
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel]
     func addShoppingListItem(list: ShoppingListModel,
@@ -83,22 +83,26 @@ final class DAO: DAOProtocol, DIDependency {
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .none
             return items.map({ list in
-                ShoppingListModel(id: list.objectID, title: list.name?.nilIfEmpty ?? dateFormatter.string(from: Date(timeIntervalSinceReferenceDate: list.date)) )
+                let date = Date(timeIntervalSinceReferenceDate: list.date)
+                let name = list.name ?? ""
+                return ShoppingListModel(id: list.objectID, name: name, date: date)
             })
         })
     }
     
-    func addShoppingList(name: String) async throws -> ShoppingListModel {
+    func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel {
         let context = contextProvider.getContext()
         return try await context.perform({
             guard let item = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList else { throw DBError.unableToCreateShoppingList }
             item.name = name
-            item.date = Date().timeIntervalSinceReferenceDate
+            item.date = date.timeIntervalSinceReferenceDate
             try context.save()
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .none
-            return ShoppingListModel(id: item.objectID, title: item.name?.nilIfEmpty ?? dateFormatter.string(from: Date(timeIntervalSinceReferenceDate: item.date)) )
+            let date = Date(timeIntervalSinceReferenceDate: item.date)
+            let name = item.name ?? ""
+            return ShoppingListModel(id: item.objectID, name: name, date: date)
         })
     }
     
@@ -450,21 +454,21 @@ final class DAO: DAOProtocol, DIDependency {
 final class DAOStub: DAOProtocol, DIDependency {
     
     var shoppingLists: [ShoppingListModel] = [
-        ShoppingListModel(id: NSManagedObjectID(), title: "test1"),
-        ShoppingListModel(id: NSManagedObjectID(), title: "test2"),
-        ShoppingListModel(id: NSManagedObjectID(), title: "test3"),
-        ShoppingListModel(id: NSManagedObjectID(), title: "test4"),
-        ShoppingListModel(id: NSManagedObjectID(), title: "test5"),
-        ShoppingListModel(id: NSManagedObjectID(), title: "test6"),
-        ShoppingListModel(id: NSManagedObjectID(), title: "test7")
+        ShoppingListModel(id: NSManagedObjectID(), name: "test1", date: Date()),
+        ShoppingListModel(id: NSManagedObjectID(), name: "test2", date: Date()),
+        ShoppingListModel(id: NSManagedObjectID(), name: "test3", date: Date()),
+        ShoppingListModel(id: NSManagedObjectID(), name: "test4", date: Date()),
+        ShoppingListModel(id: NSManagedObjectID(), name: "test5", date: Date()),
+        ShoppingListModel(id: NSManagedObjectID(), name: "test6", date: Date()),
+        ShoppingListModel(id: NSManagedObjectID(), name: "test7", date: Date())
     ]
     
     func getShoppingLists() async throws -> [ShoppingListModel] {
         return shoppingLists
     }
     
-    func addShoppingList(name: String) async throws -> ShoppingListModel {
-        return ShoppingListModel(id: NSManagedObjectID(), title: "test")
+    func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel {
+        return ShoppingListModel(id: NSManagedObjectID(), name: "test", date: date)
     }
     
     func removeShoppingList(_ item: ShoppingListModel) async throws {

@@ -9,6 +9,19 @@ import Foundation
 import CoreData
 
 struct ShoppingListModel: Identifiable, Hashable {
+    
+    private static let formatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .none
+        return dateFormatter
+    }()
+    
     let id: NSManagedObjectID
-    let title: String
+    let name: String
+    let date: Date
+    
+    var title: String {
+        return name.isEmpty ? ShoppingListModel.formatter.string(from: date) : name
+    }
 }

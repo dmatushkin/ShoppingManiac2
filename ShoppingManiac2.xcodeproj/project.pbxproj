@@ -51,6 +51,16 @@
 		560BD5F5272955940019AB13 /* CategoriesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5F3272955940019AB13 /* CategoriesModel.swift */; };
 		560BD5FA272955B20019AB13 /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5F9272955B20019AB13 /* EditCategoryView.swift */; };
 		560BD5FB272955B20019AB13 /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560BD5F9272955B20019AB13 /* EditCategoryView.swift */; };
+		562F590827A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590727A000CD004ECD5C /* ShoppingListSerializer.swift */; };
+		562F590927A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590727A000CD004ECD5C /* ShoppingListSerializer.swift */; };
+		562F590A27A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590727A000CD004ECD5C /* ShoppingListSerializer.swift */; };
+		562F590B27A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590727A000CD004ECD5C /* ShoppingListSerializer.swift */; };
+		562F590D27A016F5004ECD5C /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590C27A016F5004ECD5C /* ShareSheet.swift */; };
+		562F590E27A016F5004ECD5C /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590C27A016F5004ECD5C /* ShareSheet.swift */; };
+		562F591027A01C0D004ECD5C /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590F27A01C0D004ECD5C /* DataExtension.swift */; };
+		562F591127A01C0D004ECD5C /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590F27A01C0D004ECD5C /* DataExtension.swift */; };
+		562F591227A01C0D004ECD5C /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590F27A01C0D004ECD5C /* DataExtension.swift */; };
+		562F591327A01C0D004ECD5C /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562F590F27A01C0D004ECD5C /* DataExtension.swift */; };
 		563EBF0527312E30003052B7 /* RoundRectTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 563EBF0427312E30003052B7 /* RoundRectTextField.swift */; };
 		563EBF0627312E30003052B7 /* RoundRectTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 563EBF0427312E30003052B7 /* RoundRectTextField.swift */; };
 		565928BB2712C6B500B3EDE0 /* DAO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565928BA2712C6B500B3EDE0 /* DAO.swift */; };
@@ -175,6 +185,10 @@
 		560BD5F02729544D0019AB13 /* EditStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditStoreView.swift; sourceTree = "<group>"; };
 		560BD5F3272955940019AB13 /* CategoriesModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesModel.swift; sourceTree = "<group>"; };
 		560BD5F9272955B20019AB13 /* EditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCategoryView.swift; sourceTree = "<group>"; };
+		562F590727A000CD004ECD5C /* ShoppingListSerializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListSerializer.swift; sourceTree = "<group>"; };
+		562F590C27A016F5004ECD5C /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		562F590F27A01C0D004ECD5C /* DataExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtension.swift; sourceTree = "<group>"; };
+		562F591427A022C2004ECD5C /* ShoppingManiac--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "ShoppingManiac--iOS--Info.plist"; sourceTree = "<group>"; };
 		563EBF0427312E30003052B7 /* RoundRectTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundRectTextField.swift; sourceTree = "<group>"; };
 		565928BA2712C6B500B3EDE0 /* DAO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DAO.swift; sourceTree = "<group>"; };
 		565928BF2712C72D00B3EDE0 /* ShoppingListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListModel.swift; sourceTree = "<group>"; };
@@ -267,6 +281,7 @@
 				565928BA2712C6B500B3EDE0 /* DAO.swift */,
 				565928C92712C82500B3EDE0 /* ContextProvider.swift */,
 				5604AA6A2730435600E1326E /* ShoppingListSorter.swift */,
+				562F590727A000CD004ECD5C /* ShoppingListSerializer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -274,6 +289,7 @@
 		567DDE382675138500F59A54 = {
 			isa = PBXGroup;
 			children = (
+				562F591427A022C2004ECD5C /* ShoppingManiac--iOS--Info.plist */,
 				567DDE3D2675138500F59A54 /* Shared */,
 				567DDE562675138600F59A54 /* Tests iOS */,
 				567DDE602675138600F59A54 /* Tests macOS */,
@@ -433,6 +449,7 @@
 				5604AA7427306C0D00E1326E /* GeometryAware.swift */,
 				5604AA79273071A300E1326E /* AutocompletionList.swift */,
 				563EBF0427312E30003052B7 /* RoundRectTextField.swift */,
+				562F590C27A016F5004ECD5C /* ShareSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -445,6 +462,7 @@
 				56CA0A52272D2EA5007AE1F1 /* DIProviderExtension.swift */,
 				56D3A06C274D66BF00F84B30 /* ViewExtension.swift */,
 				56D3A06F274D66F100F84B30 /* ColorExtension.swift */,
+				562F590F27A01C0D004ECD5C /* DataExtension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -669,6 +687,7 @@
 				560BD5F4272955940019AB13 /* CategoriesModel.swift in Sources */,
 				56A26C83267521420071BF85 /* ShoppingScreen.swift in Sources */,
 				567DDE692675138600F59A54 /* Persistence.swift in Sources */,
+				562F590827A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */,
 				560BD5E827294B020019AB13 /* StoresItemModel.swift in Sources */,
 				560BD5D92729339E0019AB13 /* GoodsModel.swift in Sources */,
 				565928C02712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
@@ -676,6 +695,7 @@
 				5604AA7A273071A300E1326E /* AutocompletionList.swift in Sources */,
 				560BD5E527293C7B0019AB13 /* EditGoodView.swift in Sources */,
 				560BD5EB272953790019AB13 /* StoresModel.swift in Sources */,
+				562F590D27A016F5004ECD5C /* ShareSheet.swift in Sources */,
 				5604AA7527306C0D00E1326E /* GeometryAware.swift in Sources */,
 				56A26C93267521FD0071BF85 /* AboutScreen.swift in Sources */,
 				56D854FE2712068C0073168A /* NSSetExtension.swift in Sources */,
@@ -690,6 +710,7 @@
 				560BD5D327292F810019AB13 /* ShoppingListItemView.swift in Sources */,
 				560BD5CD27286E630019AB13 /* ShoppingListViewModel.swift in Sources */,
 				56A26C8B267521B20071BF85 /* StoresScreen.swift in Sources */,
+				562F591027A01C0D004ECD5C /* DataExtension.swift in Sources */,
 				56CA0A53272D2EA5007AE1F1 /* DIProviderExtension.swift in Sources */,
 				565928CF27131CA200B3EDE0 /* AddShoppingListView.swift in Sources */,
 				5604AA6B2730435600E1326E /* ShoppingListSorter.swift in Sources */,
@@ -721,6 +742,7 @@
 				560BD5F5272955940019AB13 /* CategoriesModel.swift in Sources */,
 				56A26C84267521420071BF85 /* ShoppingScreen.swift in Sources */,
 				567DDE6A2675138600F59A54 /* Persistence.swift in Sources */,
+				562F590927A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */,
 				560BD5E927294B020019AB13 /* StoresItemModel.swift in Sources */,
 				560BD5DA2729339E0019AB13 /* GoodsModel.swift in Sources */,
 				565928C12712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
@@ -728,6 +750,7 @@
 				5604AA7B273071A300E1326E /* AutocompletionList.swift in Sources */,
 				560BD5E627293C7B0019AB13 /* EditGoodView.swift in Sources */,
 				560BD5EC272953790019AB13 /* StoresModel.swift in Sources */,
+				562F590E27A016F5004ECD5C /* ShareSheet.swift in Sources */,
 				5604AA7627306C0D00E1326E /* GeometryAware.swift in Sources */,
 				56A26C94267521FD0071BF85 /* AboutScreen.swift in Sources */,
 				56D854FF2712068C0073168A /* NSSetExtension.swift in Sources */,
@@ -742,6 +765,7 @@
 				560BD5D427292F810019AB13 /* ShoppingListItemView.swift in Sources */,
 				560BD5CE27286E630019AB13 /* ShoppingListViewModel.swift in Sources */,
 				56A26C8C267521B20071BF85 /* StoresScreen.swift in Sources */,
+				562F591127A01C0D004ECD5C /* DataExtension.swift in Sources */,
 				56CA0A54272D2EA5007AE1F1 /* DIProviderExtension.swift in Sources */,
 				565928D027131CA200B3EDE0 /* AddShoppingListView.swift in Sources */,
 				5604AA6C2730435600E1326E /* ShoppingListSorter.swift in Sources */,
@@ -761,6 +785,7 @@
 			files = (
 				567CC719272AA83200CFA3F9 /* ShoppingManiac.xcdatamodeld in Sources */,
 				567CC717272AA6F800CFA3F9 /* DAOTest.swift in Sources */,
+				562F590A27A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */,
 				5604AA7727306C0D00E1326E /* GeometryAware.swift in Sources */,
 				565928C22712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
 				5604AA722730690700E1326E /* EditShoppingListItemViewModel.swift in Sources */,
@@ -768,6 +793,7 @@
 				567CC71F272AA84D00CFA3F9 /* StoresItemModel.swift in Sources */,
 				565928BD2712C6B500B3EDE0 /* DAO.swift in Sources */,
 				5604AA6D2730435600E1326E /* ShoppingListSorter.swift in Sources */,
+				562F591227A01C0D004ECD5C /* DataExtension.swift in Sources */,
 				565928C72712C77200B3EDE0 /* ShoppingListItemModel.swift in Sources */,
 				567CC71D272AA84900CFA3F9 /* CategoriesItemModel.swift in Sources */,
 				567CC723272AAA0600CFA3F9 /* Persistence.swift in Sources */,
@@ -783,6 +809,7 @@
 			files = (
 				567CC71A272AA83300CFA3F9 /* ShoppingManiac.xcdatamodeld in Sources */,
 				567CC718272AA6F800CFA3F9 /* DAOTest.swift in Sources */,
+				562F590B27A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */,
 				5604AA7827306C0D00E1326E /* GeometryAware.swift in Sources */,
 				565928C32712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
 				5604AA732730690700E1326E /* EditShoppingListItemViewModel.swift in Sources */,
@@ -790,6 +817,7 @@
 				567CC720272AA84E00CFA3F9 /* StoresItemModel.swift in Sources */,
 				565928BE2712C6B500B3EDE0 /* DAO.swift in Sources */,
 				5604AA6E2730435600E1326E /* ShoppingListSorter.swift in Sources */,
+				562F591327A01C0D004ECD5C /* DataExtension.swift in Sources */,
 				565928C82712C77200B3EDE0 /* ShoppingListItemModel.swift in Sources */,
 				567CC71E272AA84A00CFA3F9 /* CategoriesItemModel.swift in Sources */,
 				567CC724272AAA0700CFA3F9 /* Persistence.swift in Sources */,
@@ -936,6 +964,7 @@
 				DEVELOPMENT_TEAM = 5LPE595N4R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ShoppingManiac--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -967,6 +996,7 @@
 				DEVELOPMENT_TEAM = 5LPE595N4R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ShoppingManiac--iOS--Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
