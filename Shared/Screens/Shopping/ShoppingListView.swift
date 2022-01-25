@@ -31,7 +31,7 @@ struct ShoppingListSectionContent: View {
                 ShoppingListItemView(item: item, model: model)
             }
         }
-        if !section.subsections.isEmpty {
+        if !section.subsections.isEmpty && !section.items.isEmpty {
             ShoppingListSectionTitle(title: "No category")
         }
         ForEach(section.items) { item in

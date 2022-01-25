@@ -17,8 +17,16 @@ final class ShoppingModel: ObservableObject {
     @Published var items: [ShoppingListModel] = []
     @Published var showAddSheet: Bool = false
     @Published var itemToOpen: ShoppingListModel?
+    private var cancellable = Set<AnyCancellable>()
     
     init() {
+        reloadItems()
+        GlobalCommands.reloadTopList.sink(receiveValue: {[weak self] in
+            self?.reloadItems()
+        }).store(in: &cancellable)
+    }
+    
+    private func reloadItems() {
         Task {
             items = try await dao.getShoppingLists()
         }

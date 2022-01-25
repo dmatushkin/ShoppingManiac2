@@ -7,6 +7,12 @@
 
 import SwiftUI
 import DependencyInjection
+import Combine
+
+final class GlobalCommands {
+    
+    static let reloadTopList = PassthroughSubject<Void, Never>()
+}
 
 @main
 struct ShoppingManiacApp: App {
@@ -25,6 +31,7 @@ struct ShoppingManiacApp: App {
                     Task {
                         let list = try await serializer.importList(data: data)
                         print("List \(list.title) imported")
+                        GlobalCommands.reloadTopList.send()
                     }
                 } catch {
                     print(error.localizedDescription)
