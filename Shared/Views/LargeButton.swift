@@ -8,31 +8,7 @@
 import SwiftUI
 
 struct LargeButton: View {
-    
-    struct LargeButtonStyle: ButtonStyle {
-        let backgroundColor: Color
         
-        func makeBody(configuration: Configuration) -> some View {
-            Group {
-                if configuration.isPressed {
-                    configuration
-                        .label
-                        .padding(8)
-                        .frame(maxWidth: .infinity)
-                        .background(Capsule().fill(backgroundColor)).foregroundColor(.white)
-                        .southEastShadow().opacity(0.8)
-                } else {
-                    configuration
-                        .label
-                        .padding(8)
-                        .frame(maxWidth: .infinity)
-                        .background(Capsule().fill(backgroundColor)).foregroundColor(.white)
-                        .northWestShadow()
-                }
-            }            
-        }
-    }
-    
     let title: String
     let backgroundColor: Color
     let action: () -> Void
@@ -44,9 +20,6 @@ struct LargeButton: View {
     }
     
     var body: some View {
-        /*Button(title, action: {
-            action()
-        }).buttonStyle(LargeButtonStyle(backgroundColor: backgroundColor))*/
         Text(title)
             .padding(8)
             .frame(maxWidth: .infinity)
