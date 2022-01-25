@@ -44,9 +44,17 @@ struct LargeButton: View {
     }
     
     var body: some View {
-        Button(title, action: {
+        /*Button(title, action: {
             action()
-        }).buttonStyle(LargeButtonStyle(backgroundColor: backgroundColor))
+        }).buttonStyle(LargeButtonStyle(backgroundColor: backgroundColor))*/
+        Text(title)
+            .padding(8)
+            .frame(maxWidth: .infinity)
+            .background(Capsule().fill(backgroundColor)).foregroundColor(.white)
+            .northWestShadow()
+            .onTapGesture {
+                action()
+            }
     }
 }
 
