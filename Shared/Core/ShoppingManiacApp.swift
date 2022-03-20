@@ -29,9 +29,13 @@ struct ShoppingManiacApp: App {
                     @Autowired(cacheType: .share) var serializer: ShoppingListSerializerProtocol
                     let data = try Data(contentsOf: url)
                     Task {
-                        let list = try await serializer.importList(data: data)
-                        print("List \(list.title) imported")
-                        GlobalCommands.reloadTopList.send()
+                        do {
+                            let list = try await serializer.importList(data: data)
+                            print("List \(list.title) imported")
+                            GlobalCommands.reloadTopList.send()
+                        } catch {
+                            print(error.localizedDescription)
+                        }
                     }
                 } catch {
                     print(error.localizedDescription)

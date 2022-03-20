@@ -10,7 +10,7 @@ import DependencyInjection
 import CoreData
 
 struct EditShoppingListItemView: View {
-    @StateObject private var dataModel = EditShoppingListItemViewModel()
+    @StateObject private var dataModel: EditShoppingListItemViewModel
     @FocusState private var itemNameFocused: Bool
     @FocusState private var storeNameFocused: Bool
     @FocusState private var amountFocused: Bool
@@ -20,6 +20,7 @@ struct EditShoppingListItemView: View {
     let item: ShoppingListItemModel?
     
     init(model: ShoppingListViewModel, item: ShoppingListItemModel?) {
+        _dataModel = StateObject(wrappedValue: EditShoppingListItemViewModel())
         self.model = model
         self.item = item
     }
@@ -110,6 +111,7 @@ struct AddShoppingListItemView_Previews: PreviewProvider {
                                                                            isWeight: false,
                                                                            price: "20",
                                                                            isImportant: false,
-                                                                           rating: 3)))
+                                                                           rating: 3,
+                                                                           recordId: nil)))
     }
 }

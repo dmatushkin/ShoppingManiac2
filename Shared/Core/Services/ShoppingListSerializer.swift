@@ -57,7 +57,7 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency
                                       store: $0.store,
                                       price: numberFormatter.number(from: $0.price)?.decimalValue ?? 0,
                                       purchased: $0.isPurchased,
-                                      quantity: numberFormatter.number(from: $0.amount)?.decimalValue ?? 0,
+                                      quantity: numberFormatter.number(from: $0.amount)?.decimalValue ?? 1,
                                       isWeight: $0.isWeight,
                                       isImportant: $0.isImportant)
         })

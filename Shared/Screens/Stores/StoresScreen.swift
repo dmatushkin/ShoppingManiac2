@@ -10,8 +10,12 @@ import DependencyInjection
 
 struct StoresScreen: View {
     
-    @StateObject private var model = StoresModel()
+    @StateObject private var model: StoresModel
     @FocusState private var editFocused: Bool
+    
+    init() {
+        _model = StateObject(wrappedValue: StoresModel())
+    }
     
     var body: some View {
         NavigationView {

@@ -42,10 +42,11 @@ struct ShoppingListSectionContent: View {
 
 struct ShoppingListView: View {
     
-    @StateObject private var model = ShoppingListViewModel()
+    @StateObject private var model: ShoppingListViewModel
     private let listModel: ShoppingListModel
     
     init(listModel: ShoppingListModel) {
+        _model = StateObject(wrappedValue: ShoppingListViewModel())
         self.listModel = listModel
     }
     
@@ -92,7 +93,7 @@ struct ShoppingListView_Previews: PreviewProvider {
             .register(forType: DAOProtocol.self, dependency: DAOStub.self)
             .showView(
                 NavigationView {
-                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), name: "test list", date: Date()))
+                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), name: "test list", date: Date(), recordId: nil))
                 }
             )
     }

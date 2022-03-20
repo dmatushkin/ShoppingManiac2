@@ -8,11 +8,17 @@
 import SwiftUI
 
 struct AddCategoryToStoreView: View {
-    @StateObject private var dataModel = AddCategoryToStoreModel()
+    @StateObject private var dataModel: AddCategoryToStoreModel
     @Binding var categories: [String]
     @Binding var showingPopover: Bool
     @FocusState private var categoryFocused: Bool
     private let geometryStorage = GeometryStorage(coordinateSpace: "zstackCoordinateSpace")
+    
+    init(categories: Binding<[String]>, showingPopover: Binding<Bool>) {
+        _dataModel = StateObject(wrappedValue: AddCategoryToStoreModel())
+        _categories = categories
+        _showingPopover = showingPopover
+    }
     
     var body: some View {
         ZStack {

@@ -20,6 +20,7 @@ struct ShoppingListModel: Identifiable, Hashable {
     let id: NSManagedObjectID
     let name: String
     let date: Date
+    let recordId: String?
     
     var title: String {
         return name.isEmpty ? ShoppingListModel.formatter.string(from: date) : name

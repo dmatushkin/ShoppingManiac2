@@ -11,7 +11,11 @@ import DependencyInjection
 
 struct ShoppingScreen: View {
     
-    @StateObject private var model = ShoppingModel()
+    @StateObject private var model: ShoppingModel
+    
+    init() {
+        _model = StateObject(wrappedValue: ShoppingModel())
+    }
     
     var body: some View {
         NavigationView {
