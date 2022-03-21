@@ -50,6 +50,7 @@ struct ShoppingListItemView_Previews: PreviewProvider {
             DIProvider.shared
                 .register(forType: DAOProtocol.self, dependency: DAOStub.self)
                 .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                           uniqueId: "3452345",
                                                                            title: "Test title",
                                                                            store: "Test store",
                                                                            category: "Test category",
@@ -64,6 +65,7 @@ struct ShoppingListItemView_Previews: PreviewProvider {
             DIProvider.shared
                 .register(forType: DAOProtocol.self, dependency: DAOStub.self)
                 .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                           uniqueId: "1211234",
                                                                            title: "Test title",
                                                                            store: "Test store",
                                                                            category: "Test category",

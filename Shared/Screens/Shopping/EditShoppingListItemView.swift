@@ -102,6 +102,7 @@ struct AddShoppingListItemView_Previews: PreviewProvider {
             .register(forType: DAOProtocol.self, dependency: DAOStub.self)
             .showView(EditShoppingListItemView(model: ShoppingListViewModel(),
                                                item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                           uniqueId: "112341234",
                                                                            title: "test 1",
                                                                            store: "test 2",
                                                                            category: "test category",

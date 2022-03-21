@@ -206,6 +206,7 @@
 		565928C92712C82500B3EDE0 /* ContextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextProvider.swift; sourceTree = "<group>"; };
 		565928CE27131CA200B3EDE0 /* AddShoppingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShoppingListView.swift; sourceTree = "<group>"; };
 		565928D127131F2000B3EDE0 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
+		567802AA27E8EE56000547D1 /* ShoppingManiac 13.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "ShoppingManiac 13.xcdatamodel"; sourceTree = "<group>"; };
 		567CC716272AA6F800CFA3F9 /* DAOTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DAOTest.swift; sourceTree = "<group>"; };
 		567DDE402675138500F59A54 /* ShoppingManiacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingManiacApp.swift; sourceTree = "<group>"; };
 		567DDE422675138500F59A54 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -1345,6 +1346,7 @@
 		56F5742426B99C50007069D4 /* ShoppingManiac.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				567802AA27E8EE56000547D1 /* ShoppingManiac 13.xcdatamodel */,
 				56F5742526B99C50007069D4 /* ShoppingManiac 10.xcdatamodel */,
 				56F5742626B99C50007069D4 /* ShoppingManiac 8.xcdatamodel */,
 				56F5742726B99C50007069D4 /* ShoppingManiac 4.xcdatamodel */,
@@ -1358,7 +1360,7 @@
 				56F5742F26B99C50007069D4 /* ShoppingManiac 12.xcdatamodel */,
 				56F5743026B99C50007069D4 /* ShoppingManiac 6.xcdatamodel */,
 			);
-			currentVersion = 56F5742F26B99C50007069D4 /* ShoppingManiac 12.xcdatamodel */;
+			currentVersion = 567802AA27E8EE56000547D1 /* ShoppingManiac 13.xcdatamodel */;
 			path = ShoppingManiac.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

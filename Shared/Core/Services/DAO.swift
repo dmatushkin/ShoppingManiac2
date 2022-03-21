@@ -12,7 +12,7 @@ import CommonError
 
 protocol DAOProtocol {
     func getShoppingLists() async throws -> [ShoppingListModel]
-    func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel
+    func addShoppingList(name: String, date: Date, uniqueId: String?) async throws -> ShoppingListModel
     func removeShoppingList(_ item: ShoppingListModel) async throws
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel]
     func addShoppingListItem(list: ShoppingListModel,
@@ -22,7 +22,9 @@ protocol DAOProtocol {
                              isWeight: Bool,
                              price: String,
                              isImportant: Bool,
-                             rating: Int) async throws
+                             rating: Int,
+                             isPurchased: Bool,
+                             uniqueId: String?) async throws
     func editShoppingListItem(item: ShoppingListItemModel,
                               name: String,
                               amount: String,
@@ -85,25 +87,38 @@ final class DAO: DAOProtocol, DIDependency {
             return items.map({ list in
                 let date = Date(timeIntervalSinceReferenceDate: list.date)
                 let name = list.name ?? ""
-                return ShoppingListModel(id: list.objectID, name: name, date: date, recordId: list.recordid)
+                return ShoppingListModel(id: list.objectID, uniqueId: list.uniqueId ?? "", name: name, date: date, recordId: list.recordid)
             })
         })
     }
     
-    func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel {
+    func addShoppingList(name: String, date: Date, uniqueId: String?) async throws -> ShoppingListModel {
         let context = contextProvider.getContext()
-        return try await context.perform({
-            guard let item = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList else { throw DBError.unableToCreateShoppingList }
+        return try await context.perform({[weak self] in
+            guard let self = self, let item = self.createOrGetShoppingList(uniqueId: uniqueId, context: context) else { throw DBError.unableToCreateShoppingList }
+            let uniqueId = uniqueId?.nilIfEmpty ?? UUID().uuidString
             item.name = name
             item.date = date.timeIntervalSinceReferenceDate
+            item.uniqueId = uniqueId
             try context.save()
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .medium
             dateFormatter.timeStyle = .none
             let date = Date(timeIntervalSinceReferenceDate: item.date)
             let name = item.name ?? ""
-            return ShoppingListModel(id: item.objectID, name: name, date: date, recordId: nil)
+            return ShoppingListModel(id: item.objectID, uniqueId: uniqueId, name: name, date: date, recordId: nil)
         })
+    }
+    
+    private func createOrGetShoppingList(uniqueId: String?, context: NSManagedObjectContext) -> ShoppingList? {
+        if let uniqueId = uniqueId?.nilIfEmpty {
+            let request = NSFetchRequest<ShoppingList>(entityName: "ShoppingList")
+            request.predicate = NSPredicate(format: "uniqueId == %@", uniqueId)
+            if let existing: ShoppingList = try? context.fetch(request).first {
+                return existing
+            }
+        }
+        return NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
     }
     
     func removeShoppingList(_ item: ShoppingListModel) async throws {
@@ -129,6 +144,7 @@ final class DAO: DAOProtocol, DIDependency {
                 numberFormatter.maximumFractionDigits = item.isWeight ? 2 : 0
                 let amount = numberFormatter.string(from: NSNumber(value: item.quantity)) ?? ""
                 return ShoppingListItemModel(id: item.objectID,
+                                             uniqueId: item.uniqueId ?? "",
                                              title: item.good?.name ?? "",
                                              store: item.store?.name ?? "",
                                              category: item.good?.category?.name ?? "",
@@ -151,24 +167,40 @@ final class DAO: DAOProtocol, DIDependency {
                              isWeight: Bool,
                              price: String,
                              isImportant: Bool,
-                             rating: Int) async throws {
+                             rating: Int,
+                             isPurchased: Bool,
+                             uniqueId: String?) async throws {
         let context = contextProvider.getContext()
         return try await context.perform({[weak self] in
-            guard let shoppingList = try context.existingObject(with: list.id) as? ShoppingList else { throw DBError.unableToGetShoppingList }
-            guard !name.isEmpty, let item = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem else { throw DBError.unableToCreateShoppingItem }
+            guard let self = self, let shoppingList = try context.existingObject(with: list.id) as? ShoppingList else { throw DBError.unableToGetShoppingList }
+            guard !name.isEmpty, let item = self.createOrGetShoppingListItem(uniqueId: uniqueId, context: context) else { throw DBError.unableToCreateShoppingItem }
+            let uniqueId = uniqueId?.nilIfEmpty ?? UUID().uuidString
             let numberFormatter = NumberFormatter()
             item.list = shoppingList
-            item.good = try self?.createOrGetGood(name: name, context: context)
+            item.good = try self.createOrGetGood(name: name, context: context)
             item.good?.personalRating = Int16(rating)
             item.quantity = numberFormatter.number(from: amount)?.floatValue ?? 1
             item.isWeight = isWeight
             item.price = numberFormatter.number(from: price)?.floatValue ?? 0
             item.isImportant = isImportant
+            item.uniqueId = uniqueId
+            item.purchased = isPurchased
             if !store.isEmpty {
-                item.store = try self?.createOrGetStore(name: store, context: context)
+                item.store = try self.createOrGetStore(name: store, context: context)
             }
             try context.save()
         })
+    }
+    
+    private func createOrGetShoppingListItem(uniqueId: String?, context: NSManagedObjectContext) -> ShoppingListItem? {
+        if let uniqueId = uniqueId?.nilIfEmpty {
+            let request = NSFetchRequest<ShoppingListItem>(entityName: "ShoppingListItem")
+            request.predicate = NSPredicate(format: "uniqueId == %@", uniqueId)
+            if let existing: ShoppingListItem = try? context.fetch(request).first {
+                return existing
+            }
+        }
+        return NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
     }
     
     func editShoppingListItem(item: ShoppingListItemModel,
@@ -460,50 +492,50 @@ final class DAO: DAOProtocol, DIDependency {
 final class DAOStub: DAOProtocol, DIDependency {
     
     var shoppingLists: [ShoppingListModel] = [
-        ShoppingListModel(id: NSManagedObjectID(), name: "test1", date: Date(), recordId: nil),
-        ShoppingListModel(id: NSManagedObjectID(), name: "test2", date: Date(), recordId: nil),
-        ShoppingListModel(id: NSManagedObjectID(), name: "test3", date: Date(), recordId: nil),
-        ShoppingListModel(id: NSManagedObjectID(), name: "test4", date: Date(), recordId: nil),
-        ShoppingListModel(id: NSManagedObjectID(), name: "test5", date: Date(), recordId: nil),
-        ShoppingListModel(id: NSManagedObjectID(), name: "test6", date: Date(), recordId: nil),
-        ShoppingListModel(id: NSManagedObjectID(), name: "test7", date: Date(), recordId: nil)
+        ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234124", name: "test1", date: Date(), recordId: nil),
+        ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234125", name: "test2", date: Date(), recordId: nil),
+        ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234126", name: "test3", date: Date(), recordId: nil),
+        ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234127", name: "test4", date: Date(), recordId: nil),
+        ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234128", name: "test5", date: Date(), recordId: nil),
+        ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234129", name: "test6", date: Date(), recordId: nil),
+        ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234120", name: "test7", date: Date(), recordId: nil)
     ]
     
     func getShoppingLists() async throws -> [ShoppingListModel] {
         return shoppingLists
     }
     
-    func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel {
-        return ShoppingListModel(id: NSManagedObjectID(), name: "test", date: date, recordId: nil)
+    func addShoppingList(name: String, date: Date, uniqueId: String?) async throws -> ShoppingListModel {
+        return ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test", date: date, recordId: nil)
     }
     
     func removeShoppingList(_ item: ShoppingListModel) async throws {
     }
     
     var shoppingItems: [ShoppingListItemModel] = [
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title1", store: "store1", category: "category1", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title2", store: "store1", category: "category1", categoryStoreOrder: 0, isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title3", store: "store1", category: "category2", categoryStoreOrder: 0, isPurchased: true, amount: "3", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title4", store: "store1", category: "category2", categoryStoreOrder: 0, isPurchased: false, amount: "2", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title5", store: "store2", category: "category2", categoryStoreOrder: 0, isPurchased: true, amount: "7", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title6", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "5", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title7", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "20", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title8", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "4", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title9", store: "store2", category: "category4", categoryStoreOrder: 0, isPurchased: true, amount: "8", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title10", store: "store2", category: "category4", categoryStoreOrder: 0, isPurchased: false, amount: "24", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title11", store: "store3", category: "category4", categoryStoreOrder: 0, isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title12", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: false, amount: "6", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title13", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: false, amount: "18", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title14", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: true, amount: "9", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title15", store: "store3", category: "category6", categoryStoreOrder: 0, isPurchased: false, amount: "19", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
-        ShoppingListItemModel(id: NSManagedObjectID(), title: "item title16", store: "store3", category: "category6", categoryStoreOrder: 0, isPurchased: false, amount: "10", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241234", title: "item title1", store: "store1", category: "category1", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241235", title: "item title2", store: "store1", category: "category1", categoryStoreOrder: 0, isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241236", title: "item title3", store: "store1", category: "category2", categoryStoreOrder: 0, isPurchased: true, amount: "3", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241237", title: "item title4", store: "store1", category: "category2", categoryStoreOrder: 0, isPurchased: false, amount: "2", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241238", title: "item title5", store: "store2", category: "category2", categoryStoreOrder: 0, isPurchased: true, amount: "7", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241239", title: "item title6", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "5", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241230", title: "item title7", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "20", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241231", title: "item title8", store: "store2", category: "category3", categoryStoreOrder: 0, isPurchased: false, amount: "4", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241232", title: "item title9", store: "store2", category: "category4", categoryStoreOrder: 0, isPurchased: true, amount: "8", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241233", title: "item title10", store: "store2", category: "category4", categoryStoreOrder: 0, isPurchased: false, amount: "24", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241214", title: "item title11", store: "store3", category: "category4", categoryStoreOrder: 0, isPurchased: false, amount: "1", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241215", title: "item title12", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: false, amount: "6", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241216", title: "item title13", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: false, amount: "18", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241217", title: "item title14", store: "store3", category: "category5", categoryStoreOrder: 0, isPurchased: true, amount: "9", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241218", title: "item title15", store: "store3", category: "category6", categoryStoreOrder: 0, isPurchased: false, amount: "19", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
+        ShoppingListItemModel(id: NSManagedObjectID(), uniqueId: "1241219", title: "item title16", store: "store3", category: "category6", categoryStoreOrder: 0, isPurchased: false, amount: "10", isWeight: false, price: "15", isImportant: false, rating: 5, recordId: nil),
     ]
     
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel] {
         return shoppingItems
     }
     
-    func addShoppingListItem(list: ShoppingListModel, name: String, amount: String, store: String, isWeight: Bool, price: String, isImportant: Bool, rating: Int) async throws {
+    func addShoppingListItem(list: ShoppingListModel, name: String, amount: String, store: String, isWeight: Bool, price: String, isImportant: Bool, rating: Int, isPurchased: Bool, uniqueId: String?) async throws {
     }
     
     func editShoppingListItem(item: ShoppingListItemModel, name: String, amount: String, store: String, isWeight: Bool, price: String, isImportant: Bool, rating: Int) async throws {

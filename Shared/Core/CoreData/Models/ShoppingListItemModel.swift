@@ -10,6 +10,7 @@ import CoreData
 
 struct ShoppingListItemModel: Identifiable {
     let id: NSManagedObjectID
+    let uniqueId: String
     let title: String
     let store: String
     let category: String

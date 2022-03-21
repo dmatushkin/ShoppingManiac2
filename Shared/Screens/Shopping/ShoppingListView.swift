@@ -93,7 +93,7 @@ struct ShoppingListView_Previews: PreviewProvider {
             .register(forType: DAOProtocol.self, dependency: DAOStub.self)
             .showView(
                 NavigationView {
-                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), name: "test list", date: Date(), recordId: nil))
+                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test list", date: Date(), recordId: nil))
                 }
             )
     }

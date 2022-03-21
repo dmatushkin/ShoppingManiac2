@@ -46,7 +46,9 @@ final class ShoppingListViewModel: ObservableObject {
                                           isWeight: model.amountType == 1,
                                           price: model.price,
                                           isImportant: model.isImportant,
-                                          rating: model.rating)
+                                          rating: model.rating,
+                                          isPurchased: false,
+                                          uniqueId: nil)
         output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
     }
     

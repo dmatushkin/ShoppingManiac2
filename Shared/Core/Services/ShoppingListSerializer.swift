@@ -36,6 +36,7 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency
     private struct ShoppingListJsonModel: Codable {
         let name: String
         let date: String
+        let uniqueId: String?
         let items: [ShoppingListItemJsonModel]
     }
     
@@ -47,6 +48,7 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency
         let quantity: Decimal
         let isWeight: Bool
         let isImportant: Bool
+        let uniqueId: String?
     }
     
     func exportList(listModel: ShoppingListModel) async throws -> Data {
@@ -59,15 +61,16 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency
                                       purchased: $0.isPurchased,
                                       quantity: numberFormatter.number(from: $0.amount)?.decimalValue ?? 1,
                                       isWeight: $0.isWeight,
-                                      isImportant: $0.isImportant)
+                                      isImportant: $0.isImportant,
+                                      uniqueId: $0.uniqueId)
         })
-        let listJsonModel = ShoppingListJsonModel(name: listModel.name, date: dateFormatter.string(from: listModel.date), items: items)        
+        let listJsonModel = ShoppingListJsonModel(name: listModel.name, date: dateFormatter.string(from: listModel.date), uniqueId: listModel.uniqueId, items: items)        
         return try JSONEncoder().encode(listJsonModel)
     }
     
     func importList(data: Data) async throws -> ShoppingListModel {
         let jsonModel = try JSONDecoder().decode(ShoppingListJsonModel.self, from: data)
-        let list = try await dao.addShoppingList(name: jsonModel.name, date: dateFormatter.date(from: jsonModel.date) ?? Date())
+        let list = try await dao.addShoppingList(name: jsonModel.name, date: dateFormatter.date(from: jsonModel.date) ?? Date(), uniqueId: jsonModel.uniqueId)
         for item in jsonModel.items {
             try await dao.addShoppingListItem(list: list,
                                               name: item.good,
@@ -76,7 +79,9 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency
                                               isWeight: item.isWeight,
                                               price: numberFormatter.string(from: item.price as NSNumber) ?? "",
                                               isImportant: item.isImportant,
-                                              rating: 0)
+                                              rating: 0,
+                                              isPurchased: item.purchased,
+                                              uniqueId: item.uniqueId)
         }
         return list
     }

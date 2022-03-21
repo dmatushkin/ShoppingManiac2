@@ -18,6 +18,7 @@ struct ShoppingListModel: Identifiable, Hashable {
     }()
     
     let id: NSManagedObjectID
+    let uniqueId: String
     let name: String
     let date: Date
     let recordId: String?
