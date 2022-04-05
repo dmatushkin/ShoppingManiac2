@@ -51,7 +51,7 @@ struct ShoppingListView: View {
     }
     
     var body: some View {
-        ZStack {
+        VStack {
             List {
                 ForEach(model.output.sections) { section in
                     Section(content: {
@@ -63,37 +63,30 @@ struct ShoppingListView: View {
                 ForEach(model.output.items) { item in
                     ShoppingListItemView(item: item, model: model)
                 }
-                Color.black.opacity(0).frame(height: 88).listRowBackground(Color("backgroundColor")).listRowSeparator(.hidden)
-            }.listStyle(.grouped)
-                .mask(
-                    VStack(spacing: 0) {
-                        Color.black
-                        LinearGradient(gradient: Gradient(colors: [Color.black, Color.black.opacity(0)]), startPoint: .top, endPoint: .bottom).frame(height: 88)
-                    }
-                )
-            VStack {
-                Spacer()
-                HStack(alignment: .center) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 25, weight: .light))
-                        .padding(10)
-                        .onTapGesture {
-                            model.shareList(model: listModel)
-                        }.background(content: { Color.black.opacity(0.2) })
-                        .cornerRadius(10)
-                        .padding(10)
-                    Spacer()
-                    Image("add_purchase_large")
-                        .padding(10)
-                        .onTapGesture {
-                            model.showAddSheet = true
-                        }.background(content: { Color.black.opacity(0.2) })
-                        .cornerRadius(10)
-                        .padding(10)
-                }.padding(.bottom, 15)
-                    .background(content: {
-                        Color("bottomPanelColor")
-                    })
+            }.listStyle(.grouped).safeAreaInset(edge: .bottom) {
+                VStack {
+                    HStack(alignment: .center) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 25, weight: .light))
+                            .padding(10)
+                            .onTapGesture {
+                                model.shareList(model: listModel)
+                            }.background(content: { Color.black.opacity(0.2) })
+                            .cornerRadius(10)
+                            .padding(10)
+                        Spacer()
+                        Image("add_purchase_large")
+                            .padding(10)
+                            .onTapGesture {
+                                model.showAddSheet = true
+                            }.background(content: { Color.black.opacity(0.2) })
+                            .cornerRadius(10)
+                            .padding(10)
+                    }.padding(.bottom, 15)
+                        .background(content: {
+                            Color("bottomPanelColor")
+                        })
+                }
             }
         }.onAppear(perform: { model.listModel = listModel })
             .navigationTitle(Text(listModel.title))
