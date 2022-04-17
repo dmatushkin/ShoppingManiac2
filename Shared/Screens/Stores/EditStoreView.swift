@@ -18,7 +18,7 @@ struct EditStoreView: View {
     @State private var isEditable = false
     @FocusState private var editFocused: Bool
     @State private var showingPopover = false
-    @Environment(\.presentationMode) var presentation
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack {
@@ -56,13 +56,13 @@ struct EditStoreView: View {
                 .environment(\.editMode, isEditable ? .constant(.active) : .constant(.inactive))
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
-                    presentation.wrappedValue.dismiss()
+                    dismiss()
                 })
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
                         try await model.editStore(item: item, name: name, categories: categories)
-                        presentation.wrappedValue.dismiss()
+                        dismiss()
                     }
                 })
             }.toolbar {

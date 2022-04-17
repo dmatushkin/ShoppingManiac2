@@ -17,7 +17,7 @@ struct EditCategoryView: View {
     @State private var goods: [String] = []
     @State private var showingPopover = false
     @FocusState private var editFocused: Bool
-    @Environment(\.presentationMode) var presentation
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack {
@@ -42,13 +42,13 @@ struct EditCategoryView: View {
             }.listStyle(.plain)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
-                    presentation.wrappedValue.dismiss()
+                    dismiss()
                 })
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
                         try await model.editCategory(item: item, name: name, goods: goods)
-                        presentation.wrappedValue.dismiss()
+                        dismiss()
                     }
                 })
             }.padding([.top])

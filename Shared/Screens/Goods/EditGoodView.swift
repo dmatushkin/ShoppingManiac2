@@ -17,7 +17,7 @@ struct EditGoodView: View {
     @State private var category: String = ""
     @FocusState private var goodFocused: Bool
     @FocusState private var categoryFocused: Bool
-    @Environment(\.presentationMode) var presentation
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack {
@@ -25,13 +25,13 @@ struct EditGoodView: View {
             RoundRectTextField(title: "Category name", input: $category, focus: $categoryFocused)
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
-                    presentation.wrappedValue.dismiss()
+                    dismiss()
                 })
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
                         try await model.editGood(item: item, name: name, category: category)
-                        presentation.wrappedValue.dismiss()
+                        dismiss()
                     }
                 })
             }.padding([.top])
