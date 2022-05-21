@@ -9,10 +9,17 @@ import SwiftUI
 import Combine
 import DependencyInjection
 import CoreData
+import CloudKit
 
 struct ExportedList: Identifiable {
     let id: NSManagedObjectID
     let url: URL
+}
+
+struct SharedList: Identifiable {
+    let id: NSManagedObjectID
+    let share: CKShare
+    let container: CKContainer
 }
 
 @MainActor
@@ -24,6 +31,7 @@ final class ShoppingListViewModel: ObservableObject {
     @Published var showAddSheet: Bool = false
     @Published var itemToShow: ShoppingListItemModel?
     @Published var dataToShare: ExportedList?
+    @Published var sharedList: SharedList?
     @Published var output: ShoppingListOutput = ShoppingListOutput(sections: [], items: [])
     
     private let sorter = ShoppingListSorter()
@@ -96,8 +104,13 @@ final class ShoppingListViewModel: ObservableObject {
     func shareList(model: ShoppingListModel) {
         Task {
             do {
-                let data = try await serializer.exportList(listModel: model)
-                dataToShare = ExportedList(id: model.id, url: try data.store())
+                if let itemShare = try await PersistenceController.shared.getShare(model),
+                    let container = PersistenceController.shared.ckContainer {
+                    sharedList = SharedList(id: model.id, share: itemShare, container: container)
+                } else {
+                    let data = try await serializer.exportList(listModel: model)
+                    dataToShare = ExportedList(id: model.id, url: try data.store())
+                }                
             } catch {
                 print(error.localizedDescription)
             }

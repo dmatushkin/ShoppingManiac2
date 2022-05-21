@@ -16,7 +16,7 @@ final class GlobalCommands {
 
 @main
 struct ShoppingManiacApp: App {
-    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     private let diProvider = DIProvider.shared
         .register(forType: ContextProviderProtocol.self, dependency: ContextProvider.self)
         .register(forType: DAOProtocol.self, dependency: DAO.self)

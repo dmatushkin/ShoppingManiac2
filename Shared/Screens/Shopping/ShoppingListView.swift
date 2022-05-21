@@ -91,12 +91,14 @@ struct ShoppingListView: View {
         }.onAppear(perform: { model.listModel = listModel })
             .navigationTitle(Text(listModel.title))
             .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
-            .sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
+            .sheet(isPresented: $model.showAddSheet, onDismiss: nil) {
                 EditShoppingListItemView(model: model, item: nil)
-            }).sheet(item: $model.itemToShow) { item in
+            }.sheet(item: $model.itemToShow) { item in
                 EditShoppingListItemView(model: model, item: item)
             }.sheet(item: $model.dataToShare) { item in
                 ShareSheet(activityItems: [item.url])
+            }.sheet(item: $model.sharedList) { sharedList in
+                CloudSharingView(share: sharedList.share, container: sharedList.container, list: listModel)
             }
     }
 }
