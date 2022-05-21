@@ -16,7 +16,7 @@
 		</dict>
 	</array>
 	<key>CKSharingSupported</key>
-        <true/>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
