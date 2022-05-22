@@ -36,7 +36,7 @@ final class PersistenceController {
     }()
     
     let container: NSPersistentCloudKitContainer
-    
+        
     init(inMemory: Bool = false) {
         container = NSPersistentCloudKitContainer(name: "ShoppingManiac")
         if inMemory {
@@ -45,8 +45,8 @@ final class PersistenceController {
             guard let privateStoreDescription = container.persistentStoreDescriptions.first else {
                 fatalError("Unable to get persistentStoreDescription")
             }
-            let storesURL = privateStoreDescription.url?.deletingLastPathComponent()
-            privateStoreDescription.url = storesURL?.appendingPathComponent("private.sqlite")
+            let storesURL = FileManager.default.urls(for: FileManager.SearchPathDirectory.documentDirectory, in: .userDomainMask).first
+            privateStoreDescription.url = storesURL?.appendingPathComponent("ShoppingManiac.sqlite")
             let sharedStoreURL = storesURL?.appendingPathComponent("shared.sqlite")
             guard let sharedStoreDescription = privateStoreDescription.copy() as? NSPersistentStoreDescription else {
                 fatalError("Copying the private store description returned an unexpected value.")
