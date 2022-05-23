@@ -70,7 +70,7 @@ struct ShoppingListView: View {
                             .font(.system(size: 25, weight: .light))
                             .padding(10)
                             .onTapGesture {
-                                model.shareList(model: listModel)
+                                model.showShareSheet = true
                             }.background(content: { Color.black.opacity(0.2) })
                             .cornerRadius(10)
                             .padding(10)
@@ -99,6 +99,13 @@ struct ShoppingListView: View {
                 ShareSheet(activityItems: [item.url])
             }.sheet(item: $model.sharedList) { sharedList in
                 CloudSharingView(share: sharedList.share, container: sharedList.container, list: listModel)
+            }.confirmationDialog("Share", isPresented: $model.showShareSheet) {
+                Button("Share with iCloud") {
+                    model.shareByiCloud(model: listModel)
+                }
+                Button("Share with file") {
+                    model.shareByFile(model: listModel)
+                }
             }
     }
 }

@@ -114,12 +114,12 @@ final class PersistenceController {
     func getShare(_ list: ShoppingListModel) async throws -> CKShare? {
         let shareDictionary = try container.fetchShares(matching: [list.id])
         if let share = shareDictionary[list.id] {
-            share[CKShare.SystemFieldKey.title] = list.name
+            share[CKShare.SystemFieldKey.title] = list.title
             return share
         }
         let item = try container.viewContext.existingObject(with: list.id)
         let (_, share, _) = try await container.share([item], to: nil)
-        share[CKShare.SystemFieldKey.title] = list.name
+        share[CKShare.SystemFieldKey.title] = list.title
         return share
     }
 }

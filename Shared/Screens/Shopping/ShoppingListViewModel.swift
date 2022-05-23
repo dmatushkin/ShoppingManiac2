@@ -29,6 +29,7 @@ final class ShoppingListViewModel: ObservableObject {
     @Autowired(cacheType: .share) private var serializer: ShoppingListSerializerProtocol
     
     @Published var showAddSheet: Bool = false
+    @Published var showShareSheet: Bool = false
     @Published var itemToShow: ShoppingListItemModel?
     @Published var dataToShare: ExportedList?
     @Published var sharedList: SharedList?
@@ -101,16 +102,24 @@ final class ShoppingListViewModel: ObservableObject {
         output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
     }
     
-    func shareList(model: ShoppingListModel) {
+    func shareByFile(model: ShoppingListModel) {
+        Task {
+            do {
+                let data = try await serializer.exportList(listModel: model)
+                dataToShare = ExportedList(id: model.id, url: try data.store())
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    func shareByiCloud(model: ShoppingListModel) {
         Task {
             do {
                 if let itemShare = try await PersistenceController.shared.getShare(model),
                     let container = PersistenceController.shared.ckContainer {
                     sharedList = SharedList(id: model.id, share: itemShare, container: container)
-                } else {
-                    let data = try await serializer.exportList(listModel: model)
-                    dataToShare = ExportedList(id: model.id, url: try data.store())
-                }                
+                }
             } catch {
                 print(error.localizedDescription)
             }

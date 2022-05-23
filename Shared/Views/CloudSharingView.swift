@@ -18,8 +18,9 @@ struct CloudSharingView: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> UICloudSharingController {
-        share[CKShare.SystemFieldKey.title] = list.name
+        share[CKShare.SystemFieldKey.title] = list.title
         let controller = UICloudSharingController(share: share, container: container)
+        controller.availablePermissions = [.allowReadWrite, .allowPrivate, .allowPublic]
         controller.modalPresentationStyle = .formSheet
         controller.delegate = context.coordinator
         return controller
@@ -30,14 +31,13 @@ struct CloudSharingView: UIViewControllerRepresentable {
 }
 
 final class CloudSharingCoordinator: NSObject, UICloudSharingControllerDelegate {
-    let persistance = PersistenceController.shared
     let list: ShoppingListModel
     init(list: ShoppingListModel) {
         self.list = list
     }
     
     func itemTitle(for csc: UICloudSharingController) -> String? {
-        list.name
+        list.title
     }
     
     func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {
@@ -49,5 +49,6 @@ final class CloudSharingCoordinator: NSObject, UICloudSharingControllerDelegate 
     }
     
     func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController) {
+        print("Stop sharing")
     }
 }
