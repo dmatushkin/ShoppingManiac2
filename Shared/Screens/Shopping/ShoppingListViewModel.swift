@@ -34,6 +34,7 @@ final class ShoppingListViewModel: ObservableObject {
     @Published var dataToShare: ExportedList?
     @Published var sharedList: SharedList?
     @Published var output: ShoppingListOutput = ShoppingListOutput(sections: [], items: [])
+    @Published var isLoading: Bool = false
     
     private let sorter = ShoppingListSorter()
     
@@ -105,9 +106,12 @@ final class ShoppingListViewModel: ObservableObject {
     func shareByFile(model: ShoppingListModel) {
         Task {
             do {
+                isLoading = true
                 let data = try await serializer.exportList(listModel: model)
                 dataToShare = ExportedList(id: model.id, url: try data.store())
+                isLoading = false
             } catch {
+                isLoading = false
                 print(error.localizedDescription)
             }
         }
@@ -116,11 +120,14 @@ final class ShoppingListViewModel: ObservableObject {
     func shareByiCloud(model: ShoppingListModel) {
         Task {
             do {
+                isLoading = true
                 if let itemShare = try await PersistenceController.shared.getShare(model),
                     let container = PersistenceController.shared.ckContainer {
                     sharedList = SharedList(id: model.id, share: itemShare, container: container)
                 }
+                isLoading = false
             } catch {
+                isLoading = false
                 print(error.localizedDescription)
             }
         }
