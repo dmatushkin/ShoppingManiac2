@@ -25,6 +25,7 @@ struct AutocompletionList: View {
                     }.contentShape(Rectangle())
                         .onTapGesture {
                             search = element
+                            focus.wrappedValue = false
                         }
                 }
                 HStack {
