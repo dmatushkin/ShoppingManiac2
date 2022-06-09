@@ -60,8 +60,7 @@ struct ShoppingListItemView_Previews: PreviewProvider {
                                                                            isWeight: false,
                                                                            price: "25",
                                                                            isImportant: false,
-                                                                           rating: 5,
-                                                                           recordId: nil), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
+                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
             DIProvider.shared
                 .register(forType: DAOProtocol.self, dependency: DAOStub.self)
                 .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
@@ -75,8 +74,7 @@ struct ShoppingListItemView_Previews: PreviewProvider {
                                                                            isWeight: false,
                                                                            price: "25",
                                                                            isImportant: false,
-                                                                           rating: 5,
-                                                                           recordId: nil), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
+                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
         }
     }
 }

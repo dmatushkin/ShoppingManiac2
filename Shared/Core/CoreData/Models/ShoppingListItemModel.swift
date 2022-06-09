@@ -21,5 +21,4 @@ struct ShoppingListItemModel: Identifiable {
     let price: String
     let isImportant: Bool
     let rating: Int
-    let recordId: String?
 }

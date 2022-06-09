@@ -203,6 +203,7 @@
 		562F590F27A01C0D004ECD5C /* DataExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtension.swift; sourceTree = "<group>"; };
 		562F591427A022C2004ECD5C /* ShoppingManiac--iOS--Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "ShoppingManiac--iOS--Info.plist"; sourceTree = "<group>"; };
 		563EBF0427312E30003052B7 /* RoundRectTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundRectTextField.swift; sourceTree = "<group>"; };
+		56442065285263C1001C83AB /* ShoppingManiac 15.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "ShoppingManiac 15.xcdatamodel"; sourceTree = "<group>"; };
 		565928BA2712C6B500B3EDE0 /* DAO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DAO.swift; sourceTree = "<group>"; };
 		565928BF2712C72D00B3EDE0 /* ShoppingListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListModel.swift; sourceTree = "<group>"; };
 		565928C42712C77200B3EDE0 /* ShoppingListItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListItemModel.swift; sourceTree = "<group>"; };
@@ -1004,7 +1005,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ShoppingManiac--iOS--Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Shopping;
+				INFOPLIST_KEY_CFBundleDisplayName = Shopping2;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1018,7 +1019,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = org.md.ShoppingManiac;
+				PRODUCT_BUNDLE_IDENTIFIER = org.md.ShoppingManiac2;
 				PRODUCT_NAME = ShoppingManiac;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1039,7 +1040,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ShoppingManiac--iOS--Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Shopping;
+				INFOPLIST_KEY_CFBundleDisplayName = Shopping2;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1053,7 +1054,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = org.md.ShoppingManiac;
+				PRODUCT_BUNDLE_IDENTIFIER = org.md.ShoppingManiac2;
 				PRODUCT_NAME = ShoppingManiac;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1340,6 +1341,7 @@
 		56F5742426B99C50007069D4 /* ShoppingManiac.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				56442065285263C1001C83AB /* ShoppingManiac 15.xcdatamodel */,
 				56A0A7512838B88C00B95551 /* ShoppingManiac 14.xcdatamodel */,
 				567802AA27E8EE56000547D1 /* ShoppingManiac 13.xcdatamodel */,
 				56F5742526B99C50007069D4 /* ShoppingManiac 10.xcdatamodel */,
@@ -1355,7 +1357,7 @@
 				56F5742F26B99C50007069D4 /* ShoppingManiac 12.xcdatamodel */,
 				56F5743026B99C50007069D4 /* ShoppingManiac 6.xcdatamodel */,
 			);
-			currentVersion = 56A0A7512838B88C00B95551 /* ShoppingManiac 14.xcdatamodel */;
+			currentVersion = 56442065285263C1001C83AB /* ShoppingManiac 15.xcdatamodel */;
 			path = ShoppingManiac.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

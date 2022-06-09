@@ -8,6 +8,12 @@
 import XCTest
 import DependencyInjection
 import CoreData
+import Combine
+
+final class GlobalCommands {
+    
+    static let reloadTopList = PassthroughSubject<Void, Never>()
+}
 
 final class ContextProviderStub: ContextProviderProtocol, DIDependency {
     
@@ -83,9 +89,10 @@ final class DAOTest: XCTestCase {
     func testAddShoppingList() async throws {
         // arrange
         let dao = DAO()
+        let date = Date()
         
         // act
-        let model = try await dao.addShoppingList(name: "test1")
+        let model = try await dao.addShoppingList(name: "test1", date: date, uniqueId: "testunique")
         
         // assert
         XCTAssertEqual(model.title, "test1")
@@ -96,13 +103,16 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(items[0].isRemoved, false)
         XCTAssertEqual(items[0].name, "test1")
         XCTAssertEqual(items[0].objectID, model.id)
+        XCTAssertEqual(items[0].date, date.timeIntervalSinceReferenceDate)
+        XCTAssertEqual(items[0].uniqueId, "testunique")
     }
     
     func testRemoveShoppingList() async throws {
         // arrange
+        let date = Date()
         let context = contextProvider.getContext()
         let list1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        let model = ShoppingListModel(id: list1!.objectID, title: "test")
+        let model = ShoppingListModel(id: list1!.objectID, uniqueId: "testunique", name: "test", date: date)
         let dao = DAO()
         
         // act
@@ -117,8 +127,9 @@ final class DAOTest: XCTestCase {
     func testGetShoppingListItems() async throws {
         // arrange
         let context = contextProvider.getContext()
+        let date = Date()
         let list1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        let model = ShoppingListModel(id: list1!.objectID, title: "test")
+        let model = ShoppingListModel(id: list1!.objectID, uniqueId: "testunique", name: "test", date: date)
         let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         let good1 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
         let store1 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
@@ -131,7 +142,8 @@ final class DAOTest: XCTestCase {
         item1?.good = good1
         item1?.list = list1
         item1?.purchased = true
-        item1?.quantity = 5
+        item1?.isWeight = true
+        item1?.quantity = 5.251
         let item2 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         let good2 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
         let store2 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
@@ -144,7 +156,8 @@ final class DAOTest: XCTestCase {
         item2?.good = good2
         item2?.list = list1
         item2?.purchased = false
-        item2?.quantity = 6
+        item2?.isWeight = false
+        item2?.quantity = 6.15
         let item3 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         let good3 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
         let store3 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
@@ -156,9 +169,11 @@ final class DAOTest: XCTestCase {
         good3?.category = category3
         item3?.good = good3
         item3?.list = list1
+        item3?.isWeight = false
         let item4 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         item4?.isRemoved = true
         item4?.list = list1
+        item4?.isWeight = false
         let dao = DAO()
         
         // act
@@ -171,30 +186,31 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(list[0].store, "store1")
         XCTAssertEqual(list[0].category, "category1")
         XCTAssertEqual(list[0].isPurchased, true)
-        XCTAssertEqual(list[0].amount, "5.0")
+        XCTAssertEqual(list[0].amount, "5.25")
         XCTAssertEqual(list[1].id, item2?.objectID)
         XCTAssertEqual(list[1].title, "test2")
         XCTAssertEqual(list[1].store, "store2")
         XCTAssertEqual(list[1].category, "category2")
         XCTAssertEqual(list[1].isPurchased, false)
-        XCTAssertEqual(list[1].amount, "6.0")
+        XCTAssertEqual(list[1].amount, "6")
         XCTAssertEqual(list[2].id, item3?.objectID)
         XCTAssertEqual(list[2].title, "test3")
         XCTAssertEqual(list[2].store, "store3")
         XCTAssertEqual(list[2].category, "category3")
         XCTAssertEqual(list[2].isPurchased, false)
-        XCTAssertEqual(list[2].amount, "0.0")
+        XCTAssertEqual(list[2].amount, "0")
     }
     
     func testAddShoppingListItem() async throws {
         // arrange
         let context = contextProvider.getContext()
+        let date = Date()
         let list1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        let model = ShoppingListModel(id: list1!.objectID, title: "test")
+        let model = ShoppingListModel(id: list1!.objectID, uniqueId: "testunique", name: "test", date: date)
         let dao = DAO()
         
         // act
-        try await dao.addShoppingListItem(list: model, name: "test", amount: "15", store: "test store", isWeight: false, price: "25", isImportant: false, rating: 5)
+        try await dao.addShoppingListItem(list: model, name: "test", amount: "15", store: "test store", isWeight: false, price: "25", isImportant: false, rating: 5, isPurchased: false, uniqueId: "testunique")
         
         // assert
         let request: NSFetchRequest<ShoppingListItem> = ShoppingListItem.fetchRequest()
@@ -208,13 +224,15 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(items.first?.price, 25)
         XCTAssertEqual(items.first?.isImportant, false)
         XCTAssertEqual(items.first?.good?.personalRating, 5)
+        XCTAssertEqual(items.first?.purchased, false)
+        XCTAssertEqual(items.first?.uniqueId, "testunique")
     }
     
     func testRemoveShoppingListItem() async throws {
         // arrange
         let context = contextProvider.getContext()
         let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
+        let model = ShoppingListItemModel(id: item1!.objectID, uniqueId: "testunique", title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
         let dao = DAO()
         
         // act
@@ -232,7 +250,7 @@ final class DAOTest: XCTestCase {
         let context = contextProvider.getContext()
         let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         item1?.purchased = true
-        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
+        let model = ShoppingListItemModel(id: item1!.objectID, uniqueId: "testunique", title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
         let dao = DAO()
         
         // act
@@ -250,7 +268,7 @@ final class DAOTest: XCTestCase {
         let context = contextProvider.getContext()
         let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
         item1?.purchased = false
-        let model = ShoppingListItemModel(id: item1!.objectID, title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
+        let model = ShoppingListItemModel(id: item1!.objectID, uniqueId: "testunique", title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
         let dao = DAO()
         
         // act

@@ -112,7 +112,6 @@ struct AddShoppingListItemView_Previews: PreviewProvider {
                                                                            isWeight: false,
                                                                            price: "20",
                                                                            isImportant: false,
-                                                                           rating: 3,
-                                                                           recordId: nil)))
+                                                                           rating: 3)))
     }
 }
