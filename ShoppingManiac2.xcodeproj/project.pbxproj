@@ -109,6 +109,11 @@
 		5695E9132711F7AD00EB023C /* DependencyInjection in Frameworks */ = {isa = PBXBuildFile; productRef = 5695E9122711F7AD00EB023C /* DependencyInjection */; };
 		5695E9152711F7B400EB023C /* DependencyInjection in Frameworks */ = {isa = PBXBuildFile; productRef = 5695E9142711F7B400EB023C /* DependencyInjection */; };
 		5695E9172711F7BB00EB023C /* DependencyInjection in Frameworks */ = {isa = PBXBuildFile; productRef = 5695E9162711F7BB00EB023C /* DependencyInjection */; };
+		569EFB3D285372140060BE63 /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569EFB3C285372140060BE63 /* CollectionExtension.swift */; };
+		569EFB3E2853731B0060BE63 /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569EFB3C285372140060BE63 /* CollectionExtension.swift */; };
+		569EFB3F2853731C0060BE63 /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569EFB3C285372140060BE63 /* CollectionExtension.swift */; };
+		569EFB402853731D0060BE63 /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569EFB3C285372140060BE63 /* CollectionExtension.swift */; };
+		569EFB42285374400060BE63 /* AboutModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569EFB41285374400060BE63 /* AboutModel.swift */; };
 		56A0A7502838225300B95551 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56A0A74F2838225300B95551 /* CloudKit.framework */; };
 		56A0A7532838BE2000B95551 /* CloudSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A0A7522838BE2000B95551 /* CloudSharingView.swift */; };
 		56A0A7542838BE2000B95551 /* CloudSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A0A7522838BE2000B95551 /* CloudSharingView.swift */; };
@@ -219,6 +224,8 @@
 		567DDE4E2675138600F59A54 /* ShoppingManiac2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoppingManiac2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		567DDE532675138600F59A54 /* Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		567DDE5D2675138600F59A54 /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		569EFB3C285372140060BE63 /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
+		569EFB41285374400060BE63 /* AboutModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutModel.swift; sourceTree = "<group>"; };
 		56A0A74E2838224D00B95551 /* ShoppingManiac (iOS).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "ShoppingManiac (iOS).entitlements"; sourceTree = "<group>"; };
 		56A0A74F2838225300B95551 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS15.5.sdk/System/Library/Frameworks/CloudKit.framework; sourceTree = DEVELOPER_DIR; };
 		56A0A7512838B88C00B95551 /* ShoppingManiac 14.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "ShoppingManiac 14.xcdatamodel"; sourceTree = "<group>"; };
@@ -463,6 +470,7 @@
 			isa = PBXGroup;
 			children = (
 				56A26C92267521FD0071BF85 /* AboutScreen.swift */,
+				569EFB41285374400060BE63 /* AboutModel.swift */,
 			);
 			path = About;
 			sourceTree = "<group>";
@@ -492,6 +500,7 @@
 				56D3A06C274D66BF00F84B30 /* ViewExtension.swift */,
 				56D3A06F274D66F100F84B30 /* ColorExtension.swift */,
 				562F590F27A01C0D004ECD5C /* DataExtension.swift */,
+				569EFB3C285372140060BE63 /* CollectionExtension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -705,6 +714,7 @@
 				56CA0A50272C7755007AE1F1 /* RatingView.swift in Sources */,
 				560BD5CA27286E4D0019AB13 /* ShoppingListView.swift in Sources */,
 				560BD5D627292FAC0019AB13 /* EditShoppingListItemView.swift in Sources */,
+				569EFB42285374400060BE63 /* AboutModel.swift in Sources */,
 				565928C52712C77200B3EDE0 /* ShoppingListItemModel.swift in Sources */,
 				56DC162E279AD7580035FDEC /* AddCategoryToStoreModel.swift in Sources */,
 				56DC1628279AC8A70035FDEC /* AddGoodToCategoryModel.swift in Sources */,
@@ -743,6 +753,7 @@
 				560BD5CD27286E630019AB13 /* ShoppingListViewModel.swift in Sources */,
 				56A26C8B267521B20071BF85 /* StoresScreen.swift in Sources */,
 				562F591027A01C0D004ECD5C /* DataExtension.swift in Sources */,
+				569EFB3D285372140060BE63 /* CollectionExtension.swift in Sources */,
 				56CA0A53272D2EA5007AE1F1 /* DIProviderExtension.swift in Sources */,
 				565928CF27131CA200B3EDE0 /* AddShoppingListView.swift in Sources */,
 				5604AA6B2730435600E1326E /* ShoppingListSorter.swift in Sources */,
@@ -803,6 +814,7 @@
 				560BD5CE27286E630019AB13 /* ShoppingListViewModel.swift in Sources */,
 				56A26C8C267521B20071BF85 /* StoresScreen.swift in Sources */,
 				562F591127A01C0D004ECD5C /* DataExtension.swift in Sources */,
+				569EFB3E2853731B0060BE63 /* CollectionExtension.swift in Sources */,
 				56CA0A54272D2EA5007AE1F1 /* DIProviderExtension.swift in Sources */,
 				565928D027131CA200B3EDE0 /* AddShoppingListView.swift in Sources */,
 				5604AA6C2730435600E1326E /* ShoppingListSorter.swift in Sources */,
@@ -827,6 +839,7 @@
 				562F590A27A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */,
 				5604AA7727306C0D00E1326E /* GeometryAware.swift in Sources */,
 				565928C22712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
+				569EFB3F2853731C0060BE63 /* CollectionExtension.swift in Sources */,
 				5604AA722730690700E1326E /* EditShoppingListItemViewModel.swift in Sources */,
 				567CC71B272AA84400CFA3F9 /* GoodsItemModel.swift in Sources */,
 				567CC71F272AA84D00CFA3F9 /* StoresItemModel.swift in Sources */,
@@ -851,6 +864,7 @@
 				562F590B27A000CD004ECD5C /* ShoppingListSerializer.swift in Sources */,
 				5604AA7827306C0D00E1326E /* GeometryAware.swift in Sources */,
 				565928C32712C72D00B3EDE0 /* ShoppingListModel.swift in Sources */,
+				569EFB402853731D0060BE63 /* CollectionExtension.swift in Sources */,
 				5604AA732730690700E1326E /* EditShoppingListItemViewModel.swift in Sources */,
 				567CC71C272AA84500CFA3F9 /* GoodsItemModel.swift in Sources */,
 				567CC720272AA84E00CFA3F9 /* StoresItemModel.swift in Sources */,
@@ -1018,7 +1032,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.3;
+				MARKETING_VERSION = 2.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = org.md.ShoppingManiac;
 				PRODUCT_NAME = ShoppingManiac;
 				SDKROOT = iphoneos;
@@ -1053,7 +1067,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.3;
+				MARKETING_VERSION = 2.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = org.md.ShoppingManiac;
 				PRODUCT_NAME = ShoppingManiac;
 				SDKROOT = iphoneos;

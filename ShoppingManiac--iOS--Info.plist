@@ -14,6 +14,16 @@
 				<string>com.mdd.shoppingmaniac.storage</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>ShoppingManiac Backup</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.mdd.shoppingmaniac.backup</string>
+			</array>
+		</dict>
 	</array>
 	<key>CKSharingSupported</key>
 	<true/>
@@ -53,6 +63,29 @@
 				</array>
 			</dict>
 		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>ShoppingManiac Backup</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>com.mdd.shoppingmaniac.backup</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>smbackup</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>text/json</string>
+				</array>
+			</dict>
+		</dict>
 	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
@@ -72,6 +105,29 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>smstorage</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>text/json</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>ShoppingManiac Backup</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>com.mdd.shoppingmaniac.backup</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>smbackup</string>
 				</array>
 				<key>public.mime-type</key>
 				<array>

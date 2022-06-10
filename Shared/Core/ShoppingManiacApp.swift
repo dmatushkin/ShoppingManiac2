@@ -30,9 +30,15 @@ struct ShoppingManiacApp: App {
                     let data = try Data(contentsOf: url)
                     Task {
                         do {
-                            let list = try await serializer.importList(data: data)
-                            print("List \(list.title) imported")
-                            GlobalCommands.reloadTopList.send()
+                            if url.pathExtension == "smstorage" {
+                                let list = try await serializer.importList(data: data)
+                                print("List \(list.title) imported")
+                                GlobalCommands.reloadTopList.send()
+                            } else if url.pathExtension == "smbackup" {
+                                let backup = try await serializer.importBackup(data: data)
+                                print("Backup of \(backup.count) imported")
+                                GlobalCommands.reloadTopList.send()
+                            }
                         } catch {
                             print(error.localizedDescription)
                         }

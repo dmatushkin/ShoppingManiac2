@@ -50,6 +50,13 @@ struct CategoriesScreen: View {
                         }
                     }
                 }.navigationTitle("Categories")
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                }
+                Spacer()
+            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
         }.onAppear(perform: {
             model.reload()
         }).sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {

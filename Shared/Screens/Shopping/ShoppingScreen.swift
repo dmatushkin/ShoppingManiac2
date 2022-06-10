@@ -43,6 +43,13 @@ struct ShoppingScreen: View {
                         }
                     }
                 }.navigationTitle("Shopping lists")
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                }
+                Spacer()
+            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
         }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
             AddShoppingListView(model: model)
         })

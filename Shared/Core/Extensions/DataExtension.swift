@@ -10,11 +10,10 @@ import CommonError
 
 extension Data {
     
-    func store() throws -> URL {
+    func store(fileExtension: String = ".smstorage") throws -> URL {
         guard let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first else {
             throw CommonError(description: "Unable to get documents path")
         }
-        let fileExtension = ".smstorage"
         let documentsURL = URL(fileURLWithPath: documentsPath)
         let filesList = try FileManager.default.contentsOfDirectory(atPath: documentsPath)
         for file in filesList {

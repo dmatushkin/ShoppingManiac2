@@ -100,6 +100,7 @@ final class DAO: DAOProtocol, DIDependency {
             item.name = name
             item.date = date.timeIntervalSinceReferenceDate
             item.uniqueId = uniqueId
+            item.isRemoved = false
             try context.save()
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .medium
@@ -184,6 +185,7 @@ final class DAO: DAOProtocol, DIDependency {
             item.isImportant = isImportant
             item.uniqueId = uniqueId
             item.purchased = isPurchased
+            item.isRemoved = false
             if !store.isEmpty {
                 item.store = try self.createOrGetStore(name: store, context: context)
             }
