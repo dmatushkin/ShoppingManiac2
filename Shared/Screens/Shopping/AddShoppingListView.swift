@@ -8,13 +8,18 @@
 import SwiftUI
 import DependencyInjection
 
-struct AddShoppingListView: View {
+protocol AddShoppingListModelProtocol: ObservableObject {
+    func addItem(name: String) async throws
+    func cancelAddingItem() async throws
+}
+
+struct AddShoppingListView<Model: AddShoppingListModelProtocol>: View {
     
     @State private var listName: String = ""
     @FocusState private var editFocused: Bool
-    let model: ShoppingModel
+    let model: Model
     
-    init(model: ShoppingModel) {
+    init(model: Model) {
         self.model = model
     }
     

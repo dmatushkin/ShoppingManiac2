@@ -10,7 +10,7 @@ import Combine
 import DependencyInjection
 
 @MainActor
-final class StoresModel: ObservableObject {
+final class StoresModel: ObservableObject, EditStoreModelProtocol {
     
     @Autowired(cacheType: .share) private var dao: DAOProtocol
     

@@ -9,9 +9,13 @@ import SwiftUI
 import DependencyInjection
 import CoreData
 
-struct EditGoodView: View {
+protocol EditGoodModelProtocol: ObservableObject {
+    func editGood(item: GoodsItemModel?, name: String, category: String) async throws
+}
+
+struct EditGoodView<Model: EditGoodModelProtocol>: View {
     
-    let model: GoodsModel
+    let model: Model
     let item: GoodsItemModel?
     @State private var name: String = ""
     @State private var category: String = ""

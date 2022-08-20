@@ -10,7 +10,7 @@ import Combine
 import DependencyInjection
 
 @MainActor
-final class CategoriesModel: ObservableObject {
+final class CategoriesModel: ObservableObject, EditCategoryModelProtocol {
     
     @Autowired(cacheType: .share) private var dao: DAOProtocol
     

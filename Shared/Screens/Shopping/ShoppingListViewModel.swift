@@ -23,7 +23,7 @@ struct SharedList: Identifiable {
 }
 
 @MainActor
-final class ShoppingListViewModel: ObservableObject {
+final class ShoppingListViewModel: ObservableObject, ShoppingListItemModelProtocol, EditShoppingListItemModelProtocol {
     
     @Autowired(cacheType: .share) private var dao: DAOProtocol
     @Autowired(cacheType: .share) private var serializer: ShoppingListSerializerProtocol
@@ -89,7 +89,10 @@ final class ShoppingListViewModel: ObservableObject {
         withAnimation {
             output = sorter.sort(items)
         }
-        
+    }
+
+    func editItem(item: ShoppingListItemModel) async throws {
+        itemToShow = item
     }
     
     func togglePurchased(item: ShoppingListItemModel) async throws {

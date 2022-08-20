@@ -9,12 +9,18 @@ import SwiftUI
 import DependencyInjection
 import CoreData
 
-struct ShoppingListItemView: View {
+protocol ShoppingListItemModelProtocol: ObservableObject {
+    func togglePurchased(item: ShoppingListItemModel) async throws
+    func removeShoppingListItem(item: ShoppingListItemModel) async throws
+    func editItem(item: ShoppingListItemModel) async throws
+}
+
+struct ShoppingListItemView<Model: ShoppingListItemModelProtocol>: View  {
     
     private let item: ShoppingListItemModel
-    @ObservedObject private var model: ShoppingListViewModel
+    @ObservedObject private var model: Model
     
-    init(item: ShoppingListItemModel, model: ShoppingListViewModel) {
+    init(item: ShoppingListItemModel, model: Model) {
         self.item = item
         self.model = model
     }
@@ -26,7 +32,7 @@ struct ShoppingListItemView: View {
             Spacer()
             Text(item.amount)
         }.contentShape(Rectangle())
-            .listRowBackground(Color("backgroundColor"))
+            .listRowBackground(item.isImportant ? Color("importantItemColor") : Color("backgroundColor"))
             .onTapGesture {
                 Task {
                     try await model.togglePurchased(item: item)
@@ -38,7 +44,9 @@ struct ShoppingListItemView: View {
                     }
                 }.tint(.red)
                 Button("Edit") {
-                    model.itemToShow = item
+                    Task {
+                        try await model.editItem(item: item)
+                    }
                 }
             }
     }

@@ -9,9 +9,14 @@ import SwiftUI
 import DependencyInjection
 import CoreData
 
-struct EditStoreView: View {
+protocol EditStoreModelProtocol: ObservableObject {
+    func editStore(item: StoresItemModel?, name: String, categories: [String]) async throws
+    func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel]
+}
+
+struct EditStoreView<Model: EditStoreModelProtocol>: View {
     
-    let model: StoresModel
+    let model: Model
     let item: StoresItemModel?
     @State private var name: String = ""
     @State private var categories: [String] = []

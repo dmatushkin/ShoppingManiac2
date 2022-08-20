@@ -9,17 +9,23 @@ import SwiftUI
 import DependencyInjection
 import CoreData
 
-struct EditShoppingListItemView: View {
+protocol EditShoppingListItemModelProtocol: ObservableObject {
+    func editShoppingListItem(item: ShoppingListItemModel, model: EditShoppingListItemViewModel) async throws
+    func addShoppingListItem(model: EditShoppingListItemViewModel) async throws
+    func cancelAddingItem() async throws
+}
+
+struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol>: View {
     @StateObject private var dataModel: EditShoppingListItemViewModel
     @FocusState private var itemNameFocused: Bool
     @FocusState private var storeNameFocused: Bool
     @FocusState private var amountFocused: Bool
     @FocusState private var priceFocused: Bool
     private let geometryStorage = GeometryStorage(coordinateSpace: "zstackCoordinateSpace")
-    let model: ShoppingListViewModel
+    let model: Model
     let item: ShoppingListItemModel?
     
-    init(model: ShoppingListViewModel, item: ShoppingListItemModel?) {
+    init(model: Model, item: ShoppingListItemModel?) {
         _dataModel = StateObject(wrappedValue: EditShoppingListItemViewModel())
         self.model = model
         self.item = item
