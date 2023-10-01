@@ -44,7 +44,7 @@ struct MainScreen: View {
                 }
             }
             LoadingView().opacity(model.isLoaded ? 0 : 0.9)
-        }
+        }.scrollContentBackground(.hidden)
     }
 }
 
