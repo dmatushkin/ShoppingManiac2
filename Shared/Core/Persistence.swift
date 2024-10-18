@@ -8,17 +8,15 @@
 import CoreData
 import CloudKit
 
-final class PersistenceController {
-    
-    static var previewMode: Bool = true
-    
+final class PersistenceController: @unchecked Sendable {
+
     static var viewContext: NSManagedObjectContext {
-        return previewMode ? preview.container.viewContext : shared.container.viewContext
+        return shared.container.viewContext
     }
     
     static let shared = PersistenceController()
     
-    static var preview: PersistenceController = {
+    static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         for _ in 0..<10 {
@@ -77,7 +75,7 @@ final class PersistenceController {
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        //container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         NotificationCenter.default
             .addObserver(self,
                          selector: #selector(managedObjectContextObjectsDidChange),

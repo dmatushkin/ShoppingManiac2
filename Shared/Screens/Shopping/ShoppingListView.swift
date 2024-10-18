@@ -20,7 +20,7 @@ struct ShoppingListSectionTitle: View {
     }
 }
 
-struct ShoppingListSectionContent<Model: ShoppingListItemModelProtocol>: View {
+struct ShoppingListSectionContent<Model: ShoppingListItemModelProtocol&Sendable>: View {
     @ObservedObject var model: Model
     let section: ShoppingListSection
     

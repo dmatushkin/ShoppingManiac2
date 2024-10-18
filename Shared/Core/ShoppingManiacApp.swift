@@ -7,7 +7,7 @@
 
 import SwiftUI
 import DependencyInjection
-import Combine
+@preconcurrency import Combine
 
 final class GlobalCommands {
     

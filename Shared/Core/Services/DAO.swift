@@ -10,7 +10,7 @@ import CoreData
 import DependencyInjection
 import CommonError
 
-protocol DAOProtocol {
+protocol DAOProtocol: Sendable {
     func getShoppingLists() async throws -> [ShoppingListModel]
     func addShoppingList(name: String, date: Date, uniqueId: String?) async throws -> ShoppingListModel
     func removeShoppingList(_ item: ShoppingListModel) async throws
@@ -53,7 +53,7 @@ protocol DAOProtocol {
     func syncStoreCategories(item: StoresItemModel, categories: [String]) async throws
 }
 
-final class DAO: DAOProtocol, DIDependency {
+final class DAO: DAOProtocol, DIDependency, @unchecked Sendable {
     
     enum DBError: Error {
         case unableToCreateShoppingList
@@ -490,7 +490,7 @@ final class DAO: DAOProtocol, DIDependency {
     }
 }
 
-final class DAOStub: DAOProtocol, DIDependency {
+final class DAOStub: DAOProtocol, DIDependency, @unchecked Sendable {
     
     var shoppingLists: [ShoppingListModel] = [
         ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1234124", name: "test1", date: Date()),

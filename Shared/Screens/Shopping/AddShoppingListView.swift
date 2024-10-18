@@ -13,7 +13,7 @@ protocol AddShoppingListModelProtocol: ObservableObject {
     func cancelAddingItem() async throws
 }
 
-struct AddShoppingListView<Model: AddShoppingListModelProtocol>: View {
+struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
     
     @State private var listName: String = ""
     @FocusState private var editFocused: Bool

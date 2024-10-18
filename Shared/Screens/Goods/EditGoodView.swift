@@ -13,7 +13,7 @@ protocol EditGoodModelProtocol: ObservableObject {
     func editGood(item: GoodsItemModel?, name: String, category: String) async throws
 }
 
-struct EditGoodView<Model: EditGoodModelProtocol>: View {
+struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
     
     let model: Model
     let item: GoodsItemModel?

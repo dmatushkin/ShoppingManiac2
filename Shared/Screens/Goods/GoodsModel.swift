@@ -10,8 +10,8 @@ import Combine
 import DependencyInjection
 
 @MainActor
-final class GoodsModel: ObservableObject, EditGoodModelProtocol {
-    
+final class GoodsModel: ObservableObject, EditGoodModelProtocol, Sendable {
+
     @Autowired(cacheType: .share) private var dao: DAOProtocol
     
     @Published var items: [GoodsItemModel] = []

@@ -14,7 +14,7 @@ protocol EditCategoryModelProtocol: ObservableObject {
     func getCategoryGoods(category: CategoriesItemModel) async throws -> [GoodsItemModel]
 }
 
-struct EditCategoryView<Model: EditCategoryModelProtocol>: View {
+struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
     
     let model: Model
     let item: CategoriesItemModel?

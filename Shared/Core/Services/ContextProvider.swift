@@ -8,7 +8,7 @@
 import CoreData
 import DependencyInjection
 
-protocol ContextProviderProtocol {
+protocol ContextProviderProtocol: Sendable {
     
     func getContext() -> NSManagedObjectContext
 }

@@ -9,14 +9,14 @@ import Foundation
 import DependencyInjection
 import CoreData
 
-protocol ShoppingListSerializerProtocol {
+protocol ShoppingListSerializerProtocol: Sendable {
     func exportList(listModel: ShoppingListModel) async throws -> Data
     func importList(data: Data) async throws -> ShoppingListModel
     func exportBackup(lists: [ShoppingListModel]) async throws -> Data
     func importBackup(data: Data) async throws -> [ShoppingListModel]
 }
 
-final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency {
+final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency, @unchecked Sendable {
     
     private let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()

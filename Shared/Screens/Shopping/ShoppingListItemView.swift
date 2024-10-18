@@ -15,7 +15,7 @@ protocol ShoppingListItemModelProtocol: ObservableObject {
     func editItem(item: ShoppingListItemModel) async throws
 }
 
-struct ShoppingListItemView<Model: ShoppingListItemModelProtocol>: View  {
+struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View  {
     
     private let item: ShoppingListItemModel
     @ObservedObject private var model: Model

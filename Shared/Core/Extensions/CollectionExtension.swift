@@ -9,7 +9,7 @@ import Foundation
 
 extension Collection {
 
-    public func asyncCompactMap<ElementOfResult>(_ transform: @escaping (Element) async throws -> ElementOfResult?) async rethrows -> [ElementOfResult] {
+    public func asyncCompactMap<ElementOfResult>(_ transform: @escaping @Sendable (Element) async throws -> ElementOfResult?) async rethrows -> [ElementOfResult] where ElementOfResult: Sendable, Element: Sendable {
         return try await withThrowingTaskGroup(of: ElementOfResult?.self, returning: [ElementOfResult].self, body: { group in
             var result: [ElementOfResult] = []
             result.reserveCapacity(self.count)
@@ -27,7 +27,7 @@ extension Collection {
         })
     }
 
-    public func asyncMap<ElementOfResult>(_ transform: @escaping (Element) async throws -> ElementOfResult) async rethrows -> [ElementOfResult] {
+    public func asyncMap<ElementOfResult>(_ transform: @escaping @Sendable (Element) async throws -> ElementOfResult) async rethrows -> [ElementOfResult] where ElementOfResult: Sendable, Element: Sendable {
         return try await withThrowingTaskGroup(of: ElementOfResult.self, returning: [ElementOfResult].self, body: { group in
             var result: [ElementOfResult] = []
             result.reserveCapacity(self.count)
