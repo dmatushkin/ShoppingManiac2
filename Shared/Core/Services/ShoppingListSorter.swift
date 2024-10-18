@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import DependencyInjection
+import Factory
 
 struct ShoppingListSection: Identifiable {
     var id: String { title }
@@ -25,7 +25,7 @@ protocol ShoppingListSorterProtocol {
     func sort(_ items: [ShoppingListItemModel]) -> ShoppingListOutput
 }
 
-final class ShoppingListSorter: DIDependency, ShoppingListSorterProtocol {
+final class ShoppingListSorter: ShoppingListSorterProtocol {
     
     private struct CategoryIntermediate: Hashable {
         let name: String

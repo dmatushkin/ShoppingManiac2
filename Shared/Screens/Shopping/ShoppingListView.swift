@@ -6,8 +6,8 @@
 //
 
 import SwiftUI
-import DependencyInjection
 import CoreData
+import Factory
 
 struct ShoppingListSectionTitle: View {
     let title: String
@@ -115,12 +115,9 @@ struct ShoppingListView: View {
 
 struct ShoppingListView_Previews: PreviewProvider {
     static var previews: some View {
-        DIProvider.shared
-            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(
-                NavigationView {
-                    ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test list", date: Date()))
-                }
-            )
+        Container.shared.dao.register(factory: { DAOStub() })
+        return NavigationView {
+            ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test list", date: Date()))
+        }
     }
 }

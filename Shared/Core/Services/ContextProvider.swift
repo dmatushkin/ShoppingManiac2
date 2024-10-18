@@ -6,14 +6,14 @@
 //
 
 import CoreData
-import DependencyInjection
+import Factory
 
 protocol ContextProviderProtocol: Sendable {
     
     func getContext() -> NSManagedObjectContext
 }
 
-final class ContextProvider: ContextProviderProtocol, DIDependency {
+final class ContextProvider: ContextProviderProtocol {
     
     required init() {}
     

@@ -7,12 +7,12 @@
 
 import SwiftUI
 import Combine
-import DependencyInjection
+import Factory
 
 @MainActor
 final class CategoriesModel: ObservableObject, EditCategoryModelProtocol {
     
-    @Autowired(cacheType: .share) private var dao: DAOProtocol
+    @Injected(\.dao) private var dao: DAOProtocol
     
     @Published var items: [CategoriesItemModel] = []
     @Published var showAddSheet: Bool = false

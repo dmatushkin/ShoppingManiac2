@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import DependencyInjection
+import Factory
 import CoreData
 
 protocol EditCategoryModelProtocol: ObservableObject {
@@ -80,8 +80,7 @@ struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
 
 struct EditCategoryView_Previews: PreviewProvider {
     static var previews: some View {
-        DIProvider.shared
-            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(EditCategoryView(model: CategoriesModel(), item: CategoriesItemModel(id: NSManagedObjectID(), name: "Test category")))
+        Container.shared.dao.register(factory: { DAOStub() })
+        return EditCategoryView(model: CategoriesModel(), item: CategoriesItemModel(id: NSManagedObjectID(), name: "Test category"))
     }
 }

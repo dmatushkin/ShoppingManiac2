@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import DependencyInjection
+import Factory
 import CoreData
 
 protocol ShoppingListSerializerProtocol: Sendable {
@@ -16,7 +16,7 @@ protocol ShoppingListSerializerProtocol: Sendable {
     func importBackup(data: Data) async throws -> [ShoppingListModel]
 }
 
-final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency, @unchecked Sendable {
+final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked Sendable {
     
     private let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
@@ -33,7 +33,7 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, DIDependency
     
     required init() {}
     
-    @Autowired(cacheType: .share) private var dao: DAOProtocol
+    @Injected(\.dao) private var dao: DAOProtocol
     
     private struct Backup: Codable {
         let lists: [ShoppingListJsonModel]

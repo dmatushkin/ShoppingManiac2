@@ -6,13 +6,13 @@
 //
 
 import SwiftUI
-import DependencyInjection
+import Factory
 
 @MainActor
 final class AboutModel: ObservableObject {
-    
-    @Autowired(cacheType: .share) private var dao: DAOProtocol
-    @Autowired(cacheType: .share) private var serializer: ShoppingListSerializerProtocol
+
+    @Injected(\.dao) private var dao: DAOProtocol
+    @Injected(\.shoppingListSerializer) private var serializer: ShoppingListSerializerProtocol
     
     @Published var dataToShare: ExportedList?
     

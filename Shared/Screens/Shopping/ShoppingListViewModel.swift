@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Combine
-import DependencyInjection
+import Factory
 import CoreData
 import CloudKit
 
@@ -25,8 +25,8 @@ struct SharedList: Identifiable {
 @MainActor
 final class ShoppingListViewModel: ObservableObject, ShoppingListItemModelProtocol, EditShoppingListItemModelProtocol {
     
-    @Autowired(cacheType: .share) private var dao: DAOProtocol
-    @Autowired(cacheType: .share) private var serializer: ShoppingListSerializerProtocol
+    @Injected(\.dao) private var dao: DAOProtocol
+    @Injected(\.shoppingListSerializer) private var serializer: ShoppingListSerializerProtocol
     
     @Published var showAddSheet: Bool = false
     @Published var showShareSheet: Bool = false

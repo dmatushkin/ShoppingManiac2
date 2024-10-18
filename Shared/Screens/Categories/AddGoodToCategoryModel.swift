@@ -7,7 +7,7 @@
 
 import Foundation
 import Combine
-import DependencyInjection
+import Factory
 
 @MainActor
 final class AddGoodToCategoryModel: ObservableObject {
@@ -15,7 +15,7 @@ final class AddGoodToCategoryModel: ObservableObject {
     @Published var goodsNames: [String] = []
     @Published var itemName: String = ""
     private var cancellables = Set<AnyCancellable>()
-    @Autowired(cacheType: .share) private var dao: DAOProtocol
+    @Injected(\.dao) private var dao: DAOProtocol
     
     init() {
         $itemName.sink(receiveValue: {value in

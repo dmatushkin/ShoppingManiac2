@@ -7,12 +7,12 @@
 
 import SwiftUI
 import Combine
-import DependencyInjection
+import Factory
 
 @MainActor
 final class GoodsModel: ObservableObject, EditGoodModelProtocol, Sendable {
 
-    @Autowired(cacheType: .share) private var dao: DAOProtocol
+    @Injected(\.dao) private var dao: DAOProtocol
     
     @Published var items: [GoodsItemModel] = []
     @Published var showAddSheet: Bool = false

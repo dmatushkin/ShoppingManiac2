@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import DependencyInjection
+import Factory
 import CoreData
 
 protocol ShoppingListItemModelProtocol: ObservableObject {
@@ -54,10 +54,9 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
 
 struct ShoppingListItemView_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            DIProvider.shared
-                .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-                .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+        Container.shared.dao.register(factory: { DAOStub() })
+        return Group {
+            ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
                                                                            uniqueId: "3452345",
                                                                            title: "Test title",
                                                                            store: "Test store",
@@ -68,10 +67,8 @@ struct ShoppingListItemView_Previews: PreviewProvider {
                                                                            isWeight: false,
                                                                            price: "25",
                                                                            isImportant: false,
-                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
-            DIProvider.shared
-                .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-                .showView(ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50))
+            ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
                                                                            uniqueId: "1211234",
                                                                            title: "Test title",
                                                                            store: "Test store",
@@ -82,7 +79,7 @@ struct ShoppingListItemView_Previews: PreviewProvider {
                                                                            isWeight: false,
                                                                            price: "25",
                                                                            isImportant: false,
-                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50)))
+                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50))
         }
     }
 }

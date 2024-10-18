@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import DependencyInjection
+import Factory
 
 protocol AddShoppingListModelProtocol: ObservableObject {
     func addItem(name: String) async throws
@@ -56,8 +56,7 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
 
 struct AddShoppingListView_Previews: PreviewProvider {
     static var previews: some View {
-        DIProvider.shared
-            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(AddShoppingListView(model: ShoppingModel()))
+        Container.shared.dao.register(factory: { DAOStub() })
+        return AddShoppingListView(model: ShoppingModel())
     }
 }

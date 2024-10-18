@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import DependencyInjection
+import Factory
 import CoreData
 
 protocol EditGoodModelProtocol: ObservableObject {
@@ -59,8 +59,7 @@ struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
 
 struct EditGoodView_Previews: PreviewProvider {
     static var previews: some View {
-        DIProvider.shared
-            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(EditGoodView(model: GoodsModel(), item: GoodsItemModel(id: NSManagedObjectID(), name: "good name", category: "good category")))
+        Container.shared.dao.register(factory: { DAOStub() })
+        return EditGoodView(model: GoodsModel(), item: GoodsItemModel(id: NSManagedObjectID(), name: "good name", category: "good category"))
     }
 }

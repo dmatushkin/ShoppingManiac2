@@ -7,7 +7,7 @@
 
 import Foundation
 import Combine
-import DependencyInjection
+import Factory
 
 @MainActor
 final class EditShoppingListItemViewModel: ObservableObject {
@@ -21,7 +21,7 @@ final class EditShoppingListItemViewModel: ObservableObject {
     @Published var goodsNames: [String] = []
     @Published var storesNames: [String] = []
     private var cancellables = Set<AnyCancellable>()
-    @Autowired(cacheType: .share) private var dao: DAOProtocol
+    @Injected(\.dao) private var dao: DAOProtocol
     
     init() {
         $itemName.sink(receiveValue: {value in

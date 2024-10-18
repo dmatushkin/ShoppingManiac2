@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import DependencyInjection
+import Factory
 
 struct MainScreen: View {
     
@@ -50,9 +50,7 @@ struct MainScreen: View {
 
 struct MainScreen_Previews: PreviewProvider {
     static var previews: some View {
-        DIProvider.shared
-            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(MainScreen())
-        
+        Container.shared.dao.register(factory: { DAOStub() })
+        return MainScreen()
     }
 }

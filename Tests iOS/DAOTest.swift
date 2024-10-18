@@ -6,16 +6,16 @@
 //
 
 import XCTest
-import DependencyInjection
+import Factory
 import CoreData
-import Combine
+@preconcurrency import Combine
 
 final class GlobalCommands {
     
     static let reloadTopList = PassthroughSubject<Void, Never>()
 }
 
-final class ContextProviderStub: ContextProviderProtocol, DIDependency {
+final class ContextProviderStub: ContextProviderProtocol, @unchecked Sendable {
     
     private var container: NSPersistentContainer!
     
@@ -37,16 +37,15 @@ final class ContextProviderStub: ContextProviderProtocol, DIDependency {
 
 final class DAOTest: XCTestCase {
     
-    @Autowired(cacheType: .share) private var contextProvider: ContextProviderProtocol
-        
+    @Injected(\.contextProvider) private var contextProvider: ContextProviderProtocol
+
     override func setUp() {
-        DIProvider.shared
-            .register(forType: ContextProviderProtocol.self, dependency: ContextProviderStub.self)
+        Container.shared.contextProvider.register(factory: { ContextProviderStub() })
         super.setUp()
     }
     
     override func tearDown() {
-        DIProvider.shared.clear()
+        Container.shared.reset()
         super.tearDown()
     }
     

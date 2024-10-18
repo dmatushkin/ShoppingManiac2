@@ -6,8 +6,8 @@
 //
 
 import SwiftUI
-import DependencyInjection
 @preconcurrency import Combine
+import Factory
 
 final class GlobalCommands {
     
@@ -17,25 +17,20 @@ final class GlobalCommands {
 @main
 struct ShoppingManiacApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    private let diProvider = DIProvider.shared
-        .register(forType: ContextProviderProtocol.self, dependency: ContextProvider.self)
-        .register(forType: DAOProtocol.self, dependency: DAO.self)
-        .register(forType: ShoppingListSerializerProtocol.self, dependency: ShoppingListSerializer.self)
 
     var body: some Scene {
         WindowGroup {
             MainScreen().onOpenURL { url in
                 do {
-                    @Autowired(cacheType: .share) var serializer: ShoppingListSerializerProtocol
                     let data = try Data(contentsOf: url)
                     Task {
                         do {
                             if url.pathExtension == "smstorage" {
-                                let list = try await serializer.importList(data: data)
+                                let list = try await Container.shared.shoppingListSerializer().importList(data: data)
                                 print("List \(list.title) imported")
                                 GlobalCommands.reloadTopList.send()
                             } else if url.pathExtension == "smbackup" {
-                                let backup = try await serializer.importBackup(data: data)
+                                let backup = try await Container.shared.shoppingListSerializer().importBackup(data: data)
                                 print("Backup of \(backup.count) imported")
                                 GlobalCommands.reloadTopList.send()
                             }

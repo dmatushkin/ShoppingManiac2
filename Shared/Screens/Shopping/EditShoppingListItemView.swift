@@ -6,8 +6,8 @@
 //
 
 import SwiftUI
-import DependencyInjection
 import CoreData
+import Factory
 
 protocol EditShoppingListItemModelProtocol: ObservableObject {
     func editShoppingListItem(item: ShoppingListItemModel, model: EditShoppingListItemViewModel) async throws
@@ -104,9 +104,8 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
 
 struct AddShoppingListItemView_Previews: PreviewProvider {
     static var previews: some View {
-        DIProvider.shared
-            .register(forType: DAOProtocol.self, dependency: DAOStub.self)
-            .showView(EditShoppingListItemView(model: ShoppingListViewModel(),
+        Container.shared.dao.register(factory: { DAOStub() })
+        return EditShoppingListItemView(model: ShoppingListViewModel(),
                                                item: ShoppingListItemModel(id: NSManagedObjectID(),
                                                                            uniqueId: "112341234",
                                                                            title: "test 1",
@@ -118,6 +117,6 @@ struct AddShoppingListItemView_Previews: PreviewProvider {
                                                                            isWeight: false,
                                                                            price: "20",
                                                                            isImportant: false,
-                                                                           rating: 3)))
+                                                                           rating: 3))
     }
 }
