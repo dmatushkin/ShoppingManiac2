@@ -13,9 +13,12 @@ private struct StarItemView: View {
     @Binding var rating: Int
     
     var body: some View {
-        Image(rating > (ratingValue - 1) ? "star_selected" : "star_not_selected").padding(2).onTapGesture {
+        Button {
             rating = ratingValue
+        } label: {
+            Image(rating > (ratingValue - 1) ? "star_selected" : "star_not_selected").padding(2)
         }
+        .buttonStyle(.plain)
     }
 }
 

@@ -80,7 +80,7 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
             }.padding([.top])
             Spacer()
         }.padding()
-            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            .background(Color("backgroundColor").ignoresSafeArea())
             .onAppear(perform: {
                 name = item?.name ?? ""
                 if let item = item {

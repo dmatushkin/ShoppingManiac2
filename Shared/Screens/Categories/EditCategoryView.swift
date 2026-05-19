@@ -66,7 +66,7 @@ struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
                 }
             }
         }.padding()
-            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            .background(Color("backgroundColor").ignoresSafeArea())
             .onAppear(perform: {
                 name = item?.name ?? ""
                 if let item = item {

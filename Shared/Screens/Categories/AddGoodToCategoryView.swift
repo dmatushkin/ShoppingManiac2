@@ -51,6 +51,6 @@ struct AddGoodToCategoryView: View {
                                focus: $goodFocused,
                                offset: geometryStorage.getFrame(viewName: "goods").offset)
         }.padding()
-            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            .background(Color("backgroundColor").ignoresSafeArea())
     }
 }

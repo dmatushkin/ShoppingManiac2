@@ -32,7 +32,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .topLeading) {
                 VStack {
                     RoundRectTextField(title: "Item name", input: $dataModel.itemName, focus: $itemNameFocused)
@@ -45,7 +45,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                         Picker("", selection: $dataModel.amountType) {
                             Text("Quantity").tag(0)
                             Text("Weight").tag(1)
-                        }.pickerStyle(MenuPickerStyle()).padding([.bottom], 2)
+                        }.pickerStyle(.menu).padding([.bottom], 2)
                     }
                     HStack(alignment: .bottom) {
                         RoundRectTextField(title: "Price", input: $dataModel.price, focus: $priceFocused)
@@ -81,7 +81,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                                    search: $dataModel.storeName,
                                    focus: $storeNameFocused,
                                    offset: geometryStorage.getFrame(viewName: "store").offset)
-            }.navigationBarHidden(true)
+            }.toolbar(.hidden, for: .navigationBar)
                 .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
@@ -94,7 +94,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                     }
                 }.coordinateSpace(name: geometryStorage.coordinateSpace)
                 .padding()
-                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                .background(Color("backgroundColor").ignoresSafeArea())
                 .onAppear(perform: {
                     dataModel.setItem(item)
                 })

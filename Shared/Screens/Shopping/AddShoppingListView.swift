@@ -24,7 +24,7 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 RoundRectTextField(title: "Shopping list name", input: $listName, focus: $editFocused)
                 HStack {
@@ -47,9 +47,9 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
                         editFocused = false
                     }
                 }
-            }.navigationBarHidden(true)
+            }.toolbar(.hidden, for: .navigationBar)
                 .padding()
-                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                .background(Color("backgroundColor").ignoresSafeArea())
         }        
     }
 }

@@ -32,7 +32,7 @@ struct AboutScreen: View {
                 model.makeBackup()
             }.padding()
             Spacer()
-        }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all)).navigationTitle("ShoppingManiac")
+        }.background(Color("backgroundColor").ignoresSafeArea()).navigationTitle("ShoppingManiac")
             .sheet(item: $model.dataToShare) { item in
                 ShareSheet(activityItems: [item.url])
             }

@@ -49,7 +49,7 @@ struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
                 }
             }
         }.padding()
-            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            .background(Color("backgroundColor").ignoresSafeArea())
             .onAppear(perform: {
                 name = item?.name ?? ""
                 category = item?.category ?? ""

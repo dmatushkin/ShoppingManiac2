@@ -15,7 +15,7 @@ struct ShoppingListSectionTitle: View {
     var body: some View {
         VStack {
             Spacer()
-            Text(title.uppercased()).font(Font.caption).foregroundColor(.gray)
+            Text(title.uppercased()).font(Font.caption).foregroundStyle(.gray)
         }
     }
 }
@@ -58,7 +58,7 @@ struct ShoppingListView: View {
                         Section(content: {
                             ShoppingListSectionContent(model: model, section: section)
                         }, header: {
-                            Text(section.title).font(section.isStore ? Font.title3 : Font.caption).foregroundColor(.gray)
+                            Text(section.title).font(section.isStore ? Font.title3 : Font.caption).foregroundStyle(.gray)
                         }).listRowBackground(Color("backgroundColor"))
                     }
                     ForEach(model.output.items) { item in
@@ -91,7 +91,7 @@ struct ShoppingListView: View {
                 }
             }.onAppear(perform: { model.listModel = listModel })
                 .navigationTitle(Text(listModel.title))
-                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                .background(Color("backgroundColor").ignoresSafeArea())
                 .sheet(isPresented: $model.showAddSheet, onDismiss: nil) {
                     EditShoppingListItemView(model: model, item: nil)
                 }.sheet(item: $model.itemToShow) { item in
@@ -116,7 +116,7 @@ struct ShoppingListView: View {
 struct ShoppingListView_Previews: PreviewProvider {
     static var previews: some View {
         Container.shared.dao.register(factory: { DAOStub() })
-        return NavigationView {
+        return NavigationStack {
             ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test list", date: Date()))
         }
     }

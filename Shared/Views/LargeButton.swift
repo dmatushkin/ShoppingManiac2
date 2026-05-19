@@ -20,14 +20,14 @@ struct LargeButton: View {
     }
     
     var body: some View {
-        Text(title)
-            .padding(8)
-            .frame(maxWidth: .infinity)
-            .background(Capsule().fill(backgroundColor)).foregroundColor(.white)
-            .northWestShadow()
-            .onTapGesture {
-                action()
+        Button(action: action) {
+            Text(title)
+                .padding(8)
+                .frame(maxWidth: .infinity)
+                .background(Capsule().fill(backgroundColor)).foregroundStyle(.white)
+                .northWestShadow()
             }
+        .buttonStyle(.plain)
     }
 }
 

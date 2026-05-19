@@ -14,7 +14,7 @@ struct LoadingView: View {
             Spacer()
             HStack {
                 Spacer()
-                ProgressView().progressViewStyle(CircularProgressViewStyle())
+                ProgressView().progressViewStyle(.circular)
                 Spacer()
             }
             Spacer()

@@ -12,20 +12,19 @@ import Factory
 struct ShoppingScreen: View {
     
     @State private var model: ShoppingModel
+    @State private var path: [ShoppingListModel] = []
     
     init() {
         _model = State(wrappedValue: ShoppingModel())
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $path) {
             List {
                 ForEach(model.items) { item in
-                    NavigationLink(tag: item, selection: $model.itemToOpen, destination: {
-                        NavigationLazyView(ShoppingListView(listModel: item))
-                    }, label: {
+                    NavigationLink(value: item) {
                         Text(item.title)
-                    }).listRowBackground(Color("backgroundColor"))
+                    }.listRowBackground(Color("backgroundColor"))
                 }
                 .onDelete(perform: {indexSet in
                     Task {
@@ -33,7 +32,10 @@ struct ShoppingScreen: View {
                     }
                 })
             }.listStyle(.grouped)
-                .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                .background(Color("backgroundColor").ignoresSafeArea())
+                .navigationDestination(for: ShoppingListModel.self) { item in
+                    ShoppingListView(listModel: item)
+                }
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Button(action: {
@@ -49,10 +51,14 @@ struct ShoppingScreen: View {
                     Spacer()
                 }
                 Spacer()
-            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            }.background(Color("backgroundColor").ignoresSafeArea())
         }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
             AddShoppingListView(model: model)
-        })
+        }).onChange(of: model.itemToOpen) { _, item in
+            guard let item else { return }
+            path.append(item)
+            model.itemToOpen = nil
+        }
     }
 }
 

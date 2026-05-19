@@ -18,23 +18,24 @@ struct CategoriesScreen: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 RoundRectTextField(title: "Search", input: $model.searchString, focus: $editFocused).padding()
                 List {
                     ForEach(model.items) { item in
-                        NavigationLink(destination: {
-                            NavigationLazyView(EditCategoryView(model: model, item: item))
-                        }, label: {
+                        NavigationLink(value: item) {
                             Text(item.name)
-                        }).listRowBackground(Color("backgroundColor"))
+                        }.listRowBackground(Color("backgroundColor"))
                     }.onDelete(perform: {indexSet in
                         Task {
                             try await model.removeStore(offsets: indexSet)
                         }
                     })
                 }.listStyle(.plain)
-            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+                    .navigationDestination(for: CategoriesItemModel.self) { item in
+                        EditCategoryView(model: model, item: item)
+                    }
+            }.background(Color("backgroundColor").ignoresSafeArea())
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Button(action: {
@@ -56,7 +57,7 @@ struct CategoriesScreen: View {
                     Spacer()
                 }
                 Spacer()
-            }.background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            }.background(Color("backgroundColor").ignoresSafeArea())
         }.onAppear(perform: {
             model.reload()
         }).sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {

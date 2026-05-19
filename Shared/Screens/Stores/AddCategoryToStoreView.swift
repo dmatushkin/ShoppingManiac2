@@ -52,6 +52,6 @@ struct AddCategoryToStoreView: View {
                                focus: $categoryFocused,
                                offset: geometryStorage.getFrame(viewName: "categories").offset)
         }.padding()
-            .background(Color("backgroundColor").edgesIgnoringSafeArea(.all))
+            .background(Color("backgroundColor").ignoresSafeArea())
     }
 }
