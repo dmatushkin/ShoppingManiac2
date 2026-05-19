@@ -46,18 +46,14 @@ struct StoresScreen: View {
                     }
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
-                        Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                        Button {
                             editFocused = false
+                        } label: {
+                            Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                                .labelStyle(.iconOnly)
                         }
                     }
                 }.navigationTitle("Stores")
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                }
-                Spacer()
-            }.background(Color("backgroundColor").ignoresSafeArea())
         }.onAppear(perform: {
             model.reload()
         }).sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
@@ -66,9 +62,7 @@ struct StoresScreen: View {
     }
 }
 
-struct StoresScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return StoresScreen()
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    StoresScreen()
 }

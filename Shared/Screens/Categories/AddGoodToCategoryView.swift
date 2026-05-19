@@ -41,8 +41,11 @@ struct AddGoodToCategoryView: View {
             }.toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                    Button {
                         goodFocused = false
+                    } label: {
+                        Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                            .labelStyle(.iconOnly)
                     }
                 }
             }

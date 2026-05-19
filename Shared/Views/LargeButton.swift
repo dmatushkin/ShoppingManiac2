@@ -31,37 +31,17 @@ struct LargeButton: View {
     }
 }
 
-struct LargeAcceptButton: View {
-    
-    let title: String
-    let action: () -> Void
-    
-    var body: some View {
-        LargeButton(title: title, backgroundColor: Color("acceptColor"), action: action)
-    }
-}
-
-struct LargeCancelButton: View {
-    
-    let title: String
-    let action: () -> Void
-    
-    var body: some View {
-        LargeButton(title: title, backgroundColor: Color("cancelColor"), action: action)
-    }
-}
-
-struct Large_Buttons_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview {
+    Group {
         LargeAcceptButton(title: "Save", action: {})
             .padding()
-            .frame(width: 375, height: 50).previewLayout(.sizeThatFits)
+            .frame(width: 375, height: 50)
         LargeCancelButton(title: "Cancel", action: {})
             .padding()
-            .frame(width: 375, height: 50).previewLayout(.sizeThatFits)
+            .frame(width: 375, height: 50)
         HStack {
             LargeCancelButton(title: "Cancel", action: {})
             LargeAcceptButton(title: "Save", action: {})
-        }.padding().frame(width: 375, height: 50).previewLayout(.sizeThatFits)
+        }.padding().frame(width: 375, height: 50)
     }
 }

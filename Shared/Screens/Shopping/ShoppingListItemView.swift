@@ -26,18 +26,21 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
     }
     
     var body: some View {
-        HStack {
-            Image(systemName: item.isPurchased ? "checkmark.square" : "square").padding([.top, .bottom], 8)
-            Text(item.title).padding([.top, .bottom], 8)
-            Spacer()
-            Text(item.amount)
-        }.contentShape(Rectangle())
-            .listRowBackground(item.isImportant ? Color("importantItemColor") : Color("backgroundColor"))
-            .onTapGesture {
-                Task {
-                    try await model.togglePurchased(item: item)
-                }
-            }.swipeActions {
+        Button {
+            Task {
+                try await model.togglePurchased(item: item)
+            }
+        } label: {
+            HStack {
+                Image(systemName: item.isPurchased ? "checkmark.square" : "square").padding([.top, .bottom], 8)
+                Text(item.title).padding([.top, .bottom], 8)
+                Spacer()
+                Text(item.amount)
+            }.contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .listRowBackground(item.isImportant ? Color("importantItemColor") : Color("backgroundColor"))
+        .swipeActions {
                 Button("Delete") {
                     Task {
                         try await model.removeShoppingListItem(item: item)
@@ -48,38 +51,36 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
                         try await model.editItem(item: item)
                     }
                 }
-            }
+        }
     }
 }
 
-struct ShoppingListItemView_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return Group {
-            ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
-                                                                           uniqueId: "3452345",
-                                                                           title: "Test title",
-                                                                           store: "Test store",
-                                                                           category: "Test category",
-                                                                           categoryStoreOrder: 0,
-                                                                           isPurchased: false,
-                                                                           amount: "15",
-                                                                           isWeight: false,
-                                                                           price: "25",
-                                                                           isImportant: false,
-                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50))
-            ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
-                                                                           uniqueId: "1211234",
-                                                                           title: "Test title",
-                                                                           store: "Test store",
-                                                                           category: "Test category",
-                                                                           categoryStoreOrder: 0,
-                                                                           isPurchased: true,
-                                                                           amount: "15",
-                                                                           isWeight: false,
-                                                                           price: "25",
-                                                                           isImportant: false,
-                                                                           rating: 5), model: ShoppingListViewModel()).previewLayout(.fixed(width: 375, height: 50))
-        }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    Group {
+        ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                       uniqueId: "3452345",
+                                                                       title: "Test title",
+                                                                       store: "Test store",
+                                                                       category: "Test category",
+                                                                       categoryStoreOrder: 0,
+                                                                       isPurchased: false,
+                                                                       amount: "15",
+                                                                       isWeight: false,
+                                                                       price: "25",
+                                                                       isImportant: false,
+                                                                       rating: 5), model: ShoppingListViewModel()).frame(width: 375, height: 50)
+        ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                                       uniqueId: "1211234",
+                                                                       title: "Test title",
+                                                                       store: "Test store",
+                                                                       category: "Test category",
+                                                                       categoryStoreOrder: 0,
+                                                                       isPurchased: true,
+                                                                       amount: "15",
+                                                                       isWeight: false,
+                                                                       price: "25",
+                                                                       isImportant: false,
+                                                                       rating: 5), model: ShoppingListViewModel()).frame(width: 375, height: 50)
     }
 }

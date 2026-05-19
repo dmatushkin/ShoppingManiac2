@@ -43,8 +43,11 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
             }.toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                    Button {
                         editFocused = false
+                    } label: {
+                        Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                            .labelStyle(.iconOnly)
                     }
                 }
             }.toolbar(.hidden, for: .navigationBar)
@@ -54,9 +57,7 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
     }
 }
 
-struct AddShoppingListView_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return AddShoppingListView(model: ShoppingModel())
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    AddShoppingListView(model: ShoppingModel())
 }

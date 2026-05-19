@@ -14,29 +14,40 @@ struct AutocompletionList: View {
     let focus: FocusState<Bool>.Binding
     let offset: CGSize
     
+    private var isVisible: Bool {
+        focus.wrappedValue && !items.isEmpty && items.first != search
+    }
+    
     var body: some View {
         VStack {
             Spacer().frame(height: offset.height)
             List {
                 ForEach(items, id: \.self) { element in
+                    Button {
+                        search = element
+                        focus.wrappedValue = false
+                    } label: {
+                        HStack {
+                            Text(element)
+                            Spacer()
+                        }.contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                Button {
+                    focus.wrappedValue = false
+                } label: {
                     HStack {
-                        Text(element)
+                        Spacer()
+                        Label("Dismiss suggestions", systemImage: "arrow.up.to.line")
+                            .labelStyle(.iconOnly)
                         Spacer()
                     }.contentShape(Rectangle())
-                        .onTapGesture {
-                            search = element
-                            focus.wrappedValue = false
-                        }
                 }
-                HStack {
-                    Spacer()
-                    Image(systemName: "arrow.up.to.line")
-                    Spacer()
-                }.contentShape(Rectangle())
-                    .onTapGesture {
-                        focus.wrappedValue = false
-                    }
+                .buttonStyle(.plain)
             }.listStyle(.plain)
-        }.opacity((focus.wrappedValue && items.count > 0 && items.first != search) ? 1 : 0)
+        }
+        .opacity(isVisible ? 1 : 0)
+        .allowsHitTesting(isVisible)
     }
 }

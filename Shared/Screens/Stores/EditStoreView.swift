@@ -73,8 +73,11 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
             }.toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                    Button {
                         editFocused = false
+                    } label: {
+                        Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                            .labelStyle(.iconOnly)
                     }
                 }
             }.padding([.top])
@@ -92,9 +95,7 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
     }
 }
 
-struct EditStoreView_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return EditStoreView(model: StoresModel(), item: StoresItemModel(id: NSManagedObjectID(), name: "Test store"))
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    EditStoreView(model: StoresModel(), item: StoresItemModel(id: NSManagedObjectID(), name: "Test store"))
 }

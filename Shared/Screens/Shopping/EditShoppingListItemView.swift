@@ -85,11 +85,14 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                 .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
-                        Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                        Button {
                             itemNameFocused = false
                             storeNameFocused = false
                             amountFocused = false
                             priceFocused = false
+                        } label: {
+                            Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                                .labelStyle(.iconOnly)
                         }
                     }
                 }.coordinateSpace(name: geometryStorage.coordinateSpace)
@@ -102,21 +105,19 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
     }
 }
 
-struct AddShoppingListItemView_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return EditShoppingListItemView(model: ShoppingListViewModel(),
-                                               item: ShoppingListItemModel(id: NSManagedObjectID(),
-                                                                           uniqueId: "112341234",
-                                                                           title: "test 1",
-                                                                           store: "test 2",
-                                                                           category: "test category",
-                                                                           categoryStoreOrder: 0,
-                                                                           isPurchased: false,
-                                                                           amount: "10",
-                                                                           isWeight: false,
-                                                                           price: "20",
-                                                                           isImportant: false,
-                                                                           rating: 3))
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    EditShoppingListItemView(model: ShoppingListViewModel(),
+                             item: ShoppingListItemModel(id: NSManagedObjectID(),
+                                                         uniqueId: "112341234",
+                                                         title: "test 1",
+                                                         store: "test 2",
+                                                         category: "test category",
+                                                         categoryStoreOrder: 0,
+                                                         isPurchased: false,
+                                                         amount: "10",
+                                                         isWeight: false,
+                                                         price: "20",
+                                                         isImportant: false,
+                                                         rating: 3))
 }

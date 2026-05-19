@@ -61,8 +61,11 @@ struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
         }.toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                Button {
                     editFocused = false
+                } label: {
+                    Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                        .labelStyle(.iconOnly)
                 }
             }
         }.padding()
@@ -78,9 +81,7 @@ struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
     }
 }
 
-struct EditCategoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return EditCategoryView(model: CategoriesModel(), item: CategoriesItemModel(id: NSManagedObjectID(), name: "Test category"))
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    EditCategoryView(model: CategoriesModel(), item: CategoriesItemModel(id: NSManagedObjectID(), name: "Test category"))
 }

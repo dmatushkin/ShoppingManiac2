@@ -42,8 +42,11 @@ struct AddCategoryToStoreView: View {
             }.toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                    Button {
                         categoryFocused = false
+                    } label: {
+                        Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                            .labelStyle(.iconOnly)
                     }
                 }
             }

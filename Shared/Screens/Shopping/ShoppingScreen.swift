@@ -45,13 +45,6 @@ struct ShoppingScreen: View {
                         }
                     }
                 }.navigationTitle("Shopping lists")
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                }
-                Spacer()
-            }.background(Color("backgroundColor").ignoresSafeArea())
         }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
             AddShoppingListView(model: model)
         }).onChange(of: model.itemToOpen) { _, item in
@@ -62,9 +55,7 @@ struct ShoppingScreen: View {
     }
 }
 
-struct ShoppingScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return ShoppingScreen()
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    ShoppingScreen()
 }

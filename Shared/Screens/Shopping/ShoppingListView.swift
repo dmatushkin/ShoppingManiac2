@@ -9,37 +9,6 @@ import SwiftUI
 import CoreData
 import Factory
 
-struct ShoppingListSectionTitle: View {
-    let title: String
-    
-    var body: some View {
-        VStack {
-            Spacer()
-            Text(title.uppercased()).font(Font.caption).foregroundStyle(.gray)
-        }
-    }
-}
-
-struct ShoppingListSectionContent<Model: ShoppingListItemModelProtocol&Sendable>: View {
-    let model: Model
-    let section: ShoppingListSection
-    
-    var body: some View {
-        ForEach(section.subsections) { subsection in
-            ShoppingListSectionTitle(title: subsection.title)
-            ForEach(subsection.items) { item in
-                ShoppingListItemView(item: item, model: model)
-            }
-        }
-        if !section.subsections.isEmpty && !section.items.isEmpty {
-            ShoppingListSectionTitle(title: "No category")
-        }
-        ForEach(section.items) { item in
-            ShoppingListItemView(item: item, model: model)
-        }
-    }
-}
-
 struct ShoppingListView: View {
     
     @State private var model: ShoppingListViewModel
@@ -67,22 +36,42 @@ struct ShoppingListView: View {
                 }.listStyle(.grouped).safeAreaInset(edge: .bottom) {
                     VStack {
                         HStack(alignment: .center) {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.system(size: 25, weight: .light))
-                                .padding(10)
-                                .onTapGesture {
-                                    model.showShareSheet = true
-                                }.background(content: { Color.black.opacity(0.2) })
-                                .cornerRadius(10)
-                                .padding(10)
+                            Button {
+                                model.showShareSheet = true
+                            } label: {
+                                Label("Share", systemImage: "square.and.arrow.up")
+                                    .labelStyle(.iconOnly)
+                                    .font(.system(size: 25, weight: .light))
+                                    .padding(10)
+                                    .background(content: { Color.black.opacity(0.2) })
+                                    .cornerRadius(10)
+                            }
+                            .buttonStyle(.plain)
+                            .confirmationDialog("Share", isPresented: $model.showShareSheet) {
+                                Button("Share with iCloud") {
+                                    model.shareByiCloud(model: listModel)
+                                }
+                                Button("Share with file") {
+                                    model.shareByFile(model: listModel)
+                                }
+                            }
+                            .padding(10)
                             Spacer()
-                            Image("add_purchase_large")
+                            Button {
+                                model.showAddSheet = true
+                            } label: {
+                                Label {
+                                    Text("Add item")
+                                } icon: {
+                                    Image("add_purchase_large")
+                                }
+                                .labelStyle(.iconOnly)
                                 .padding(10)
-                                .onTapGesture {
-                                    model.showAddSheet = true
-                                }.background(content: { Color.black.opacity(0.2) })
+                                .background(content: { Color.black.opacity(0.2) })
                                 .cornerRadius(10)
-                                .padding(10)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(10)
                         }.padding(.bottom, 15)
                             .background(content: {
                                 Color("bottomPanelColor")
@@ -100,24 +89,15 @@ struct ShoppingListView: View {
                     ShareSheet(activityItems: [item.url])
                 }.sheet(item: $model.sharedList) { sharedList in
                     CloudSharingView(share: sharedList.share, container: sharedList.container, list: listModel)
-                }.confirmationDialog("Share", isPresented: $model.showShareSheet) {
-                    Button("Share with iCloud") {
-                        model.shareByiCloud(model: listModel)
-                    }
-                    Button("Share with file") {
-                        model.shareByFile(model: listModel)
-                    }
                 }
             LoadingView().opacity(model.isLoading ? 0.9 : 0)
         }
     }
 }
 
-struct ShoppingListView_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return NavigationStack {
-            ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test list", date: Date()))
-        }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    NavigationStack {
+        ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test list", date: Date()))
     }
 }

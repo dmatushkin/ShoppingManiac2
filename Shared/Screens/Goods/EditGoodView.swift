@@ -43,9 +43,12 @@ struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
         }.toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Image(systemName: "keyboard.chevron.compact.down").onTapGesture {
+                Button {
                     goodFocused = false
                     categoryFocused = false
+                } label: {
+                    Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                        .labelStyle(.iconOnly)
                 }
             }
         }.padding()
@@ -57,9 +60,7 @@ struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
     }
 }
 
-struct EditGoodView_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return EditGoodView(model: GoodsModel(), item: GoodsItemModel(id: NSManagedObjectID(), name: "good name", category: "good category"))
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    EditGoodView(model: GoodsModel(), item: GoodsItemModel(id: NSManagedObjectID(), name: "good name", category: "good category"))
 }

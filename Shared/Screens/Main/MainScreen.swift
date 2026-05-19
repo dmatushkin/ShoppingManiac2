@@ -48,9 +48,7 @@ struct MainScreen: View {
     }
 }
 
-struct MainScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        Container.shared.dao.register(factory: { DAOStub() })
-        return MainScreen()
-    }
+#Preview {
+    let _ = Container.shared.dao.register(factory: { DAOStub() })
+    MainScreen()
 }
