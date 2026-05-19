@@ -22,6 +22,8 @@ final class ShoppingModel: AddShoppingListModelProtocol {
     var itemToOpen: ShoppingListModel?
     @ObservationIgnored
     private var cancellable = Set<AnyCancellable>()
+    @ObservationIgnored
+    private var reloadTask: Task<Void, Never>?
     
     init() {
         reloadItems()
@@ -30,9 +32,20 @@ final class ShoppingModel: AddShoppingListModelProtocol {
         }).store(in: &cancellable)
     }
     
+    deinit {
+        reloadTask?.cancel()
+    }
+    
     private func reloadItems() {
-        Task {
-            items = try await dao.getShoppingLists()
+        reloadTask?.cancel()
+        reloadTask = Task {
+            do {
+                let lists = try await dao.getShoppingLists()
+                try Task.checkCancellation()
+                items = lists
+            } catch is CancellationError {
+            } catch {
+            }
         }
     }
             

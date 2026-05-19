@@ -17,15 +17,31 @@ final class AboutModel {
     @Injected(\.dao) private var dao: DAOProtocol
     @ObservationIgnored
     @Injected(\.shoppingListSerializer) private var serializer: ShoppingListSerializerProtocol
+    @ObservationIgnored
+    private var backupTask: Task<Void, Never>?
     
     var dataToShare: ExportedList?
+    var isLoading: Bool = false
+    
+    deinit {
+        backupTask?.cancel()
+    }
     
     func makeBackup() {
-        Task {
-            let lists = try await dao.getShoppingLists()
-            guard lists.count > 0 else { return }
-            let backup = try await serializer.exportBackup(lists: lists)
-            dataToShare = ExportedList(id: lists[0].id, url: try backup.store(fileExtension: ".smbackup"))
+        backupTask?.cancel()
+        backupTask = Task {
+            do {
+                isLoading = true
+                defer { isLoading = false }
+                let lists = try await dao.getShoppingLists()
+                guard let firstList = lists.first else { return }
+                let backup = try await serializer.exportBackup(lists: lists)
+                try Task.checkCancellation()
+                dataToShare = ExportedList(id: firstList.id, url: try backup.store(fileExtension: ".smbackup"))
+            } catch is CancellationError {
+                isLoading = false
+            } catch {
+            }
         }
     }
 }

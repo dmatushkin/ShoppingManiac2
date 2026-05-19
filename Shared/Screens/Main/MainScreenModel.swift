@@ -14,8 +14,6 @@ final class MainScreenModel {
     var isLoaded: Bool = false
     
     init() {
-        Task {
-            isLoaded = true
-        }
+        isLoaded = true
     }
 }

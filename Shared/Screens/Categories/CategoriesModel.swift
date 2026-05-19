@@ -15,6 +15,8 @@ final class CategoriesModel: EditCategoryModelProtocol {
     
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
+    private var reloadTask: Task<Void, Never>?
     
     var items: [CategoriesItemModel] = []
     var showAddSheet: Bool = false
@@ -25,14 +27,24 @@ final class CategoriesModel: EditCategoryModelProtocol {
     }
     
     init() {
-        Task {
-            items = try await dao.getCategories(search: "")
-        }
+        reload()
+    }
+    
+    deinit {
+        reloadTask?.cancel()
     }
     
     func reload() {
-        Task {
-            items = try await self.dao.getCategories(search: searchString)
+        reloadTask?.cancel()
+        let search = searchString
+        reloadTask = Task {
+            do {
+                let categories = try await dao.getCategories(search: search)
+                try Task.checkCancellation()
+                items = categories
+            } catch is CancellationError {
+            } catch {
+            }
         }
     }
         

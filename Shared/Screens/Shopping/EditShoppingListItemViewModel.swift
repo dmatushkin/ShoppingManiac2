@@ -31,16 +31,41 @@ final class EditShoppingListItemViewModel {
     var storesNames: [String] = []
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
+    private var goodsReloadTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var storesReloadTask: Task<Void, Never>?
+    
+    deinit {
+        goodsReloadTask?.cancel()
+        storesReloadTask?.cancel()
+    }
     
     private func reloadGoods() {
-        Task {
-            goodsNames = try await dao.getGoods(search: itemName).map({ $0.name })
+        goodsReloadTask?.cancel()
+        let search = itemName
+        goodsReloadTask = Task {
+            do {
+                let names = try await dao.getGoods(search: search).map({ $0.name })
+                try Task.checkCancellation()
+                goodsNames = names
+            } catch is CancellationError {
+            } catch {
+            }
         }
     }
     
     private func reloadStores() {
-        Task {
-            storesNames = try await dao.getStores(search: storeName).map({ $0.name })
+        storesReloadTask?.cancel()
+        let search = storeName
+        storesReloadTask = Task {
+            do {
+                let names = try await dao.getStores(search: search).map({ $0.name })
+                try Task.checkCancellation()
+                storesNames = names
+            } catch is CancellationError {
+            } catch {
+            }
         }
     }
     

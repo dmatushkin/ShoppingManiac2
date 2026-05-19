@@ -21,10 +21,24 @@ final class AddCategoryToStoreModel {
     }
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
+    private var reloadTask: Task<Void, Never>?
+    
+    deinit {
+        reloadTask?.cancel()
+    }
     
     private func reloadCategories() {
-        Task {
-            categoryNames = try await dao.getCategories(search: itemName).map({ $0.name })
+        reloadTask?.cancel()
+        let search = itemName
+        reloadTask = Task {
+            do {
+                let names = try await dao.getCategories(search: search).map({ $0.name })
+                try Task.checkCancellation()
+                categoryNames = names
+            } catch is CancellationError {
+            } catch {
+            }
         }
     }
 }

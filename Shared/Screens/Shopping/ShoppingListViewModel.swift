@@ -41,13 +41,20 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
     
     @ObservationIgnored
     private let sorter = ShoppingListSorter()
+    @ObservationIgnored
+    private var reloadTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var shareTask: Task<Void, Never>?
     
     var listModel: ShoppingListModel? {
         didSet {
-            Task {
-                try await reloadList()
-            }
+            reloadList()
         }
+    }
+    
+    deinit {
+        reloadTask?.cancel()
+        shareTask?.cancel()
     }
     
     func addShoppingListItem(model: EditShoppingListItemViewModel) async throws {
@@ -105,37 +112,52 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
         output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
     }
         
-    private func reloadList() async throws {
-        guard let listModel = listModel else { return }        
-        output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
+    private func reloadList() {
+        reloadTask?.cancel()
+        guard let listModel = listModel else { return }
+        reloadTask = Task {
+            do {
+                let items = try await dao.getShoppingListItems(list: listModel)
+                try Task.checkCancellation()
+                output = sorter.sort(items)
+            } catch is CancellationError {
+            } catch {
+            }
+        }
     }
     
     func shareByFile(model: ShoppingListModel) {
-        Task {
+        shareTask?.cancel()
+        shareTask = Task {
             do {
                 isLoading = true
                 let data = try await serializer.exportList(listModel: model)
+                try Task.checkCancellation()
                 dataToShare = ExportedList(id: model.id, url: try data.store())
+                isLoading = false
+            } catch is CancellationError {
                 isLoading = false
             } catch {
                 isLoading = false
-                print(error.localizedDescription)
             }
         }
     }
     
     func shareByiCloud(model: ShoppingListModel) {
-        Task {
+        shareTask?.cancel()
+        shareTask = Task {
             do {
                 isLoading = true
                 if let itemShare = try await PersistenceController.shared.getShare(model),
                     let container = PersistenceController.shared.ckContainer {
+                    try Task.checkCancellation()
                     sharedList = SharedList(id: model.id, share: itemShare, container: container)
                 }
                 isLoading = false
+            } catch is CancellationError {
+                isLoading = false
             } catch {
                 isLoading = false
-                print(error.localizedDescription)
             }
         }
     }

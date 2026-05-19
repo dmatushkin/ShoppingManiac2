@@ -15,6 +15,8 @@ final class StoresModel: EditStoreModelProtocol {
     
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
+    private var reloadTask: Task<Void, Never>?
     
     var items: [StoresItemModel] = []
     var showAddSheet: Bool = false
@@ -25,14 +27,24 @@ final class StoresModel: EditStoreModelProtocol {
     }
     
     init() {
-        Task {
-            items = try await dao.getStores(search: "")
-        }
+        reload()
+    }
+    
+    deinit {
+        reloadTask?.cancel()
     }
     
     func reload() {
-        Task {
-            items = try await dao.getStores(search: searchString)
+        reloadTask?.cancel()
+        let search = searchString
+        reloadTask = Task {
+            do {
+                let stores = try await dao.getStores(search: search)
+                try Task.checkCancellation()
+                items = stores
+            } catch is CancellationError {
+            } catch {
+            }
         }
     }
         

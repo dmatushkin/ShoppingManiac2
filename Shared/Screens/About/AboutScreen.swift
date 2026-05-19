@@ -30,7 +30,13 @@ struct AboutScreen: View {
             
             LargeAcceptButton(title: "Create backup") {
                 model.makeBackup()
-            }.padding()
+            }.disabled(model.isLoading)
+                .overlay {
+                    if model.isLoading {
+                        ProgressView()
+                    }
+                }
+            .padding()
             Spacer()
         }.background(Color("backgroundColor").ignoresSafeArea()).navigationTitle("ShoppingManiac")
             .sheet(item: $model.dataToShare) { item in

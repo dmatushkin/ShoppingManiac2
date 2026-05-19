@@ -15,6 +15,8 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
 
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
+    private var reloadTask: Task<Void, Never>?
     
     var items: [GoodsItemModel] = []
     var showAddSheet: Bool = false
@@ -25,14 +27,24 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
     }
     
     init() {
-        Task {
-            items = try await dao.getGoods(search: "")
-        }
+        reload()
+    }
+    
+    deinit {
+        reloadTask?.cancel()
     }
     
     func reload() {
-        Task {
-            items = try await dao.getGoods(search: searchString)
+        reloadTask?.cancel()
+        let search = searchString
+        reloadTask = Task {
+            do {
+                let goods = try await dao.getGoods(search: search)
+                try Task.checkCancellation()
+                items = goods
+            } catch is CancellationError {
+            } catch {
+            }
         }
     }
         
