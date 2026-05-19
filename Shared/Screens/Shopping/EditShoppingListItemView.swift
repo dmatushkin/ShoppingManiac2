@@ -9,14 +9,14 @@ import SwiftUI
 import CoreData
 import Factory
 
-protocol EditShoppingListItemModelProtocol: ObservableObject {
+protocol EditShoppingListItemModelProtocol: AnyObject {
     func editShoppingListItem(item: ShoppingListItemModel, model: EditShoppingListItemViewModel) async throws
     func addShoppingListItem(model: EditShoppingListItemViewModel) async throws
     func cancelAddingItem() async throws
 }
 
 struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendable>: View {
-    @StateObject private var dataModel: EditShoppingListItemViewModel
+    @State private var dataModel: EditShoppingListItemViewModel
     @FocusState private var itemNameFocused: Bool
     @FocusState private var storeNameFocused: Bool
     @FocusState private var amountFocused: Bool
@@ -26,7 +26,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
     let item: ShoppingListItemModel?
     
     init(model: Model, item: ShoppingListItemModel?) {
-        _dataModel = StateObject(wrappedValue: EditShoppingListItemViewModel())
+        _dataModel = State(wrappedValue: EditShoppingListItemViewModel())
         self.model = model
         self.item = item
     }

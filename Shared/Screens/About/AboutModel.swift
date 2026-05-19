@@ -7,14 +7,18 @@
 
 import SwiftUI
 import Factory
+import Observation
 
 @MainActor
-final class AboutModel: ObservableObject {
+@Observable
+final class AboutModel {
 
+    @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
     @Injected(\.shoppingListSerializer) private var serializer: ShoppingListSerializerProtocol
     
-    @Published var dataToShare: ExportedList?
+    var dataToShare: ExportedList?
     
     func makeBackup() {
         Task {

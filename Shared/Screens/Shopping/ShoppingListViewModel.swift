@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
-import Combine
 import Factory
 import CoreData
 import CloudKit
+import Observation
 
 struct ExportedList: Identifiable {
     let id: NSManagedObjectID
@@ -23,19 +23,23 @@ struct SharedList: Identifiable {
 }
 
 @MainActor
-final class ShoppingListViewModel: ObservableObject, ShoppingListItemModelProtocol, EditShoppingListItemModelProtocol {
+@Observable
+final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingListItemModelProtocol {
     
+    @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
     @Injected(\.shoppingListSerializer) private var serializer: ShoppingListSerializerProtocol
     
-    @Published var showAddSheet: Bool = false
-    @Published var showShareSheet: Bool = false
-    @Published var itemToShow: ShoppingListItemModel?
-    @Published var dataToShare: ExportedList?
-    @Published var sharedList: SharedList?
-    @Published var output: ShoppingListOutput = ShoppingListOutput(sections: [], items: [])
-    @Published var isLoading: Bool = false
+    var showAddSheet: Bool = false
+    var showShareSheet: Bool = false
+    var itemToShow: ShoppingListItemModel?
+    var dataToShare: ExportedList?
+    var sharedList: SharedList?
+    var output: ShoppingListOutput = ShoppingListOutput(sections: [], items: [])
+    var isLoading: Bool = false
     
+    @ObservationIgnored
     private let sorter = ShoppingListSorter()
     
     var listModel: ShoppingListModel? {

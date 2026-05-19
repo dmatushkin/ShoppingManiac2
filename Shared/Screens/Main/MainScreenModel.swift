@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Observation
 
 @MainActor
-final class MainScreenModel: ObservableObject {
-    @Published var isLoaded: Bool = false
+@Observable
+final class MainScreenModel {
+    var isLoaded: Bool = false
     
     init() {
         Task {

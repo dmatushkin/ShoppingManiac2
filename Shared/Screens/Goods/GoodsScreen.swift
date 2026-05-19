@@ -10,11 +10,11 @@ import Factory
 
 struct GoodsScreen: View {
     
-    @StateObject private var model: GoodsModel
+    @State private var model: GoodsModel
     @FocusState private var editFocused: Bool
     
     init() {
-        _model = StateObject(wrappedValue: GoodsModel())
+        _model = State(wrappedValue: GoodsModel())
     }
     
     var body: some View {

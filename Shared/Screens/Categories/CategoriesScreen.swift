@@ -10,11 +10,11 @@ import Factory
 
 struct CategoriesScreen: View {
     
-    @StateObject private var model: CategoriesModel
+    @State private var model: CategoriesModel
     @FocusState private var editFocused: Bool
     
     init() {
-        _model = StateObject(wrappedValue: CategoriesModel())
+        _model = State(wrappedValue: CategoriesModel())
     }
     
     var body: some View {

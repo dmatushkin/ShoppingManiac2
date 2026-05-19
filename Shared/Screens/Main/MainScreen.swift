@@ -10,13 +10,13 @@ import Factory
 
 struct MainScreen: View {
     
-    @StateObject private var model: MainScreenModel
+    @State private var model: MainScreenModel
     
     init() {
         #if os(iOS)
         UITableView.appearance().backgroundColor = .clear
         #endif
-        _model = StateObject(wrappedValue: MainScreenModel())
+        _model = State(wrappedValue: MainScreenModel())
     }
     
     var body: some View {

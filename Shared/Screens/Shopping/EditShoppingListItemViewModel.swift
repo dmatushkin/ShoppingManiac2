@@ -6,34 +6,42 @@
 //
 
 import Foundation
-import Combine
 import Factory
+import Observation
 
 @MainActor
-final class EditShoppingListItemViewModel: ObservableObject {
-    @Published var itemName: String = ""
-    @Published var storeName: String = ""
-    @Published var amount: String = ""
-    @Published var amountType: Int = 0
-    @Published var price: String = ""
-    @Published var isImportant: Bool = false
-    @Published var rating: Int = 0
-    @Published var goodsNames: [String] = []
-    @Published var storesNames: [String] = []
-    private var cancellables = Set<AnyCancellable>()
+@Observable
+final class EditShoppingListItemViewModel {
+    var itemName: String = "" {
+        didSet {
+            reloadGoods()
+        }
+    }
+    var storeName: String = "" {
+        didSet {
+            reloadStores()
+        }
+    }
+    var amount: String = ""
+    var amountType: Int = 0
+    var price: String = ""
+    var isImportant: Bool = false
+    var rating: Int = 0
+    var goodsNames: [String] = []
+    var storesNames: [String] = []
+    @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     
-    init() {
-        $itemName.sink(receiveValue: {value in
-            Task { [weak self] in
-                self?.goodsNames = try await self?.dao.getGoods(search: value).map({ $0.name }) ?? []
-            }
-        }).store(in: &cancellables)
-        $storeName.sink(receiveValue: {value in
-            Task { [weak self] in
-                self?.storesNames = try await self?.dao.getStores(search: value).map({ $0.name }) ?? []
-            }
-        }).store(in: &cancellables)
+    private func reloadGoods() {
+        Task {
+            goodsNames = try await dao.getGoods(search: itemName).map({ $0.name })
+        }
+    }
+    
+    private func reloadStores() {
+        Task {
+            storesNames = try await dao.getStores(search: storeName).map({ $0.name })
+        }
     }
     
     func setItem(_ item: ShoppingListItemModel?) {

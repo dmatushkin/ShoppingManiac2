@@ -9,7 +9,7 @@ import SwiftUI
 import Factory
 import CoreData
 
-protocol ShoppingListItemModelProtocol: ObservableObject {
+protocol ShoppingListItemModelProtocol: AnyObject {
     func togglePurchased(item: ShoppingListItemModel) async throws
     func removeShoppingListItem(item: ShoppingListItemModel) async throws
     func editItem(item: ShoppingListItemModel) async throws
@@ -18,7 +18,7 @@ protocol ShoppingListItemModelProtocol: ObservableObject {
 struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View  {
     
     private let item: ShoppingListItemModel
-    @ObservedObject private var model: Model
+    private let model: Model
     
     init(item: ShoppingListItemModel, model: Model) {
         self.item = item

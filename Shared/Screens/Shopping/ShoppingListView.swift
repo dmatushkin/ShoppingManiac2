@@ -21,7 +21,7 @@ struct ShoppingListSectionTitle: View {
 }
 
 struct ShoppingListSectionContent<Model: ShoppingListItemModelProtocol&Sendable>: View {
-    @ObservedObject var model: Model
+    let model: Model
     let section: ShoppingListSection
     
     var body: some View {
@@ -42,11 +42,11 @@ struct ShoppingListSectionContent<Model: ShoppingListItemModelProtocol&Sendable>
 
 struct ShoppingListView: View {
     
-    @StateObject private var model: ShoppingListViewModel
+    @State private var model: ShoppingListViewModel
     private let listModel: ShoppingListModel
     
     init(listModel: ShoppingListModel) {
-        _model = StateObject(wrappedValue: ShoppingListViewModel())
+        _model = State(wrappedValue: ShoppingListViewModel())
         self.listModel = listModel
     }
     

@@ -8,7 +8,7 @@
 import SwiftUI
 import Factory
 
-protocol AddShoppingListModelProtocol: ObservableObject {
+protocol AddShoppingListModelProtocol: AnyObject {
     func addItem(name: String) async throws
     func cancelAddingItem() async throws
 }

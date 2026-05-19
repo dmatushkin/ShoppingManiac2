@@ -6,22 +6,25 @@
 //
 
 import Foundation
-import Combine
 import Factory
+import Observation
 
 @MainActor
-final class AddCategoryToStoreModel: ObservableObject {
+@Observable
+final class AddCategoryToStoreModel {
     
-    @Published var categoryNames: [String] = []
-    @Published var itemName: String = ""
-    private var cancellables = Set<AnyCancellable>()
+    var categoryNames: [String] = []
+    var itemName: String = "" {
+        didSet {
+            reloadCategories()
+        }
+    }
+    @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     
-    init() {
-        $itemName.sink(receiveValue: {value in
-            Task { [weak self] in
-                self?.categoryNames = try await self?.dao.getCategories(search: value).map({ $0.name }) ?? []
-            }
-        }).store(in: &cancellables)
+    private func reloadCategories() {
+        Task {
+            categoryNames = try await dao.getCategories(search: itemName).map({ $0.name })
+        }
     }
 }

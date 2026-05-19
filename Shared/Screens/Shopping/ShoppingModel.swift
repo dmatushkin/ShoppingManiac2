@@ -8,15 +8,19 @@
 import SwiftUI
 import Combine
 import Factory
+import Observation
 
 @MainActor
-final class ShoppingModel: ObservableObject, AddShoppingListModelProtocol {
+@Observable
+final class ShoppingModel: AddShoppingListModelProtocol {
     
+    @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     
-    @Published var items: [ShoppingListModel] = []
-    @Published var showAddSheet: Bool = false
-    @Published var itemToOpen: ShoppingListModel?
+    var items: [ShoppingListModel] = []
+    var showAddSheet: Bool = false
+    var itemToOpen: ShoppingListModel?
+    @ObservationIgnored
     private var cancellable = Set<AnyCancellable>()
     
     init() {

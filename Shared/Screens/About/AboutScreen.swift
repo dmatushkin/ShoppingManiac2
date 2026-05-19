@@ -9,12 +9,12 @@ import SwiftUI
 
 struct AboutScreen: View {
     
-    @StateObject private var model: AboutModel
+    @State private var model: AboutModel
     let shortVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown"
     let longVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Unknown"
     
     init() {
-        _model = StateObject(wrappedValue: AboutModel())
+        _model = State(wrappedValue: AboutModel())
     }
     
     var body: some View {

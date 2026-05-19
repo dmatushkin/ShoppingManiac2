@@ -6,29 +6,28 @@
 //
 
 import SwiftUI
-import Combine
 import Factory
+import Observation
 
 @MainActor
-final class StoresModel: ObservableObject, EditStoreModelProtocol {
+@Observable
+final class StoresModel: EditStoreModelProtocol {
     
+    @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     
-    @Published var items: [StoresItemModel] = []
-    @Published var showAddSheet: Bool = false
-    @Published var searchString: String = ""
-    private var cancellables = Set<AnyCancellable>()
+    var items: [StoresItemModel] = []
+    var showAddSheet: Bool = false
+    var searchString: String = "" {
+        didSet {
+            reload()
+        }
+    }
     
     init() {
         Task {
             items = try await dao.getStores(search: "")
         }
-        $searchString.sink(receiveValue: {[weak self] value in
-            guard let self = self else { return }
-            Task {
-                self.items = try await self.dao.getStores(search: value)
-            }
-        }).store(in: &cancellables)
     }
     
     func reload() {

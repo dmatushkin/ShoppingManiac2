@@ -11,10 +11,10 @@ import Factory
 
 struct ShoppingScreen: View {
     
-    @StateObject private var model: ShoppingModel
+    @State private var model: ShoppingModel
     
     init() {
-        _model = StateObject(wrappedValue: ShoppingModel())
+        _model = State(wrappedValue: ShoppingModel())
     }
     
     var body: some View {

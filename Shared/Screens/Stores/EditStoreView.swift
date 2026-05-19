@@ -9,7 +9,7 @@ import SwiftUI
 import Factory
 import CoreData
 
-protocol EditStoreModelProtocol: ObservableObject {
+protocol EditStoreModelProtocol: AnyObject {
     func editStore(item: StoresItemModel?, name: String, categories: [String]) async throws
     func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel]
 }

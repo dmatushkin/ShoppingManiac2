@@ -9,7 +9,7 @@ import SwiftUI
 import Factory
 import CoreData
 
-protocol EditGoodModelProtocol: ObservableObject {
+protocol EditGoodModelProtocol: AnyObject {
     func editGood(item: GoodsItemModel?, name: String, category: String) async throws
 }
 

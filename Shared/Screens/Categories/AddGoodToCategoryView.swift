@@ -9,14 +9,14 @@ import SwiftUI
 
 struct AddGoodToCategoryView: View {
     
-    @StateObject private var dataModel: AddGoodToCategoryModel
+    @State private var dataModel: AddGoodToCategoryModel
     @Binding var goods: [String]
     @Binding var showingPopover: Bool
     @FocusState private var goodFocused: Bool
     private let geometryStorage = GeometryStorage(coordinateSpace: "zstackCoordinateSpace")
     
     init(goods: Binding<[String]>, showingPopover: Binding<Bool>) {
-        _dataModel = StateObject(wrappedValue: AddGoodToCategoryModel())
+        _dataModel = State(wrappedValue: AddGoodToCategoryModel())
         _goods = goods
         _showingPopover = showingPopover
     }
