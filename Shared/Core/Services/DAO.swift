@@ -73,6 +73,15 @@ final class DAO: DAOProtocol, @unchecked Sendable {
 
     required init() {}
     
+    private static func persistentIDString<T: PersistentModel>(_ model: T) -> String {
+        String(describing: model.persistentModelID.id)
+    }
+    
+    private func fetchModel<T: PersistentModel>(id: String, context: ModelContext, as type: T.Type) throws -> T? {
+        let descriptor = FetchDescriptor<T>()
+        return try context.fetch(descriptor).first { Self.persistentIDString($0) == id }
+    }
+    
     func getShoppingLists() async throws -> [ShoppingListModel] {
         let context = contextProvider.getContext()
         let descriptor = FetchDescriptor<ShoppingList>(sortBy: [SortDescriptor(\.date, order: .reverse)])
@@ -111,9 +120,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
     
     private func fetchShoppingList(id: String, context: ModelContext) throws -> ShoppingList? {
-        var descriptor = FetchDescriptor<ShoppingList>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first
+        try fetchModel(id: id, context: context, as: ShoppingList.self)
     }
     
     func removeShoppingList(_ item: ShoppingListModel) async throws {
@@ -127,15 +134,17 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel] {
         let context = contextProvider.getContext()
         guard let list = try fetchShoppingList(id: list.id, context: context) else { throw DBError.unableToGetShoppingList }
-        let listId = list.id
-        let descriptor = FetchDescriptor<ShoppingListItem>(predicate: #Predicate { $0.list?.id == listId && !$0.isRemoved })
+        let listPersistentID = list.persistentModelID
+        let descriptor = FetchDescriptor<ShoppingListItem>(predicate: #Predicate { !$0.isRemoved })
         let numberFormatter = NumberFormatter()
-        return try context.fetch(descriptor).map { item in
+        return try context.fetch(descriptor).filter { item in
+            item.list?.persistentModelID == listPersistentID
+        }.map { item in
             let orders = item.good?.category?.orders ?? []
-            let order = orders.first(where: { $0.store?.id == item.store?.id })?.order
+            let order = orders.first(where: { $0.store?.persistentModelID == item.store?.persistentModelID })?.order
             numberFormatter.maximumFractionDigits = item.isWeight ? 2 : 0
             let amount = numberFormatter.string(from: NSNumber(value: item.quantity)) ?? ""
-            return ShoppingListItemModel(id: item.id,
+            return ShoppingListItemModel(id: Self.persistentIDString(item),
                                          uniqueId: item.uniqueId,
                                          title: item.good?.name ?? "",
                                          store: item.store?.name ?? "",
@@ -196,9 +205,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
     
     private func fetchShoppingListItem(id: String, context: ModelContext) throws -> ShoppingListItem? {
-        var descriptor = FetchDescriptor<ShoppingListItem>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first
+        try fetchModel(id: id, context: context, as: ShoppingListItem.self)
     }
     
     func editShoppingListItem(item: ShoppingListItemModel,
@@ -238,9 +245,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
     
     private func fetchGood(id: String, context: ModelContext) throws -> Good? {
-        var descriptor = FetchDescriptor<Good>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first
+        try fetchModel(id: id, context: context, as: Good.self)
     }
     
     private func createOrGetStore(name: String, context: ModelContext) throws -> Store {
@@ -259,9 +264,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
     
     private func fetchStore(id: String, context: ModelContext) throws -> Store? {
-        var descriptor = FetchDescriptor<Store>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first
+        try fetchModel(id: id, context: context, as: Store.self)
     }
     
     func removeShoppingListItem(item: ShoppingListItemModel) async throws {
@@ -321,9 +324,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
     
     private func fetchCategory(id: String, context: ModelContext) throws -> Category? {
-        var descriptor = FetchDescriptor<Category>(predicate: #Predicate { $0.id == id })
-        descriptor.fetchLimit = 1
-        return try context.fetch(descriptor).first
+        try fetchModel(id: id, context: context, as: Category.self)
     }
     
     func removeGood(item: GoodsItemModel) async throws {
@@ -455,19 +456,19 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
     
     private static func makeShoppingListModel(_ list: ShoppingList) -> ShoppingListModel {
-        ShoppingListModel(id: list.id, uniqueId: list.uniqueId, name: list.name, date: list.date)
+        ShoppingListModel(id: persistentIDString(list), uniqueId: list.uniqueId, name: list.name, date: list.date)
     }
     
     private static func makeGoodsItemModel(_ good: Good) -> GoodsItemModel {
-        GoodsItemModel(id: good.id, name: good.name, category: good.category?.name ?? "")
+        GoodsItemModel(id: persistentIDString(good), name: good.name, category: good.category?.name ?? "")
     }
     
     private static func makeCategoriesItemModel(_ category: Category) -> CategoriesItemModel {
-        CategoriesItemModel(id: category.id, name: category.name)
+        CategoriesItemModel(id: persistentIDString(category), name: category.name)
     }
     
     private static func makeStoresItemModel(_ store: Store) -> StoresItemModel {
-        StoresItemModel(id: store.id, name: store.name)
+        StoresItemModel(id: persistentIDString(store), name: store.name)
     }
 }
 

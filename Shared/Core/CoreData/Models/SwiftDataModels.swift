@@ -10,7 +10,6 @@ import SwiftData
 
 @Model
 final class ShoppingList {
-    var id: String = UUID().uuidString
     var uniqueId: String = ""
     var name: String = ""
     var date: Date = Date()
@@ -18,8 +17,7 @@ final class ShoppingList {
     var ownerName: String?
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.list) var items: [ShoppingListItem]? = []
     
-    init(id: String = UUID().uuidString, uniqueId: String = "", name: String = "", date: Date = Date(), isRemoved: Bool = false, ownerName: String? = nil) {
-        self.id = id
+    init(uniqueId: String = "", name: String = "", date: Date = Date(), isRemoved: Bool = false, ownerName: String? = nil) {
         self.uniqueId = uniqueId
         self.name = name
         self.date = date
@@ -30,7 +28,6 @@ final class ShoppingList {
 
 @Model
 final class ShoppingListItem {
-    var id: String = UUID().uuidString
     var uniqueId: String = ""
     var comment: String?
     var isImportant: Bool = false
@@ -44,15 +41,13 @@ final class ShoppingListItem {
     var list: ShoppingList?
     var store: Store?
     
-    init(id: String = UUID().uuidString, uniqueId: String = "") {
-        self.id = id
+    init(uniqueId: String = "") {
         self.uniqueId = uniqueId
     }
 }
 
 @Model
 final class Good {
-    var id: String = UUID().uuidString
     var name: String = ""
     var personalRating: Int = 0
     var category: Category?
@@ -60,8 +55,7 @@ final class Good {
     @Relationship(deleteRule: .cascade, inverse: \GoodRating.good) var ratings: [GoodRating]? = []
     @Relationship(deleteRule: .cascade, inverse: \Picture.good) var pictures: [Picture]? = []
     
-    init(id: String = UUID().uuidString, name: String = "", personalRating: Int = 0, category: Category? = nil) {
-        self.id = id
+    init(name: String = "", personalRating: Int = 0, category: Category? = nil) {
         self.name = name
         self.personalRating = personalRating
         self.category = category
@@ -70,15 +64,13 @@ final class Good {
 
 @Model
 final class Category {
-    var id: String = UUID().uuidString
     var name: String = ""
     var parent: Category?
     @Relationship(deleteRule: .nullify, inverse: \Category.parent) var children: [Category]? = []
     @Relationship(deleteRule: .nullify, inverse: \Good.category) var goods: [Good]? = []
     @Relationship(deleteRule: .cascade, inverse: \CategoryStoreOrder.category) var orders: [CategoryStoreOrder]? = []
     
-    init(id: String = UUID().uuidString, name: String = "", parent: Category? = nil) {
-        self.id = id
+    init(name: String = "", parent: Category? = nil) {
         self.name = name
         self.parent = parent
     }
@@ -86,26 +78,22 @@ final class Category {
 
 @Model
 final class Store {
-    var id: String = UUID().uuidString
     var name: String = ""
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.store) var items: [ShoppingListItem]? = []
     @Relationship(deleteRule: .cascade, inverse: \CategoryStoreOrder.store) var orders: [CategoryStoreOrder]? = []
     
-    init(id: String = UUID().uuidString, name: String = "") {
-        self.id = id
+    init(name: String = "") {
         self.name = name
     }
 }
 
 @Model
 final class CategoryStoreOrder {
-    var id: String = UUID().uuidString
     var order: Int = 0
     var category: Category?
     var store: Store?
     
-    init(id: String = UUID().uuidString, order: Int = 0, category: Category? = nil, store: Store? = nil) {
-        self.id = id
+    init(order: Int = 0, category: Category? = nil, store: Store? = nil) {
         self.order = order
         self.category = category
         self.store = store
@@ -114,13 +102,11 @@ final class CategoryStoreOrder {
 
 @Model
 final class GoodRating {
-    var id: String = UUID().uuidString
     var date: Date?
     var rating: Int = 0
     var good: Good?
     
-    init(id: String = UUID().uuidString, date: Date? = nil, rating: Int = 0, good: Good? = nil) {
-        self.id = id
+    init(date: Date? = nil, rating: Int = 0, good: Good? = nil) {
         self.date = date
         self.rating = rating
         self.good = good
@@ -129,13 +115,11 @@ final class GoodRating {
 
 @Model
 final class Picture {
-    var id: String = UUID().uuidString
     @Attribute(.externalStorage) var image: Data?
     var shotDate: Date?
     var good: Good?
     
-    init(id: String = UUID().uuidString, image: Data? = nil, shotDate: Date? = nil, good: Good? = nil) {
-        self.id = id
+    init(image: Data? = nil, shotDate: Date? = nil, good: Good? = nil) {
         self.image = image
         self.shotDate = shotDate
         self.good = good
