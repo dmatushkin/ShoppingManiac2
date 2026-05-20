@@ -7,7 +7,6 @@
 
 import Foundation
 import Factory
-import CoreData
 
 protocol ShoppingListSerializerProtocol: Sendable {
     func exportList(listModel: ShoppingListModel) async throws -> Data

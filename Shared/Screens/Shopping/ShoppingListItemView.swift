@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Factory
-import CoreData
 
 protocol ShoppingListItemModelProtocol: AnyObject {
     func togglePurchased(item: ShoppingListItemModel) async throws
@@ -58,7 +57,7 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     Group {
-        ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+        ShoppingListItemView(item: ShoppingListItemModel(id: UUID().uuidString,
                                                                        uniqueId: "3452345",
                                                                        title: "Test title",
                                                                        store: "Test store",
@@ -70,7 +69,7 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
                                                                        price: "25",
                                                                        isImportant: false,
                                                                        rating: 5), model: ShoppingListViewModel()).frame(width: 375, height: 50)
-        ShoppingListItemView(item: ShoppingListItemModel(id: NSManagedObjectID(),
+        ShoppingListItemView(item: ShoppingListItemModel(id: UUID().uuidString,
                                                                        uniqueId: "1211234",
                                                                        title: "Test title",
                                                                        store: "Test store",

@@ -5,19 +5,17 @@
 //  Created by Dmitry Matyushkin on 10.10.2021.
 //
 
-import CoreData
 import Factory
+import SwiftData
 
 protocol ContextProviderProtocol: Sendable {
-    
-    func getContext() -> NSManagedObjectContext
+    func getContext() -> ModelContext
 }
 
-final class ContextProvider: ContextProviderProtocol {
-    
+final class ContextProvider: ContextProviderProtocol, @unchecked Sendable {
     required init() {}
     
-    func getContext() -> NSManagedObjectContext {
-        return PersistenceController.shared.container.newBackgroundContext()
+    func getContext() -> ModelContext {
+        ModelContext(PersistenceController.shared.container)
     }
 }

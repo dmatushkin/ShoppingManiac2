@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CoreData
 import Factory
 
 protocol EditShoppingListItemModelProtocol: AnyObject {
@@ -108,7 +107,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     EditShoppingListItemView(model: ShoppingListViewModel(),
-                             item: ShoppingListItemModel(id: NSManagedObjectID(),
+                             item: ShoppingListItemModel(id: UUID().uuidString,
                                                          uniqueId: "112341234",
                                                          title: "test 1",
                                                          store: "test 2",

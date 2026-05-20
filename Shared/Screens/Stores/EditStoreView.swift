@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Factory
-import CoreData
 
 protocol EditStoreModelProtocol: AnyObject {
     func editStore(item: StoresItemModel?, name: String, categories: [String]) async throws
@@ -97,5 +96,5 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
 
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
-    EditStoreView(model: StoresModel(), item: StoresItemModel(id: NSManagedObjectID(), name: "Test store"))
+    EditStoreView(model: StoresModel(), item: StoresItemModel(id: UUID().uuidString, name: "Test store"))
 }

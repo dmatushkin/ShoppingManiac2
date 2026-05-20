@@ -6,10 +6,9 @@
 //
 
 import Foundation
-import CoreData
 
 struct GoodsItemModel: Identifiable, Hashable {
-    let id: NSManagedObjectID
+    let id: String
     let name: String
     let category: String
 }

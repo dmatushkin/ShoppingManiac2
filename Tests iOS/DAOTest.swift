@@ -7,38 +7,41 @@
 
 import XCTest
 import Factory
-import CoreData
+import SwiftData
 @preconcurrency import Combine
 
 final class GlobalCommands {
-    
     static let reloadTopList = PassthroughSubject<Void, Never>()
 }
 
 final class ContextProviderStub: ContextProviderProtocol, @unchecked Sendable {
-    
-    private var container: NSPersistentContainer!
+    private let container: ModelContainer
     
     required init() {
-        guard let modelURL = Bundle(for: Self.self).url(forResource: "ShoppingManiac", withExtension: "momd"), let model = NSManagedObjectModel(contentsOf: modelURL) else { return }
-        container = NSPersistentContainer(name: "ShoppingManiac", managedObjectModel: model)
-        container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-        })
+        let schema = Schema([
+            ShoppingList.self,
+            ShoppingListItem.self,
+            Good.self,
+            Category.self,
+            Store.self,
+            CategoryStoreOrder.self,
+            GoodRating.self,
+            Picture.self
+        ])
+        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        do {
+            container = try ModelContainer(for: schema, configurations: [configuration])
+        } catch {
+            fatalError("Unable to create in-memory SwiftData container: \(error.localizedDescription)")
+        }
     }
     
-    func getContext() -> NSManagedObjectContext {
-        return container.viewContext
+    func getContext() -> ModelContext {
+        ModelContext(container)
     }
 }
 
 final class DAOTest: XCTestCase {
-    
-    @Injected(\.contextProvider) private var contextProvider: ContextProviderProtocol
-
     override func setUp() {
         Container.shared.contextProvider.register(factory: { ContextProviderStub() })
         super.setUp()
@@ -49,541 +52,61 @@ final class DAOTest: XCTestCase {
         super.tearDown()
     }
     
-    func testGetShoppingLists() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let list1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        list1?.date = 10
-        let list2 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        list2?.name = "name2"
-        list2?.date = 20
-        let list3 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        list3?.name = "name3"
-        list3?.date = 30
-        let list4 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        list4?.name = "name4"
-        list4?.date = 40
-        let list5 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        list5?.name = "name5"
-        list5?.date = 50
+    func testAddAndFetchShoppingLists() async throws {
         let dao = DAO()
+        let olderDate = Date(timeIntervalSinceReferenceDate: 10)
+        let newerDate = Date(timeIntervalSinceReferenceDate: 20)
         
-        // act
+        _ = try await dao.addShoppingList(name: "older", date: olderDate, uniqueId: "older-id")
+        let newer = try await dao.addShoppingList(name: "newer", date: newerDate, uniqueId: "newer-id")
+        
         let lists = try await dao.getShoppingLists()
-        
-        // assert
-        XCTAssertEqual(lists.count, 5)
-        XCTAssertEqual(lists[0].title, "name5")
-        XCTAssertEqual(lists[0].id, list5?.objectID)
-        XCTAssertEqual(lists[1].title, "name4")
-        XCTAssertEqual(lists[1].id, list4?.objectID)
-        XCTAssertEqual(lists[2].title, "name3")
-        XCTAssertEqual(lists[2].id, list3?.objectID)
-        XCTAssertEqual(lists[3].title, "name2")
-        XCTAssertEqual(lists[3].id, list2?.objectID)
-        XCTAssertEqual(lists[4].title, "Jan 1, 2001")
-        XCTAssertEqual(lists[4].id, list1?.objectID)
+        XCTAssertEqual(lists.count, 2)
+        XCTAssertEqual(lists.first, newer)
+        XCTAssertEqual(lists.map(\.title), ["newer", "older"])
     }
     
-    func testAddShoppingList() async throws {
-        // arrange
+    func testRemoveShoppingListHidesItFromFetches() async throws {
         let dao = DAO()
-        let date = Date()
+        let list = try await dao.addShoppingList(name: "removed", date: Date(), uniqueId: "removed-id")
         
-        // act
-        let model = try await dao.addShoppingList(name: "test1", date: date, uniqueId: "testunique")
+        try await dao.removeShoppingList(list)
         
-        // assert
-        XCTAssertEqual(model.title, "test1")
-        let context = contextProvider.getContext()
-        let request: NSFetchRequest<ShoppingList> = ShoppingList.fetchRequest()
-        let items = try context.fetch(request)
+        let lists = try await dao.getShoppingLists()
+        XCTAssertTrue(lists.isEmpty)
+    }
+    
+    func testAddShoppingListItemCreatesRelatedGoodAndStore() async throws {
+        let dao = DAO()
+        let list = try await dao.addShoppingList(name: "Groceries", date: Date(), uniqueId: "groceries-id")
+        
+        try await dao.addShoppingListItem(list: list,
+                                          name: "Apples",
+                                          amount: "2.5",
+                                          store: "Market",
+                                          isWeight: true,
+                                          price: "3.25",
+                                          isImportant: true,
+                                          rating: 4,
+                                          isPurchased: false,
+                                          uniqueId: "apples-id")
+        
+        let items = try await dao.getShoppingListItems(list: list)
         XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items[0].isRemoved, false)
-        XCTAssertEqual(items[0].name, "test1")
-        XCTAssertEqual(items[0].objectID, model.id)
-        XCTAssertEqual(items[0].date, date.timeIntervalSinceReferenceDate)
-        XCTAssertEqual(items[0].uniqueId, "testunique")
+        XCTAssertEqual(items.first?.title, "Apples")
+        XCTAssertEqual(items.first?.store, "Market")
+        XCTAssertEqual(items.first?.amount, "2.5")
+        XCTAssertEqual(items.first?.isImportant, true)
+        XCTAssertEqual(items.first?.rating, 4)
     }
     
-    func testRemoveShoppingList() async throws {
-        // arrange
-        let date = Date()
-        let context = contextProvider.getContext()
-        let list1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        let model = ShoppingListModel(id: list1!.objectID, uniqueId: "testunique", name: "test", date: date)
+    func testSyncStoreCategoriesPreservesOrder() async throws {
         let dao = DAO()
+        let store = try await dao.addStore(name: "Market")
         
-        // act
-        try await dao.removeShoppingList(model)
+        try await dao.syncStoreCategories(item: store, categories: ["Produce", "Bakery", "Frozen"])
         
-        // assert
-        let request: NSFetchRequest<ShoppingList> = ShoppingList.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.first?.isRemoved, true)
-    }
-    
-    func testGetShoppingListItems() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let date = Date()
-        let list1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        let model = ShoppingListModel(id: list1!.objectID, uniqueId: "testunique", name: "test", date: date)
-        let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        let good1 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        let store1 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        let category1 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category1?.name = "category1"
-        store1?.name = "store1"
-        item1?.store = store1
-        good1?.name = "test1"
-        good1?.category = category1
-        item1?.good = good1
-        item1?.list = list1
-        item1?.purchased = true
-        item1?.isWeight = true
-        item1?.quantity = 5.251
-        let item2 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        let good2 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        let store2 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        let category2 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category2?.name = "category2"
-        store2?.name = "store2"
-        item2?.store = store2
-        good2?.name = "test2"
-        good2?.category = category2
-        item2?.good = good2
-        item2?.list = list1
-        item2?.purchased = false
-        item2?.isWeight = false
-        item2?.quantity = 6.15
-        let item3 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        let good3 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        let store3 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        let category3 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category3?.name = "category3"
-        store3?.name = "store3"
-        item3?.store = store3
-        good3?.name = "test3"
-        good3?.category = category3
-        item3?.good = good3
-        item3?.list = list1
-        item3?.isWeight = false
-        let item4 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        item4?.isRemoved = true
-        item4?.list = list1
-        item4?.isWeight = false
-        let dao = DAO()
-        
-        // act
-        let list = try await dao.getShoppingListItems(list: model).sorted(by: { $0.title < $1.title })
-        
-        // assert
-        XCTAssertEqual(list.count, 3)
-        XCTAssertEqual(list[0].id, item1?.objectID)
-        XCTAssertEqual(list[0].title, "test1")
-        XCTAssertEqual(list[0].store, "store1")
-        XCTAssertEqual(list[0].category, "category1")
-        XCTAssertEqual(list[0].isPurchased, true)
-        XCTAssertEqual(list[0].amount, "5.25")
-        XCTAssertEqual(list[1].id, item2?.objectID)
-        XCTAssertEqual(list[1].title, "test2")
-        XCTAssertEqual(list[1].store, "store2")
-        XCTAssertEqual(list[1].category, "category2")
-        XCTAssertEqual(list[1].isPurchased, false)
-        XCTAssertEqual(list[1].amount, "6")
-        XCTAssertEqual(list[2].id, item3?.objectID)
-        XCTAssertEqual(list[2].title, "test3")
-        XCTAssertEqual(list[2].store, "store3")
-        XCTAssertEqual(list[2].category, "category3")
-        XCTAssertEqual(list[2].isPurchased, false)
-        XCTAssertEqual(list[2].amount, "0")
-    }
-    
-    func testAddShoppingListItem() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let date = Date()
-        let list1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingList", into: context) as? ShoppingList
-        let model = ShoppingListModel(id: list1!.objectID, uniqueId: "testunique", name: "test", date: date)
-        let dao = DAO()
-        
-        // act
-        try await dao.addShoppingListItem(list: model, name: "test", amount: "15", store: "test store", isWeight: false, price: "25", isImportant: false, rating: 5, isPurchased: false, uniqueId: "testunique")
-        
-        // assert
-        let request: NSFetchRequest<ShoppingListItem> = ShoppingListItem.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items.first?.list, list1)
-        XCTAssertEqual(items.first?.good?.name, "test")
-        XCTAssertEqual(items.first?.quantity, 15)
-        XCTAssertEqual(items.first?.store?.name, "test store")
-        XCTAssertEqual(items.first?.isWeight, false)
-        XCTAssertEqual(items.first?.price, 25)
-        XCTAssertEqual(items.first?.isImportant, false)
-        XCTAssertEqual(items.first?.good?.personalRating, 5)
-        XCTAssertEqual(items.first?.purchased, false)
-        XCTAssertEqual(items.first?.uniqueId, "testunique")
-    }
-    
-    func testRemoveShoppingListItem() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        let model = ShoppingListItemModel(id: item1!.objectID, uniqueId: "testunique", title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
-        let dao = DAO()
-        
-        // act
-        try await dao.removeShoppingListItem(item: model)
-        
-        // assert
-        let request: NSFetchRequest<ShoppingListItem> = ShoppingListItem.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items.first?.isRemoved, true)
-    }
-    
-    func testTogglePurchasedItemTrue() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        item1?.purchased = true
-        let model = ShoppingListItemModel(id: item1!.objectID, uniqueId: "testunique", title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
-        let dao = DAO()
-        
-        // act
-        try await dao.togglePurchasedShoppingListItem(item: model)
-        
-        // assert
-        let request: NSFetchRequest<ShoppingListItem> = ShoppingListItem.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items.first?.purchased, false)
-    }
-    
-    func testTogglePurchasedItemFalse() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        item1?.purchased = false
-        let model = ShoppingListItemModel(id: item1!.objectID, uniqueId: "testunique", title: "", store: "", category: "", categoryStoreOrder: 0, isPurchased: false, amount: "15", isWeight: false, price: "15", isImportant: false, rating: 5)
-        let dao = DAO()
-        
-        // act
-        try await dao.togglePurchasedShoppingListItem(item: model)
-        
-        // assert
-        let request: NSFetchRequest<ShoppingListItem> = ShoppingListItem.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items.first?.purchased, true)
-    }
-    
-    func testGetGoods() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let good1 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good1?.name = "test1"
-        let good2 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good2?.name = "test2"
-        let good3 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good3?.name = "test3"
-        let dao = DAO()
-        
-        // act
-        let items = try await dao.getGoods(search: "")
-        
-        // assert
-        XCTAssertEqual(items.count, 3)
-        XCTAssertEqual(items[0].id, good1?.objectID)
-        XCTAssertEqual(items[0].name, "test1")
-        XCTAssertEqual(items[1].id, good2?.objectID)
-        XCTAssertEqual(items[1].name, "test2")
-        XCTAssertEqual(items[2].id, good3?.objectID)
-        XCTAssertEqual(items[2].name, "test3")
-    }
-    
-    func testGetGoodsSearch() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let good1 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good1?.name = "test1"
-        let good2 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good2?.name = "test2"
-        let good3 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good3?.name = "test3"
-        let dao = DAO()
-        
-        // act
-        let items = try await dao.getGoods(search: "2")
-        
-        // assert
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items[0].id, good2?.objectID)
-        XCTAssertEqual(items[0].name, "test2")
-    }
-    
-    func testAddGood() async throws {
-        // arrange
-        let dao = DAO()
-        
-        // act
-        let model = try await dao.addGood(name: "test1", category: "test2")
-        
-        // assert
-        XCTAssertEqual(model.name, "test1")
-        XCTAssertEqual(model.category, "test2")
-        let context = contextProvider.getContext()
-        let request: NSFetchRequest<Good> = Good.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items.first?.name, "test1")
-        XCTAssertEqual(items.first?.category?.name, "test2")
-        XCTAssertEqual(model.id, items.first?.objectID)
-    }
-    
-    func testEditGood() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let good1 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good1?.name = "test1"
-        let model = GoodsItemModel(id: good1!.objectID, name: "", category: "")
-        let dao = DAO()
-        
-        // act
-        let result = try await dao.editGood(item: model, name: "test3", category: "test4")
-        
-        // assert
-        XCTAssertEqual(result.id, good1?.objectID)
-        XCTAssertEqual(result.name, "test3")
-        XCTAssertEqual(result.category, "test4")
-        let request: NSFetchRequest<Good> = Good.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(result.id, items.first?.objectID)
-        XCTAssertEqual(items.first?.name, "test3")
-        XCTAssertEqual(items.first?.category?.name, "test4")
-    }
-    
-    func testRemoveGood() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let good1 = NSEntityDescription.insertNewObject(forEntityName: "Good", into: context) as? Good
-        good1?.name = "test1"
-        let item1 = NSEntityDescription.insertNewObject(forEntityName: "ShoppingListItem", into: context) as? ShoppingListItem
-        item1?.good = good1
-        let model = GoodsItemModel(id: good1!.objectID, name: "", category: "")
-        let dao = DAO()
-        
-        // act
-        try await dao.removeGood(item: model)
-        
-        // assert
-        let goodRequest: NSFetchRequest<Good> = Good.fetchRequest()
-        let goodItems = try context.fetch(goodRequest)
-        XCTAssertEqual(goodItems.count, 0)
-        let shoppingRequest: NSFetchRequest<ShoppingListItem> = ShoppingListItem.fetchRequest()
-        let shoppingItems = try context.fetch(shoppingRequest)
-        XCTAssertEqual(shoppingItems.count, 1)
-        XCTAssertEqual(shoppingItems.first?.isRemoved, true)
-    }
-    
-    func testGetCategories() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let category1 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category1?.name = "test1"
-        let category2 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category2?.name = "test2"
-        let category3 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category3?.name = "test3"
-        let dao = DAO()
-        
-        // act
-        let items = try await dao.getCategories(search: "")
-        
-        // assert
-        XCTAssertEqual(items.count, 3)
-        XCTAssertEqual(items[0].id, category1?.objectID)
-        XCTAssertEqual(items[0].name, "test1")
-        XCTAssertEqual(items[1].id, category2?.objectID)
-        XCTAssertEqual(items[1].name, "test2")
-        XCTAssertEqual(items[2].id, category3?.objectID)
-        XCTAssertEqual(items[2].name, "test3")
-    }
-    
-    func testGetCategoriesSearch() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let category1 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category1?.name = "test1"
-        let category2 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category2?.name = "test2"
-        let category3 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category3?.name = "test3"
-        let dao = DAO()
-        
-        // act
-        let items = try await dao.getCategories(search: "2")
-        
-        // assert
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items[0].id, category2?.objectID)
-        XCTAssertEqual(items[0].name, "test2")
-    }
-    
-    func testAddCategory() async throws {
-        // arrange
-        let dao = DAO()
-        
-        // act
-        let model = try await dao.addCategory(name: "test1")
-        
-        // assert
-        XCTAssertEqual(model.name, "test1")
-        let context = contextProvider.getContext()
-        let request: NSFetchRequest<Category> = Category.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items.first?.name, "test1")
-        XCTAssertEqual(model.id, items.first?.objectID)
-    }
-    
-    func testEditCategory() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let category1 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category1?.name = "test1"
-        let model = CategoriesItemModel(id: category1!.objectID, name: "")
-        let dao = DAO()
-        
-        // act
-        let result = try await dao.editCategory(item: model, name: "test3")
-        
-        // assert
-        XCTAssertEqual(result.id, category1?.objectID)
-        XCTAssertEqual(result.name, "test3")
-        let request: NSFetchRequest<Category> = Category.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(result.id, items.first?.objectID)
-        XCTAssertEqual(items.first?.name, "test3")
-    }
-    
-    func testRemoveCategory() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let category1 = NSEntityDescription.insertNewObject(forEntityName: "Category", into: context) as? Category
-        category1?.name = "test1"
-        let model = CategoriesItemModel(id: category1!.objectID, name: "")
-        let dao = DAO()
-        
-        // act
-        try await dao.removeCategory(item: model)
-        
-        // assert
-        let request: NSFetchRequest<Category> = Category.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 0)
-    }
-    
-    func testGetStores() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let store1 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store1?.name = "test1"
-        let store2 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store2?.name = "test2"
-        let store3 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store3?.name = "test3"
-        let dao = DAO()
-        
-        // act
-        let items = try await dao.getStores(search: "")
-        
-        // assert
-        XCTAssertEqual(items.count, 3)
-        XCTAssertEqual(items[0].id, store1?.objectID)
-        XCTAssertEqual(items[0].name, "test1")
-        XCTAssertEqual(items[1].id, store2?.objectID)
-        XCTAssertEqual(items[1].name, "test2")
-        XCTAssertEqual(items[2].id, store3?.objectID)
-        XCTAssertEqual(items[2].name, "test3")
-    }
-    
-    func testGetStoresSearch() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let store1 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store1?.name = "test1"
-        let store2 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store2?.name = "test2"
-        let store3 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store3?.name = "test3"
-        let dao = DAO()
-        
-        // act
-        let items = try await dao.getStores(search: "2")
-        
-        // assert
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items[0].id, store2?.objectID)
-        XCTAssertEqual(items[0].name, "test2")
-    }
-    
-    func testAddStore() async throws {
-        // arrange
-        let dao = DAO()
-        
-        // act
-        let model = try await dao.addStore(name: "test1")
-        
-        // assert
-        XCTAssertEqual(model.name, "test1")
-        let context = contextProvider.getContext()
-        let request: NSFetchRequest<Store> = Store.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(items.first?.name, "test1")
-        XCTAssertEqual(model.id, items.first?.objectID)
-    }
-    
-    func testEditStore() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let store1 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store1?.name = "test1"
-        let model = StoresItemModel(id: store1!.objectID, name: "")
-        let dao = DAO()
-        
-        // act
-        let result = try await dao.editStore(item: model, name: "test3")
-        
-        // assert
-        XCTAssertEqual(result.id, store1?.objectID)
-        XCTAssertEqual(result.name, "test3")
-        let request: NSFetchRequest<Store> = Store.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 1)
-        XCTAssertEqual(result.id, items.first?.objectID)
-        XCTAssertEqual(items.first?.name, "test3")
-    }
-    
-    func testRemoveStore() async throws {
-        // arrange
-        let context = contextProvider.getContext()
-        let store1 = NSEntityDescription.insertNewObject(forEntityName: "Store", into: context) as? Store
-        store1?.name = "test1"
-        let model = StoresItemModel(id: store1!.objectID, name: "")
-        let dao = DAO()
-        
-        // act
-        try await dao.removeStore(item: model)
-        
-        // assert
-        let request: NSFetchRequest<Store> = Store.fetchRequest()
-        let items = try context.fetch(request)
-        XCTAssertEqual(items.count, 0)
+        let categories = try await dao.getStoreCategories(item: store)
+        XCTAssertEqual(categories.map(\.name), ["Produce", "Bakery", "Frozen"])
     }
 }

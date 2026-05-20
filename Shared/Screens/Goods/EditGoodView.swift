@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Factory
-import CoreData
 
 protocol EditGoodModelProtocol: AnyObject {
     func editGood(item: GoodsItemModel?, name: String, category: String) async throws
@@ -62,5 +61,5 @@ struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
 
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
-    EditGoodView(model: GoodsModel(), item: GoodsItemModel(id: NSManagedObjectID(), name: "good name", category: "good category"))
+    EditGoodView(model: GoodsModel(), item: GoodsItemModel(id: UUID().uuidString, name: "good name", category: "good category"))
 }

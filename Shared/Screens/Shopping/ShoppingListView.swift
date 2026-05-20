@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CoreData
 import Factory
 
 struct ShoppingListView: View {
@@ -48,9 +47,6 @@ struct ShoppingListView: View {
                             }
                             .buttonStyle(.plain)
                             .confirmationDialog("Share", isPresented: $model.showShareSheet) {
-                                Button("Share with iCloud") {
-                                    model.shareByiCloud(model: listModel)
-                                }
                                 Button("Share with file") {
                                     model.shareByFile(model: listModel)
                                 }
@@ -87,8 +83,6 @@ struct ShoppingListView: View {
                     EditShoppingListItemView(model: model, item: item)
                 }.sheet(item: $model.dataToShare) { item in
                     ShareSheet(activityItems: [item.url])
-                }.sheet(item: $model.sharedList) { sharedList in
-                    CloudSharingView(share: sharedList.share, container: sharedList.container, list: listModel)
                 }
             LoadingView().opacity(model.isLoading ? 0.9 : 0)
         }
@@ -98,6 +92,6 @@ struct ShoppingListView: View {
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     NavigationStack {
-        ShoppingListView(listModel: ShoppingListModel(id: NSManagedObjectID(), uniqueId: "1241234", name: "test list", date: Date()))
+        ShoppingListView(listModel: ShoppingListModel(id: UUID().uuidString, uniqueId: "1241234", name: "test list", date: Date()))
     }
 }

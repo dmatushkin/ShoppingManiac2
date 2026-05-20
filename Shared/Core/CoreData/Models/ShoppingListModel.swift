@@ -6,10 +6,8 @@
 //
 
 import Foundation
-import CoreData
 
 struct ShoppingListModel: Identifiable, Hashable {
-    
     private static let formatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
@@ -17,12 +15,12 @@ struct ShoppingListModel: Identifiable, Hashable {
         return dateFormatter
     }()
     
-    let id: NSManagedObjectID
+    let id: String
     let uniqueId: String
     let name: String
     let date: Date
     
     var title: String {
-        return name.isEmpty ? ShoppingListModel.formatter.string(from: date) : name
+        name.isEmpty ? ShoppingListModel.formatter.string(from: date) : name
     }
 }

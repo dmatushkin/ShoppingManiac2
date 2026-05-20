@@ -6,9 +6,8 @@
 //
 
 import Foundation
-import CoreData
 
 struct CategoriesItemModel: Identifiable, Hashable {
-    let id: NSManagedObjectID
+    let id: String
     let name: String
 }

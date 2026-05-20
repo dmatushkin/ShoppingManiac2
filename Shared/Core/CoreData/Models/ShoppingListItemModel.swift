@@ -6,10 +6,9 @@
 //
 
 import Foundation
-import CoreData
 
 struct ShoppingListItemModel: Identifiable {
-    let id: NSManagedObjectID
+    let id: String
     let uniqueId: String
     let title: String
     let store: String

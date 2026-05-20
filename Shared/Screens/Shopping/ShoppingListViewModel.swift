@@ -7,19 +7,11 @@
 
 import SwiftUI
 import Factory
-import CoreData
-import CloudKit
 import Observation
 
 struct ExportedList: Identifiable {
-    let id: NSManagedObjectID
+    let id: String
     let url: URL
-}
-
-struct SharedList: Identifiable {
-    let id: NSManagedObjectID
-    let share: CKShare
-    let container: CKContainer
 }
 
 @MainActor
@@ -35,7 +27,6 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
     var showShareSheet: Bool = false
     var itemToShow: ShoppingListItemModel?
     var dataToShare: ExportedList?
-    var sharedList: SharedList?
     var output: ShoppingListOutput = ShoppingListOutput(sections: [], items: [])
     var isLoading: Bool = false
     
@@ -74,7 +65,6 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
     }
     
     func editShoppingListItem(item: ShoppingListItemModel, model: EditShoppingListItemViewModel) async throws {
-        
         guard let listModel = listModel else { return }
         try await dao.editShoppingListItem(item: item,
                                            name: model.itemName,
@@ -134,25 +124,6 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
                 let data = try await serializer.exportList(listModel: model)
                 try Task.checkCancellation()
                 dataToShare = ExportedList(id: model.id, url: try data.store())
-                isLoading = false
-            } catch is CancellationError {
-                isLoading = false
-            } catch {
-                isLoading = false
-            }
-        }
-    }
-    
-    func shareByiCloud(model: ShoppingListModel) {
-        shareTask?.cancel()
-        shareTask = Task {
-            do {
-                isLoading = true
-                if let itemShare = try await PersistenceController.shared.getShare(model),
-                    let container = PersistenceController.shared.ckContainer {
-                    try Task.checkCancellation()
-                    sharedList = SharedList(id: model.id, share: itemShare, container: container)
-                }
                 isLoading = false
             } catch is CancellationError {
                 isLoading = false
