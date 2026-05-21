@@ -1,0 +1,47 @@
+//
+//  AddGoodToCategoryModel.swift
+//  ShoppingManiac2
+//
+//  Created by Dmitry Matyushkin on 21.01.2022.
+//
+
+import Foundation
+import FactoryKit
+import Observation
+
+@MainActor
+@Observable
+final class AddGoodToCategoryModel {
+    
+    var goodsNames: [String] = []
+    var itemName: String = "" {
+        didSet {
+            reloadGoods()
+        }
+    }
+    @ObservationIgnored
+    @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
+    @Injected(\.appEventCenter) private var appEvents
+    @ObservationIgnored
+    private var reloadTask: Task<Void, Never>?
+    
+    deinit {
+        reloadTask?.cancel()
+    }
+    
+    private func reloadGoods() {
+        reloadTask?.cancel()
+        let search = itemName
+        reloadTask = Task {
+            do {
+                let names = try await dao.getGoods(search: search).map({ $0.name })
+                try Task.checkCancellation()
+                goodsNames = names
+            } catch is CancellationError {
+            } catch {
+                appEvents.showError(error, fallback: "Unable to load goods suggestions")
+            }
+        }
+    }
+}
