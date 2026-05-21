@@ -9,8 +9,8 @@ import SwiftUI
 import Factory
 
 protocol EditStoreModelProtocol: AnyObject {
-    func editStore(item: StoresItemModel?, name: String, categories: [String]) async throws
-    func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel]
+    func editStore(item: StoresItemModel?, name: String, categories: [String]) async
+    func getStoreCategories(item: StoresItemModel) async -> [CategoriesItemModel]
 }
 
 struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
@@ -56,8 +56,11 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
                         self.isEditable = true
                     }
                 }
-            }.listStyle(.plain)
-                .environment(\.editMode, isEditable ? .constant(.active) : .constant(.inactive))
+            }
+            .listStyle(.plain)
+            #if os(iOS)
+            .environment(\.editMode, isEditable ? .constant(.active) : .constant(.inactive))
+            #endif
             HStack {
                 LargeCancelButton(title: "Cancel", action: {
                     dismiss()
@@ -65,7 +68,7 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
-                        try await model.editStore(item: item, name: name, categories: categories)
+                        await model.editStore(item: item, name: name, categories: categories)
                         dismiss()
                     }
                 })
@@ -87,7 +90,7 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
                 name = item?.name ?? ""
                 if let item = item {
                     Task {
-                        categories = try await model.getStoreCategories(item: item).map({ $0.name })
+                        categories = await model.getStoreCategories(item: item).map({ $0.name })
                     }
                 }
             }).navigationTitle("Edit store")

@@ -6,10 +6,16 @@
 //
 
 import CloudKit
+import Factory
 import SwiftUI
 
+#if os(iOS)
 final class SceneDelegate: NSObject, UIWindowSceneDelegate {
     func windowScene(_ windowScene: UIWindowScene, userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata) {
-        GlobalCommands.reloadTopList.send()
+        Task { @MainActor in
+            Container.shared.appEventCenter().shoppingListsChanged()
+            Container.shared.appEventCenter().showSuccess("Shared list updated", detail: nil)
+        }
     }
 }
+#endif

@@ -32,7 +32,13 @@ struct ShoppingListView: View {
                     ForEach(model.output.items) { item in
                         ShoppingListItemView(item: item, model: model)
                     }
-                }.listStyle(.grouped).safeAreaInset(edge: .bottom) {
+                }
+                #if os(iOS)
+                .listStyle(.grouped)
+                #else
+                .listStyle(.inset)
+                #endif
+                .safeAreaInset(edge: .bottom) {
                     VStack {
                         HStack(alignment: .center) {
                             Button {

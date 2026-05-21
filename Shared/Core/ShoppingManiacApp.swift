@@ -6,41 +6,43 @@
 //
 
 import SwiftUI
-@preconcurrency import Combine
 import Factory
-
-final class GlobalCommands {
-    
-    static let reloadTopList = PassthroughSubject<Void, Never>()
-}
 
 @main
 struct ShoppingManiacApp: App {
+    #if os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    #endif
 
     var body: some Scene {
         WindowGroup {
             MainScreen().onOpenURL { url in
-                do {
-                    let data = try Data(contentsOf: url)
-                    Task {
-                        do {
-                            if url.pathExtension == "smstorage" {
-                                let list = try await Container.shared.shoppingListSerializer().importList(data: data)
-                                print("List \(list.title) imported")
-                                GlobalCommands.reloadTopList.send()
-                            } else if url.pathExtension == "smbackup" {
-                                let backup = try await Container.shared.shoppingListSerializer().importBackup(data: data)
-                                print("Backup of \(backup.count) imported")
-                                GlobalCommands.reloadTopList.send()
-                            }
-                        } catch {
-                            print(error.localizedDescription)
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
+                handleOpenURL(url)
+            }
+        }
+    }
+
+    @MainActor
+    private func handleOpenURL(_ url: URL) {
+        Task { @MainActor in
+            let events = Container.shared.appEventCenter()
+            do {
+                let data = try Data(contentsOf: url)
+
+                switch url.pathExtension.lowercased() {
+                case "smstorage":
+                    let list = try await Container.shared.shoppingListSerializer().importList(data: data)
+                    events.shoppingListsChanged()
+                    events.showSuccess("Shopping list imported", detail: list.title)
+                case "smbackup":
+                    let backup = try await Container.shared.shoppingListSerializer().importBackup(data: data)
+                    events.shoppingListsChanged()
+                    events.showSuccess("Backup imported", detail: "\(backup.count) lists restored")
+                default:
+                    events.showError("Unsupported file", detail: url.lastPathComponent)
                 }
+            } catch {
+                events.showError(error, fallback: "Unable to import file")
             }
         }
     }

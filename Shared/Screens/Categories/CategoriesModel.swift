@@ -16,6 +16,8 @@ final class CategoriesModel: EditCategoryModelProtocol {
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     @ObservationIgnored
+    @Injected(\.appEventCenter) private var appEvents
+    @ObservationIgnored
     private var reloadTask: Task<Void, Never>?
     
     var items: [CategoriesItemModel] = []
@@ -44,30 +46,44 @@ final class CategoriesModel: EditCategoryModelProtocol {
                 items = categories
             } catch is CancellationError {
             } catch {
+                appEvents.showError(error, fallback: "Unable to load categories")
             }
         }
     }
         
-    func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async throws {
-        if let item = item {
-            let category = try await dao.editCategory(item: item, name: name)
-            try await dao.syncCategoryGoods(item: category, goods: goods)
-        } else {
-            let category = try await dao.addCategory(name: name)
-            try await dao.syncCategoryGoods(item: category, goods: goods)
-        }        
-        items = try await dao.getCategories(search: searchString)
-    }
-    
-    func removeStore(offsets: IndexSet) async throws {
-        let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
-        for item in itemsToDelete {
-            try await dao.removeCategory(item: item)
+    func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async {
+        do {
+            if let item = item {
+                let category = try await dao.editCategory(item: item, name: name)
+                try await dao.syncCategoryGoods(item: category, goods: goods)
+            } else {
+                let category = try await dao.addCategory(name: name)
+                try await dao.syncCategoryGoods(item: category, goods: goods)
+            }
+            items = try await dao.getCategories(search: searchString)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to save category")
         }
-        items = try await dao.getCategories(search: searchString)
     }
     
-    func getCategoryGoods(category: CategoriesItemModel) async throws -> [GoodsItemModel] {
-        return try await dao.getCategoryGoods(item: category)
+    func removeStore(offsets: IndexSet) async {
+        do {
+            let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
+            for item in itemsToDelete {
+                try await dao.removeCategory(item: item)
+            }
+            items = try await dao.getCategories(search: searchString)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to delete category")
+        }
+    }
+    
+    func getCategoryGoods(category: CategoriesItemModel) async -> [GoodsItemModel] {
+        do {
+            return try await dao.getCategoryGoods(item: category)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to load category goods")
+        }
+        return []
     }
 }

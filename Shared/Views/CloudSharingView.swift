@@ -6,8 +6,10 @@
 //
 
 import CloudKit
+import Factory
 import SwiftUI
 
+#if os(iOS)
 struct CloudSharingView: UIViewControllerRepresentable {
     let share: CKShare
     let container: CKContainer
@@ -29,7 +31,6 @@ struct CloudSharingView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UICloudSharingController, context: Context) {
     }
 }
-
 final class CloudSharingCoordinator: NSObject, UICloudSharingControllerDelegate {
     let list: ShoppingListModel
     init(list: ShoppingListModel) {
@@ -41,14 +42,31 @@ final class CloudSharingCoordinator: NSObject, UICloudSharingControllerDelegate 
     }
     
     func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {
-        print("Failed to save share: \(error)")
+        Task { @MainActor in
+            Container.shared.appEventCenter().showError(error, fallback: "Unable to save share")
+        }
     }
     
     func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
-        print("Saved the share")
+        Task { @MainActor in
+            Container.shared.appEventCenter().showSuccess("Share saved", detail: list.title)
+        }
     }
     
     func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController) {
-        print("Stop sharing")
+        Task { @MainActor in
+            Container.shared.appEventCenter().showSuccess("Sharing stopped", detail: list.title)
+        }
     }
 }
+#else
+struct CloudSharingView: View {
+    let share: CKShare
+    let container: CKContainer
+    let list: ShoppingListModel
+
+    var body: some View {
+        EmptyView()
+    }
+}
+#endif

@@ -9,42 +9,37 @@ import SwiftUI
 import Factory
 
 struct MainScreen: View {
-    
-    @State private var model: MainScreenModel
-    
     init() {
         #if os(iOS)
         UITableView.appearance().backgroundColor = .clear
         #endif
-        _model = State(wrappedValue: MainScreenModel())
     }
     
     var body: some View {
-        ZStack {
-            TabView {
-                ShoppingScreen().tabItem {
-                    Image("documents")
-                    Text("Shopping")
-                }
-                GoodsScreen().tabItem {
-                    Image("goods")
-                    Text("Goods")
-                }
-                StoresScreen().tabItem {
-                    Image("store")
-                    Text("Stores")
-                }
-                CategoriesScreen().tabItem {
-                    Image("categories")
-                    Text("Categories")
-                }
-                AboutScreen().tabItem {
-                    Image("empty_cart")
-                    Text("About")
-                }
+        TabView {
+            ShoppingScreen().tabItem {
+                Image("documents")
+                Text("Shopping")
             }
-            LoadingView().opacity(model.isLoaded ? 0 : 0.9)
-        }.scrollContentBackground(.hidden)
+            GoodsScreen().tabItem {
+                Image("goods")
+                Text("Goods")
+            }
+            StoresScreen().tabItem {
+                Image("store")
+                Text("Stores")
+            }
+            CategoriesScreen().tabItem {
+                Image("categories")
+                Text("Categories")
+            }
+            AboutScreen().tabItem {
+                Image("empty_cart")
+                Text("About")
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .toastOverlay()
     }
 }
 

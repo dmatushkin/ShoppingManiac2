@@ -40,7 +40,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                         .geometryAware(viewName: "store", geometryStorage: geometryStorage)
                     HStack(alignment: .bottom) {
                         RoundRectTextField(title: "Amount", input: $dataModel.amount, focus: $amountFocused)
-                            .keyboardType(.decimalPad)
+                            .decimalKeyboard()
                         Picker("", selection: $dataModel.amountType) {
                             Text("Quantity").tag(0)
                             Text("Weight").tag(1)
@@ -48,7 +48,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                     }
                     HStack(alignment: .bottom) {
                         RoundRectTextField(title: "Price", input: $dataModel.price, focus: $priceFocused)
-                            .keyboardType(.decimalPad)
+                            .decimalKeyboard()
                         RatingView(rating: $dataModel.rating).padding([.bottom], 1)
                     }
                     Toggle("Is important", isOn: $dataModel.isImportant)
@@ -80,8 +80,11 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                                    search: $dataModel.storeName,
                                    focus: $storeNameFocused,
                                    offset: geometryStorage.getFrame(viewName: "store").offset)
-            }.toolbar(.hidden, for: .navigationBar)
-                .toolbar {
+            }
+            #if os(iOS)
+            .toolbar(.hidden, for: .navigationBar)
+            #endif
+            .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
                         Button {
@@ -101,6 +104,17 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendabl
                     dataModel.setItem(item)
                 })
         }
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func decimalKeyboard() -> some View {
+        #if os(iOS)
+        keyboardType(.decimalPad)
+        #else
+        self
+        #endif
     }
 }
 

@@ -16,6 +16,8 @@ final class ShoppingModel: AddShoppingListModelProtocol {
     
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
+    @ObservationIgnored
+    @Injected(\.appEventCenter) private var appEvents
     
     var items: [ShoppingListModel] = []
     var showAddSheet: Bool = false
@@ -27,9 +29,12 @@ final class ShoppingModel: AddShoppingListModelProtocol {
     
     init() {
         reloadItems()
-        GlobalCommands.reloadTopList.sink(receiveValue: {[weak self] in
-            self?.reloadItems()
-        }).store(in: &cancellable)
+        appEvents.shoppingListsDidChange
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] in
+                self?.reloadItems()
+            })
+            .store(in: &cancellable)
     }
     
     deinit {
@@ -45,26 +50,35 @@ final class ShoppingModel: AddShoppingListModelProtocol {
                 items = lists
             } catch is CancellationError {
             } catch {
+                appEvents.showError(error, fallback: "Unable to load shopping lists")
             }
         }
     }
             
-    func addItem(name: String) async throws {
-        showAddSheet = false
-        let item = try await dao.addShoppingList(name: name, date: Date(), uniqueId: nil)
-        items = try await dao.getShoppingLists()
-        itemToOpen = item
+    func addItem(name: String) async {
+        do {
+            let item = try await dao.addShoppingList(name: name, date: Date(), uniqueId: nil)
+            items = try await dao.getShoppingLists()
+            showAddSheet = false
+            itemToOpen = item
+        } catch {
+            appEvents.showError(error, fallback: "Unable to create shopping list")
+        }
     }
     
     func cancelAddingItem() async throws {
         showAddSheet = false
     }
 
-    func deleteItems(offsets: IndexSet) async throws {
-        let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
-        for item in itemsToDelete {
-            try await dao.removeShoppingList(item)
+    func deleteItems(offsets: IndexSet) async {
+        do {
+            let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
+            for item in itemsToDelete {
+                try await dao.removeShoppingList(item)
+            }
+            items = try await dao.getShoppingLists()
+        } catch {
+            appEvents.showError(error, fallback: "Unable to delete shopping list")
         }
-        items = try await dao.getShoppingLists()
     }
 }

@@ -8,6 +8,10 @@
 import Factory
 
 extension Container {
+    var appEventCenter: Factory<AppEventCenterProtocol> {
+        Factory(self) { AppEventCenter() }.singleton
+    }
+
     var contextProvider: Factory<ContextProviderProtocol> {
         Factory(self) { ContextProvider() }.singleton
     }

@@ -27,16 +27,21 @@ struct ShoppingScreen: View {
                 }
                 .onDelete(perform: {indexSet in
                     Task {
-                        try await model.deleteItems(offsets: indexSet)
+                        await model.deleteItems(offsets: indexSet)
                     }
                 })
-            }.listStyle(.grouped)
+            }
+            #if os(iOS)
+            .listStyle(.grouped)
+            #else
+            .listStyle(.inset)
+            #endif
                 .background(Color("backgroundColor").ignoresSafeArea())
                 .navigationDestination(for: ShoppingListModel.self) { item in
                     ShoppingListView(listModel: item)
                 }
                 .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    ToolbarItemGroup(placement: .primaryAction) {
                         Button(action: {
                             model.showAddSheet = true
                         }) {
@@ -52,6 +57,7 @@ struct ShoppingScreen: View {
             model.itemToOpen = nil
         }
     }
+
 }
 
 #Preview {

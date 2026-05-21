@@ -16,6 +16,8 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     @ObservationIgnored
+    @Injected(\.appEventCenter) private var appEvents
+    @ObservationIgnored
     private var reloadTask: Task<Void, Never>?
     
     var items: [GoodsItemModel] = []
@@ -44,24 +46,33 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
                 items = goods
             } catch is CancellationError {
             } catch {
+                appEvents.showError(error, fallback: "Unable to load goods")
             }
         }
     }
         
-    func editGood(item: GoodsItemModel?, name: String, category: String) async throws {
-        if let item = item {
-            _ = try await dao.editGood(item: item, name: name, category: category)
-        } else {
-            _ = try await dao.addGood(name: name, category: category)
-        }        
-        items = try await dao.getGoods(search: searchString)
+    func editGood(item: GoodsItemModel?, name: String, category: String) async {
+        do {
+            if let item = item {
+                _ = try await dao.editGood(item: item, name: name, category: category)
+            } else {
+                _ = try await dao.addGood(name: name, category: category)
+            }
+            items = try await dao.getGoods(search: searchString)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to save good")
+        }
     }
     
-    func removeGood(offsets: IndexSet) async throws {
-        let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
-        for item in itemsToDelete {
-            try await dao.removeGood(item: item)
+    func removeGood(offsets: IndexSet) async {
+        do {
+            let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
+            for item in itemsToDelete {
+                try await dao.removeGood(item: item)
+            }
+            items = try await dao.getGoods(search: searchString)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to delete good")
         }
-        items = try await dao.getGoods(search: searchString)
     }
 }

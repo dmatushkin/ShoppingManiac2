@@ -22,6 +22,8 @@ final class AddGoodToCategoryModel {
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     @ObservationIgnored
+    @Injected(\.appEventCenter) private var appEvents
+    @ObservationIgnored
     private var reloadTask: Task<Void, Never>?
     
     deinit {
@@ -38,6 +40,7 @@ final class AddGoodToCategoryModel {
                 goodsNames = names
             } catch is CancellationError {
             } catch {
+                appEvents.showError(error, fallback: "Unable to load goods suggestions")
             }
         }
     }

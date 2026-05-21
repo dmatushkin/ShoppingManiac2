@@ -16,6 +16,8 @@ final class StoresModel: EditStoreModelProtocol {
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     @ObservationIgnored
+    @Injected(\.appEventCenter) private var appEvents
+    @ObservationIgnored
     private var reloadTask: Task<Void, Never>?
     
     var items: [StoresItemModel] = []
@@ -44,30 +46,44 @@ final class StoresModel: EditStoreModelProtocol {
                 items = stores
             } catch is CancellationError {
             } catch {
+                appEvents.showError(error, fallback: "Unable to load stores")
             }
         }
     }
         
-    func editStore(item: StoresItemModel?, name: String, categories: [String]) async throws {
-        if let item = item {
-            let store = try await dao.editStore(item: item, name: name)
-            try await dao.syncStoreCategories(item: store, categories: categories)
-        } else {
-            let store = try await dao.addStore(name: name)
-            try await dao.syncStoreCategories(item: store, categories: categories)
-        }        
-        items = try await dao.getStores(search: searchString)
-    }
-    
-    func removeStore(offsets: IndexSet) async throws {
-        let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
-        for item in itemsToDelete {
-            try await dao.removeStore(item: item)
+    func editStore(item: StoresItemModel?, name: String, categories: [String]) async {
+        do {
+            if let item = item {
+                let store = try await dao.editStore(item: item, name: name)
+                try await dao.syncStoreCategories(item: store, categories: categories)
+            } else {
+                let store = try await dao.addStore(name: name)
+                try await dao.syncStoreCategories(item: store, categories: categories)
+            }
+            items = try await dao.getStores(search: searchString)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to save store")
         }
-        items = try await dao.getStores(search: searchString)
     }
     
-    func getStoreCategories(item: StoresItemModel) async throws -> [CategoriesItemModel] {
-        return try await dao.getStoreCategories(item: item)
+    func removeStore(offsets: IndexSet) async {
+        do {
+            let itemsToDelete = items.enumerated().filter({ offsets.contains($0.offset) }).map({ $0.element })
+            for item in itemsToDelete {
+                try await dao.removeStore(item: item)
+            }
+            items = try await dao.getStores(search: searchString)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to delete store")
+        }
+    }
+    
+    func getStoreCategories(item: StoresItemModel) async -> [CategoriesItemModel] {
+        do {
+            return try await dao.getStoreCategories(item: item)
+        } catch {
+            appEvents.showError(error, fallback: "Unable to load store categories")
+        }
+        return []
     }
 }

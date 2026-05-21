@@ -32,6 +32,8 @@ final class EditShoppingListItemViewModel {
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol
     @ObservationIgnored
+    @Injected(\.appEventCenter) private var appEvents
+    @ObservationIgnored
     private var goodsReloadTask: Task<Void, Never>?
     @ObservationIgnored
     private var storesReloadTask: Task<Void, Never>?
@@ -51,6 +53,7 @@ final class EditShoppingListItemViewModel {
                 goodsNames = names
             } catch is CancellationError {
             } catch {
+                appEvents.showError(error, fallback: "Unable to load goods suggestions")
             }
         }
     }
@@ -65,6 +68,7 @@ final class EditShoppingListItemViewModel {
                 storesNames = names
             } catch is CancellationError {
             } catch {
+                appEvents.showError(error, fallback: "Unable to load store suggestions")
             }
         }
     }

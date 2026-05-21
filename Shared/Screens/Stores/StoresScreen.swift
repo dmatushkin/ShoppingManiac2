@@ -28,7 +28,7 @@ struct StoresScreen: View {
                         }.listRowBackground(Color("backgroundColor"))
                     }.onDelete(perform: {indexSet in
                         Task {
-                            try await model.removeStore(offsets: indexSet)
+                            await model.removeStore(offsets: indexSet)
                         }
                     })
                 }.listStyle(.plain)
@@ -37,7 +37,7 @@ struct StoresScreen: View {
                     }
             }.background(Color("backgroundColor").ignoresSafeArea())
                 .toolbar {
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    ToolbarItemGroup(placement: .primaryAction) {
                         Button(action: {
                             model.showAddSheet = true
                         }) {

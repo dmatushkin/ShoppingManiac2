@@ -50,8 +50,11 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
                             .labelStyle(.iconOnly)
                     }
                 }
-            }.toolbar(.hidden, for: .navigationBar)
-                .padding()
+            }
+            #if os(iOS)
+            .toolbar(.hidden, for: .navigationBar)
+            #endif
+            .padding()
                 .background(Color("backgroundColor").ignoresSafeArea())
         }        
     }

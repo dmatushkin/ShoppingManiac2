@@ -8,11 +8,6 @@
 import XCTest
 import Factory
 import SwiftData
-@preconcurrency import Combine
-
-final class GlobalCommands {
-    static let reloadTopList = PassthroughSubject<Void, Never>()
-}
 
 final class ContextProviderStub: ContextProviderProtocol, @unchecked Sendable {
     private let container: ModelContainer
@@ -99,6 +94,19 @@ final class DAOTest: XCTestCase {
         XCTAssertEqual(items.first?.isImportant, true)
         XCTAssertEqual(items.first?.rating, 4)
     }
+
+    func testAddGoodReusesExistingTrimmedName() async throws {
+        let dao = DAO()
+
+        let first = try await dao.addGood(name: " Milk ", category: "Dairy")
+        let second = try await dao.addGood(name: "Milk", category: "")
+
+        let goods = try await dao.getGoods(search: "")
+        XCTAssertEqual(first.id, second.id)
+        XCTAssertEqual(goods.count, 1)
+        XCTAssertEqual(goods.first?.name, "Milk")
+        XCTAssertEqual(goods.first?.category, "Dairy")
+    }
     
     func testSyncStoreCategoriesPreservesOrder() async throws {
         let dao = DAO()
@@ -108,5 +116,15 @@ final class DAOTest: XCTestCase {
         
         let categories = try await dao.getStoreCategories(item: store)
         XCTAssertEqual(categories.map(\.name), ["Produce", "Bakery", "Frozen"])
+    }
+
+    func testSyncStoreCategoriesTrimsAndDeduplicatesNames() async throws {
+        let dao = DAO()
+        let store = try await dao.addStore(name: "Market")
+
+        try await dao.syncStoreCategories(item: store, categories: [" Produce ", "produce", "", "Bakery"])
+
+        let categories = try await dao.getStoreCategories(item: store)
+        XCTAssertEqual(categories.map(\.name), ["Produce", "Bakery"])
     }
 }

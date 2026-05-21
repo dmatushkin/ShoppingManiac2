@@ -76,6 +76,18 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     private static func persistentIDString<T: PersistentModel>(_ model: T) -> String {
         String(describing: model.persistentModelID.id)
     }
+
+    private static func normalizedName(_ name: String) -> String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func normalizedNames(_ names: [String]) -> [String] {
+        var seenNames = Set<String>()
+        return names
+            .map(normalizedName)
+            .filter { !$0.isEmpty }
+            .filter { seenNames.insert($0.localizedLowercase).inserted }
+    }
     
     private func fetchModel<T: PersistentModel>(id: String, context: ModelContext, as type: T.Type) throws -> T? {
         let descriptor = FetchDescriptor<T>()
@@ -94,12 +106,11 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let context = contextProvider.getContext()
         let resolvedUniqueId = uniqueId?.nilIfEmpty ?? UUID().uuidString
         let item = try createOrGetShoppingList(uniqueId: uniqueId, context: context)
-        item.name = name
+        item.name = Self.normalizedName(name)
         item.date = date
         item.uniqueId = resolvedUniqueId
         item.isRemoved = false
         try context.save()
-        GlobalCommands.reloadTopList.send()
         return Self.makeShoppingListModel(item)
     }
     
@@ -128,7 +139,6 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         guard let item = try fetchShoppingList(id: item.id, context: context) else { throw DBError.unableToGetShoppingList }
         item.isRemoved = true
         try context.save()
-        GlobalCommands.reloadTopList.send()
     }
     
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel] {
@@ -170,12 +180,14 @@ final class DAO: DAOProtocol, @unchecked Sendable {
                              isPurchased: Bool,
                              uniqueId: String?) async throws {
         let context = contextProvider.getContext()
-        guard !name.isEmpty, let shoppingList = try fetchShoppingList(id: list.id, context: context) else { throw DBError.unableToGetShoppingList }
+        let resolvedName = Self.normalizedName(name)
+        let resolvedStore = Self.normalizedName(store)
+        guard !resolvedName.isEmpty, let shoppingList = try fetchShoppingList(id: list.id, context: context) else { throw DBError.unableToGetShoppingList }
         let item = try createOrGetShoppingListItem(uniqueId: uniqueId, context: context)
         let resolvedUniqueId = uniqueId?.nilIfEmpty ?? UUID().uuidString
         let numberFormatter = NumberFormatter()
         item.list = shoppingList
-        item.good = try createOrGetGood(name: name, context: context)
+        item.good = try createOrGetGood(name: resolvedName, context: context)
         item.good?.personalRating = rating
         item.quantity = numberFormatter.number(from: amount)?.floatValue ?? 1
         item.isWeight = isWeight
@@ -184,7 +196,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         item.uniqueId = resolvedUniqueId
         item.purchased = isPurchased
         item.isRemoved = false
-        item.store = store.isEmpty ? nil : try createOrGetStore(name: store, context: context)
+        item.store = resolvedStore.isEmpty ? nil : try createOrGetStore(name: resolvedStore, context: context)
         try context.save()
     }
     
@@ -217,23 +229,26 @@ final class DAO: DAOProtocol, @unchecked Sendable {
                               isImportant: Bool,
                               rating: Int) async throws {
         let context = contextProvider.getContext()
-        guard !name.isEmpty, let shoppingItem = try fetchShoppingListItem(id: item.id, context: context) else { throw DBError.unableToGetShoppingItem }
+        let resolvedName = Self.normalizedName(name)
+        let resolvedStore = Self.normalizedName(store)
+        guard !resolvedName.isEmpty, let shoppingItem = try fetchShoppingListItem(id: item.id, context: context) else { throw DBError.unableToGetShoppingItem }
         let numberFormatter = NumberFormatter()
-        shoppingItem.good = try createOrGetGood(name: name, context: context)
+        shoppingItem.good = try createOrGetGood(name: resolvedName, context: context)
         shoppingItem.good?.personalRating = rating
         shoppingItem.quantity = numberFormatter.number(from: amount)?.floatValue ?? 1
         shoppingItem.isWeight = isWeight
         shoppingItem.price = numberFormatter.number(from: price)?.floatValue ?? 0
         shoppingItem.isImportant = isImportant
-        shoppingItem.store = store.isEmpty ? nil : try createOrGetStore(name: store, context: context)
+        shoppingItem.store = resolvedStore.isEmpty ? nil : try createOrGetStore(name: resolvedStore, context: context)
         try context.save()
     }
     
     private func createOrGetGood(name: String, context: ModelContext) throws -> Good {
-        if let good = try fetchGood(name: name, context: context) {
+        let resolvedName = Self.normalizedName(name)
+        if let good = try fetchGood(name: resolvedName, context: context) {
             return good
         }
-        let good = Good(name: name)
+        let good = Good(name: resolvedName)
         context.insert(good)
         return good
     }
@@ -249,10 +264,11 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
     
     private func createOrGetStore(name: String, context: ModelContext) throws -> Store {
-        if let store = try fetchStore(name: name, context: context) {
+        let resolvedName = Self.normalizedName(name)
+        if let store = try fetchStore(name: resolvedName, context: context) {
             return store
         }
-        let store = Store(name: name)
+        let store = Store(name: resolvedName)
         context.insert(store)
         return store
     }
@@ -283,6 +299,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     
     func getGoods(search: String) async throws -> [GoodsItemModel] {
         let context = contextProvider.getContext()
+        let search = Self.normalizedName(search)
         let descriptor = FetchDescriptor<Good>(sortBy: [SortDescriptor(\.name)])
         return try context.fetch(descriptor)
             .filter { search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) }
@@ -291,28 +308,34 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     
     func addGood(name: String, category: String) async throws -> GoodsItemModel {
         let context = contextProvider.getContext()
-        guard !name.isEmpty else { throw DBError.unableToCreateGood }
-        let good = Good(name: name)
-        context.insert(good)
-        good.category = category.isEmpty ? nil : try createOrGetCategory(name: category, context: context)
+        let resolvedName = Self.normalizedName(name)
+        let resolvedCategory = Self.normalizedName(category)
+        guard !resolvedName.isEmpty else { throw DBError.unableToCreateGood }
+        let good = try createOrGetGood(name: resolvedName, context: context)
+        if !resolvedCategory.isEmpty {
+            good.category = try createOrGetCategory(name: resolvedCategory, context: context)
+        }
         try context.save()
         return Self.makeGoodsItemModel(good)
     }
     
     func editGood(item: GoodsItemModel, name: String, category: String) async throws -> GoodsItemModel {
         let context = contextProvider.getContext()
-        guard !name.isEmpty, let good = try fetchGood(id: item.id, context: context) else { throw DBError.unableToGetGood }
-        good.name = name
-        good.category = category.isEmpty ? nil : try createOrGetCategory(name: category, context: context)
+        let resolvedName = Self.normalizedName(name)
+        let resolvedCategory = Self.normalizedName(category)
+        guard !resolvedName.isEmpty, let good = try fetchGood(id: item.id, context: context) else { throw DBError.unableToGetGood }
+        good.name = resolvedName
+        good.category = resolvedCategory.isEmpty ? nil : try createOrGetCategory(name: resolvedCategory, context: context)
         try context.save()
         return Self.makeGoodsItemModel(good)
     }
     
     private func createOrGetCategory(name: String, context: ModelContext) throws -> Category {
-        if let category = try fetchCategory(name: name, context: context) {
+        let resolvedName = Self.normalizedName(name)
+        if let category = try fetchCategory(name: resolvedName, context: context) {
             return category
         }
-        let category = Category(name: name)
+        let category = Category(name: resolvedName)
         context.insert(category)
         return category
     }
@@ -339,6 +362,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     
     func getCategories(search: String) async throws -> [CategoriesItemModel] {
         let context = contextProvider.getContext()
+        let search = Self.normalizedName(search)
         let descriptor = FetchDescriptor<Category>(sortBy: [SortDescriptor(\.name)])
         return try context.fetch(descriptor)
             .filter { !$0.name.isEmpty && (search.isEmpty || $0.name.localizedCaseInsensitiveContains(search)) }
@@ -347,17 +371,18 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     
     func addCategory(name: String) async throws -> CategoriesItemModel {
         let context = contextProvider.getContext()
-        guard !name.isEmpty else { throw DBError.unableToCreateCategory }
-        let category = Category(name: name)
-        context.insert(category)
+        let resolvedName = Self.normalizedName(name)
+        guard !resolvedName.isEmpty else { throw DBError.unableToCreateCategory }
+        let category = try createOrGetCategory(name: resolvedName, context: context)
         try context.save()
         return Self.makeCategoriesItemModel(category)
     }
     
     func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel {
         let context = contextProvider.getContext()
-        guard !name.isEmpty, let category = try fetchCategory(id: item.id, context: context) else { throw DBError.unableToGetCategory }
-        category.name = name
+        let resolvedName = Self.normalizedName(name)
+        guard !resolvedName.isEmpty, let category = try fetchCategory(id: item.id, context: context) else { throw DBError.unableToGetCategory }
+        category.name = resolvedName
         try context.save()
         return Self.makeCategoriesItemModel(category)
     }
@@ -380,7 +405,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     func syncCategoryGoods(item: CategoriesItemModel, goods: [String]) async throws {
         let context = contextProvider.getContext()
         guard let category = try fetchCategory(id: item.id, context: context) else { throw DBError.unableToGetCategory }
-        let goods = try goods.map { try createOrGetGood(name: $0, context: context) }
+        let goods = try Self.normalizedNames(goods).map { try createOrGetGood(name: $0, context: context) }
         category.goods = goods
         for good in goods {
             good.category = category
@@ -390,6 +415,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     
     func getStores(search: String) async throws -> [StoresItemModel] {
         let context = contextProvider.getContext()
+        let search = Self.normalizedName(search)
         let descriptor = FetchDescriptor<Store>(sortBy: [SortDescriptor(\.name)])
         return try context.fetch(descriptor)
             .filter { !$0.name.isEmpty && (search.isEmpty || $0.name.localizedCaseInsensitiveContains(search)) }
@@ -398,17 +424,18 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     
     func addStore(name: String) async throws -> StoresItemModel {
         let context = contextProvider.getContext()
-        guard !name.isEmpty else { throw DBError.unableToCreateStore }
-        let store = Store(name: name)
-        context.insert(store)
+        let resolvedName = Self.normalizedName(name)
+        guard !resolvedName.isEmpty else { throw DBError.unableToCreateStore }
+        let store = try createOrGetStore(name: resolvedName, context: context)
         try context.save()
         return Self.makeStoresItemModel(store)
     }
     
     func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel {
         let context = contextProvider.getContext()
-        guard !name.isEmpty, let store = try fetchStore(id: item.id, context: context) else { throw DBError.unableToGetStore }
-        store.name = name
+        let resolvedName = Self.normalizedName(name)
+        guard !resolvedName.isEmpty, let store = try fetchStore(id: item.id, context: context) else { throw DBError.unableToGetStore }
+        store.name = resolvedName
         try context.save()
         return Self.makeStoresItemModel(store)
     }
@@ -432,7 +459,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     func syncStoreCategories(item: StoresItemModel, categories: [String]) async throws {
         let context = contextProvider.getContext()
         guard let store = try fetchStore(id: item.id, context: context) else { throw DBError.unableToGetStore }
-        let categories = try categories.map { try createOrGetCategory(name: $0, context: context) }
+        let categories = try Self.normalizedNames(categories).map { try createOrGetCategory(name: $0, context: context) }
         let existingOrders = store.orders ?? []
         
         for order in existingOrders where !(order.category.map { categories.contains($0) } ?? false) {
