@@ -2,7 +2,7 @@
 //  SwiftDataModels.swift
 //  ShoppingManiac2
 //
-//  Created by Coding Assistant on 20.05.2026.
+//  Created by Dmitry Matyushkin on 20.05.2026.
 //
 
 import Foundation
