@@ -8,11 +8,13 @@
 import FactoryKit
 import SwiftData
 
-protocol ContextProviderProtocol: Sendable {
+@MainActor
+protocol ContextProviderProtocol {
     func getContext() -> ModelContext
 }
 
-final class ContextProvider: ContextProviderProtocol, @unchecked Sendable {
+@MainActor
+final class ContextProvider: ContextProviderProtocol {
     nonisolated required init() {}
     
     func getContext() -> ModelContext {

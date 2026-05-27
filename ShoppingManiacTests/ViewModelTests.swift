@@ -73,13 +73,13 @@ struct ViewModelTests {
             let sut = GoodsModel()
             #expect(await waitUntil { sut.items.count == 2 })
 
-            var goodsFetchCount = dao.getGoodsCallCount
+            let searchGoodsFetchCount = dao.getGoodsCallCount
             sut.searchString = "mil"
-            #expect(await waitUntil { dao.getGoodsCallCount == goodsFetchCount + 1 && sut.items.map(\.name) == ["Milk"] })
+            #expect(await waitUntil { dao.getGoodsCallCount == searchGoodsFetchCount + 1 && sut.items.map(\.name) == ["Milk"] })
 
-            goodsFetchCount = dao.getGoodsCallCount
+            let resetGoodsFetchCount = dao.getGoodsCallCount
             sut.searchString = ""
-            #expect(await waitUntil { dao.getGoodsCallCount == goodsFetchCount + 1 && sut.items.count == 2 })
+            #expect(await waitUntil { dao.getGoodsCallCount == resetGoodsFetchCount + 1 && sut.items.count == 2 })
             let addFetchCount = dao.getGoodsCallCount
             await sut.editGood(item: nil, name: "Cheese", category: "Dairy")
             #expect(await waitUntil { dao.getGoodsCallCount == addFetchCount + 1 && sut.items.map(\.name).contains("Cheese") })
@@ -133,13 +133,13 @@ struct ViewModelTests {
             let sut = CategoriesModel()
             #expect(await waitUntil { sut.items.count == 1 })
 
-            var categoriesFetchCount = dao.getCategoriesCallCount
+            let searchCategoriesFetchCount = dao.getCategoriesCallCount
             sut.searchString = "dai"
-            #expect(await waitUntil { dao.getCategoriesCallCount == categoriesFetchCount + 1 && sut.items.map(\.name) == ["Dairy"] })
+            #expect(await waitUntil { dao.getCategoriesCallCount == searchCategoriesFetchCount + 1 && sut.items.map(\.name) == ["Dairy"] })
 
-            categoriesFetchCount = dao.getCategoriesCallCount
+            let resetCategoriesFetchCount = dao.getCategoriesCallCount
             sut.searchString = ""
-            #expect(await waitUntil { dao.getCategoriesCallCount == categoriesFetchCount + 1 && sut.items.count == 1 })
+            #expect(await waitUntil { dao.getCategoriesCallCount == resetCategoriesFetchCount + 1 && sut.items.count == 1 })
             let saveFetchCount = dao.getCategoriesCallCount
             await sut.editCategory(item: category, name: "Fresh", goods: ["Milk"])
             #expect(await waitUntil { dao.getCategoriesCallCount == saveFetchCount + 1 && sut.items.map(\.name) == ["Fresh"] })
@@ -196,13 +196,13 @@ struct ViewModelTests {
             let sut = StoresModel()
             #expect(await waitUntil { sut.items.count == 1 })
 
-            var storesFetchCount = dao.getStoresCallCount
+            let searchStoresFetchCount = dao.getStoresCallCount
             sut.searchString = "mar"
-            #expect(await waitUntil { dao.getStoresCallCount == storesFetchCount + 1 && sut.items.map(\.name) == ["Market"] })
+            #expect(await waitUntil { dao.getStoresCallCount == searchStoresFetchCount + 1 && sut.items.map(\.name) == ["Market"] })
 
-            storesFetchCount = dao.getStoresCallCount
+            let resetStoresFetchCount = dao.getStoresCallCount
             sut.searchString = ""
-            #expect(await waitUntil { dao.getStoresCallCount == storesFetchCount + 1 && sut.items.count == 1 })
+            #expect(await waitUntil { dao.getStoresCallCount == resetStoresFetchCount + 1 && sut.items.count == 1 })
             let saveFetchCount = dao.getStoresCallCount
             await sut.editStore(item: store, name: "Main", categories: ["Dairy"])
             #expect(await waitUntil { dao.getStoresCallCount == saveFetchCount + 1 && sut.items.map(\.name) == ["Main"] })
@@ -345,6 +345,7 @@ struct ViewModelTests {
             await sut.editShoppingListItem(item: item, model: editor)
             #expect(sut.itemToShow == nil)
             #expect(dao.editedShoppingListItems.count == 1)
+            #expect(events.dataChangeCount == 2)
 
             await sut.editItem(item: item)
             #expect(sut.itemToShow?.id == item.id)
@@ -355,9 +356,11 @@ struct ViewModelTests {
 
             await sut.togglePurchased(item: item)
             #expect(dao.toggledShoppingListItems.count == 1)
+            #expect(events.dataChangeCount == 2)
 
             await sut.removeShoppingListItem(item: item)
             #expect(dao.removedShoppingListItems.count == 1)
+            #expect(events.dataChangeCount == 2)
 
             sut.shareByFile(model: list)
             #expect(await waitUntil { sut.dataToShare != nil && sut.isLoading == false })

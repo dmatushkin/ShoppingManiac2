@@ -8,12 +8,13 @@
 import SwiftUI
 import FactoryKit
 
+@MainActor
 protocol EditStoreModelProtocol: AnyObject {
     func editStore(item: StoresItemModel?, name: String, categories: [String]) async
     func getStoreCategories(item: StoresItemModel) async -> [CategoriesItemModel]
 }
 
-struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
+struct EditStoreView<Model: EditStoreModelProtocol>: View {
     
     let model: Model
     let item: StoresItemModel?

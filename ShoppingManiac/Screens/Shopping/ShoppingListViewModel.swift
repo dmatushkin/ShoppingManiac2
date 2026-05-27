@@ -111,7 +111,6 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
             withAnimation {
                 output = sorter.sort(items)
             }
-            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to delete item")
         }
@@ -129,7 +128,6 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
         do {
             try await dao.togglePurchasedShoppingListItem(item: item)
             output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
-            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to update item")
         }

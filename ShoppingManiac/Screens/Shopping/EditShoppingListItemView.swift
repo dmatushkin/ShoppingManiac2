@@ -8,13 +8,14 @@
 import SwiftUI
 import FactoryKit
 
+@MainActor
 protocol EditShoppingListItemModelProtocol: AnyObject {
     func editShoppingListItem(item: ShoppingListItemModel, model: EditShoppingListItemViewModel) async
     func addShoppingListItem(model: EditShoppingListItemViewModel) async
     func cancelAddingItem() async
 }
 
-struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol&Sendable>: View {
+struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol>: View {
     @State private var dataModel: EditShoppingListItemViewModel
     @FocusState private var itemNameFocused: Bool
     @FocusState private var storeNameFocused: Bool

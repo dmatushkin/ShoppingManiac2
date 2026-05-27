@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ShoppingListSectionContent<Model: ShoppingListItemModelProtocol&Sendable>: View {
+struct ShoppingListSectionContent<Model: ShoppingListItemModelProtocol>: View {
     let model: Model
     let section: ShoppingListSection
     

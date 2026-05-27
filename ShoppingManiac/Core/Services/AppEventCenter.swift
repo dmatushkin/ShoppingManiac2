@@ -40,6 +40,7 @@ struct ToastMessage: Identifiable, Equatable {
     }
 }
 
+@MainActor
 protocol AppEventCenterProtocol: AnyObject {
     var shoppingListsDidChange: AnyPublisher<Void, Never> { get }
     var dataDidChange: AnyPublisher<Void, Never> { get }
@@ -53,6 +54,7 @@ protocol AppEventCenterProtocol: AnyObject {
     func showError(_ error: Error, fallback: String)
 }
 
+@MainActor
 final class AppEventCenter: AppEventCenterProtocol {
     private let shoppingListsSubject = PassthroughSubject<Void, Never>()
     private let dataSubject = PassthroughSubject<Void, Never>()

@@ -35,7 +35,9 @@ final class AddCategoryToStoreModel {
         let search = itemName
         reloadTask = Task {
             do {
-                let names = try await dao.getCategories(search: search).map({ $0.name })
+                try await Task.sleep(for: .milliseconds(250))
+                try Task.checkCancellation()
+                let names = try await dao.getCategories(search: search, limit: 20).map({ $0.name })
                 try Task.checkCancellation()
                 categoryNames = names
             } catch is CancellationError {

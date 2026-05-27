@@ -8,7 +8,8 @@
 import Foundation
 import SwiftData
 
-final class PersistenceController: @unchecked Sendable {
+@MainActor
+final class PersistenceController {
     static let shared = PersistenceController(
         inMemory: ProcessInfo.processInfo.arguments.contains("-UITestInMemoryStore")
     )
@@ -26,16 +27,7 @@ final class PersistenceController: @unchecked Sendable {
     let container: ModelContainer
     
     init(inMemory: Bool = false) {
-        let schema = Schema([
-            ShoppingList.self,
-            ShoppingListItem.self,
-            Good.self,
-            Category.self,
-            Store.self,
-            CategoryStoreOrder.self,
-            GoodRating.self,
-            Picture.self
-        ])
+        let schema = ShoppingManiacSchema.current
         let configuration: ModelConfiguration
         if inMemory {
             configuration = ModelConfiguration(
@@ -54,9 +46,27 @@ final class PersistenceController: @unchecked Sendable {
         }
         
         do {
-            container = try ModelContainer(for: schema, configurations: [configuration])
+            container = try ModelContainer(
+                for: schema,
+                migrationPlan: ShoppingManiacMigrationPlan.self,
+                configurations: [configuration]
+            )
         } catch {
-            fatalError("Unable to initialize SwiftData container: \(error.localizedDescription)")
+            assertionFailure("Unable to initialize SwiftData container: \(error.localizedDescription)")
+            do {
+                let fallbackConfiguration = ModelConfiguration(
+                    schema: schema,
+                    isStoredInMemoryOnly: true,
+                    cloudKitDatabase: .none
+                )
+                container = try ModelContainer(
+                    for: schema,
+                    migrationPlan: ShoppingManiacMigrationPlan.self,
+                    configurations: [fallbackConfiguration]
+                )
+            } catch {
+                preconditionFailure("Unable to initialize fallback SwiftData container: \(error.localizedDescription)")
+            }
         }
     }
 }

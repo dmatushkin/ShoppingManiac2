@@ -13,27 +13,24 @@ final class ShoppingList {
     var name: String = ""
     var date: Date = Date()
     var isRemoved: Bool = false
-    var ownerName: String?
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.list) var items: [ShoppingListItem]? = []
     
-    init(name: String = "", date: Date = Date(), isRemoved: Bool = false, ownerName: String? = nil) {
+    init(name: String = "", date: Date = Date(), isRemoved: Bool = false) {
         self.name = name
         self.date = date
         self.isRemoved = isRemoved
-        self.ownerName = ownerName
     }
 }
 
 @Model
 final class ShoppingListItem {
-    var comment: String?
     var isImportant: Bool = false
     var isRemoved: Bool = false
     var isWeight: Bool = false
     var price: Decimal = 0
     var purchased: Bool = false
-    var purchaseDate: Date?
     var quantity: Decimal = 0
+    var rating: Int = 0
     var good: Good?
     var list: ShoppingList?
     var store: Store?
@@ -45,16 +42,14 @@ final class ShoppingListItem {
 final class Good {
     var name: String = ""
     var canonicalName: String = ""
-    var personalRating: Int = 0
+    var isRemoved: Bool = false
     var category: Category?
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.good) var items: [ShoppingListItem]? = []
-    @Relationship(deleteRule: .cascade, inverse: \GoodRating.good) var ratings: [GoodRating]? = []
-    @Relationship(deleteRule: .cascade, inverse: \Picture.good) var pictures: [Picture]? = []
     
-    init(name: String = "", personalRating: Int = 0, category: Category? = nil) {
+    init(name: String = "", isRemoved: Bool = false, category: Category? = nil) {
         self.name = name
         self.canonicalName = name.shoppingCanonicalName
-        self.personalRating = personalRating
+        self.isRemoved = isRemoved
         self.category = category
     }
 }
@@ -63,15 +58,14 @@ final class Good {
 final class Category {
     var name: String = ""
     var canonicalName: String = ""
-    var parent: Category?
-    @Relationship(deleteRule: .nullify, inverse: \Category.parent) var children: [Category]? = []
+    var isRemoved: Bool = false
     @Relationship(deleteRule: .nullify, inverse: \Good.category) var goods: [Good]? = []
     @Relationship(deleteRule: .cascade, inverse: \CategoryStoreOrder.category) var orders: [CategoryStoreOrder]? = []
     
-    init(name: String = "", parent: Category? = nil) {
+    init(name: String = "", isRemoved: Bool = false) {
         self.name = name
         self.canonicalName = name.shoppingCanonicalName
-        self.parent = parent
+        self.isRemoved = isRemoved
     }
 }
 
@@ -79,12 +73,14 @@ final class Category {
 final class Store {
     var name: String = ""
     var canonicalName: String = ""
+    var isRemoved: Bool = false
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.store) var items: [ShoppingListItem]? = []
     @Relationship(deleteRule: .cascade, inverse: \CategoryStoreOrder.store) var orders: [CategoryStoreOrder]? = []
     
-    init(name: String = "") {
+    init(name: String = "", isRemoved: Bool = false) {
         self.name = name
         self.canonicalName = name.shoppingCanonicalName
+        self.isRemoved = isRemoved
     }
 }
 
@@ -98,31 +94,5 @@ final class CategoryStoreOrder {
         self.order = order
         self.category = category
         self.store = store
-    }
-}
-
-@Model
-final class GoodRating {
-    var date: Date?
-    var rating: Int = 0
-    var good: Good?
-    
-    init(date: Date? = nil, rating: Int = 0, good: Good? = nil) {
-        self.date = date
-        self.rating = rating
-        self.good = good
-    }
-}
-
-@Model
-final class Picture {
-    @Attribute(.externalStorage) var image: Data?
-    var shotDate: Date?
-    var good: Good?
-    
-    init(image: Data? = nil, shotDate: Date? = nil, good: Good? = nil) {
-        self.image = image
-        self.shotDate = shotDate
-        self.good = good
     }
 }

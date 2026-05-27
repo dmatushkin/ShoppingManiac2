@@ -101,6 +101,39 @@ struct ShoppingListSerializerTests {
         }
     }
 
+    @Test("Importing an invalid date fails instead of using the current date")
+    func importInvalidDateThrows() async throws {
+        let data = Data(#"{"version":3,"name":"Weekend","date":"not-a-date","items":[]}"#.utf8)
+
+        do {
+            _ = try await withTestContainer(dao: StubDAO()) {
+                try await ShoppingListSerializer().importList(data: data)
+            }
+            Issue.record("Expected invalid date import to throw.")
+        } catch let error as ShoppingListSerializer.ImportError {
+            #expect(error == .invalidDate("not-a-date"))
+        } catch {
+            Issue.record("Expected invalidDate, got \(error).")
+        }
+    }
+
+    @Test("Exporting invalid decimal strings fails instead of writing fallback values")
+    func exportInvalidDecimalThrows() async throws {
+        let dao = StubDAO()
+        dao.shoppingListItems = [makeShoppingItem(title: "Milk", amount: "nope", price: "1")]
+
+        do {
+            _ = try await withTestContainer(dao: dao) {
+                try await ShoppingListSerializer().exportList(listModel: makeList())
+            }
+            Issue.record("Expected invalid decimal export to throw.")
+        } catch let error as ShoppingListSerializer.ImportError {
+            #expect(error == .invalidDecimal("nope"))
+        } catch {
+            Issue.record("Expected invalidDecimal, got \(error).")
+        }
+    }
+
     @Test("Exporting list propagates DAO load failures")
     func exportListPropagatesDAOFailure() async {
         let dao = StubDAO()
@@ -127,5 +160,41 @@ struct ShoppingListSerializerTests {
                 _ = try await ShoppingListSerializer().importList(data: data)
             }
         }
+    }
+
+    @Test("Importing backup uses one transactional DAO call")
+    func importBackupUsesBatchImport() async throws {
+        let dao = StubDAO()
+        let backup = Data("""
+        {"version":3,"lists":[
+          {"version":3,"name":"First","date":"1970-01-01T00:00:00.000Z","items":[]},
+          {"version":3,"name":"Second","date":"1970-01-01T00:00:00.000Z","items":[]}
+        ]}
+        """.utf8)
+
+        _ = try await withTestContainer(dao: dao) {
+            try await ShoppingListSerializer().importBackup(data: backup)
+        }
+
+        #expect(dao.importedShoppingLists.map(\.0) == ["First", "Second"])
+    }
+
+    @Test("Importing backup does not partially import when DAO rejects the batch")
+    func importBackupFailureDoesNotPartiallyImport() async throws {
+        let dao = StubDAO()
+        dao.importShoppingListError = TestFailure.requested("batch failed")
+        let backup = Data("""
+        {"version":3,"lists":[
+          {"version":3,"name":"First","date":"1970-01-01T00:00:00.000Z","items":[]},
+          {"version":3,"name":"Second","date":"1970-01-01T00:00:00.000Z","items":[]}
+        ]}
+        """.utf8)
+
+        await expectTestFailure(.requested("batch failed")) {
+            try await withTestContainer(dao: dao) {
+                _ = try await ShoppingListSerializer().importBackup(data: backup)
+            }
+        }
+        #expect(dao.importedShoppingLists.isEmpty)
     }
 }

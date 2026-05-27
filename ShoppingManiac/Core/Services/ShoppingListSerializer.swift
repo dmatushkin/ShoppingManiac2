@@ -8,14 +8,35 @@
 import Foundation
 import FactoryKit
 
-protocol ShoppingListSerializerProtocol: Sendable {
+@MainActor
+protocol ShoppingListSerializerProtocol {
     func exportList(listModel: ShoppingListModel) async throws -> Data
     func importList(data: Data) async throws -> ShoppingListModel
     func exportBackup(lists: [ShoppingListModel]) async throws -> Data
     func importBackup(data: Data) async throws -> [ShoppingListModel]
 }
 
-final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked Sendable {
+@MainActor
+final class ShoppingListSerializer: ShoppingListSerializerProtocol {
+    enum ImportError: Error, Equatable, LocalizedError {
+        case invalidDate(String)
+        case invalidDecimal(String)
+        case unsupportedListVersion(Int)
+        case unsupportedBackupVersion(Int)
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidDate(let value):
+                "Invalid shopping list date: \(value)"
+            case .invalidDecimal(let value):
+                "Invalid decimal value: \(value)"
+            case .unsupportedListVersion(let version):
+                "Unsupported shopping list file version: \(version)"
+            case .unsupportedBackupVersion(let version):
+                "Unsupported backup file version: \(version)"
+            }
+        }
+    }
 
     nonisolated required init() {}
     
@@ -71,7 +92,7 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
         return formatter.string(from: date)
     }
 
-    private static func importedDate(_ string: String) -> Date {
+    private static func importedDate(_ string: String) throws -> Date {
         let fractionalFormatter = ISO8601DateFormatter()
         fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         if let date = fractionalFormatter.date(from: string) {
@@ -87,10 +108,14 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
         let legacyFormatter = DateFormatter()
         legacyFormatter.dateStyle = .medium
         legacyFormatter.timeStyle = .medium
-        return legacyFormatter.date(from: string) ?? Date()
+        if let date = legacyFormatter.date(from: string) {
+            return date
+        }
+
+        throw ImportError.invalidDate(string)
     }
 
-    private static func decimal(from string: String, default defaultValue: Decimal) -> Decimal {
+    private static func decimal(from string: String) throws -> Decimal {
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
         if let decimal = Decimal(string: trimmed, locale: Locale.current) {
             return decimal
@@ -101,25 +126,44 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
 
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        return formatter.number(from: trimmed)?.decimalValue ?? defaultValue
+        if let decimal = formatter.number(from: trimmed)?.decimalValue {
+            return decimal
+        }
+
+        throw ImportError.invalidDecimal(string)
+    }
+
+    private static func validateListVersion(_ version: Int?) throws {
+        guard let version else { return }
+        guard version <= ShoppingListJsonModel.currentVersion else {
+            throw ImportError.unsupportedListVersion(version)
+        }
+    }
+
+    private static func validateBackupVersion(_ version: Int?) throws {
+        guard let version else { return }
+        guard version <= Backup.currentVersion else {
+            throw ImportError.unsupportedBackupVersion(version)
+        }
     }
     
     private func listModelToJson(listModel: ShoppingListModel) async throws -> ShoppingListJsonModel {
         let listItems = try await dao.getShoppingListItems(list: listModel)
         
-        let items: [ShoppingListItemJsonModel] = listItems.map({
-            ShoppingListItemJsonModel(good: $0.title,
-                                      store: $0.store,
-                                      price: Self.decimal(from: $0.price, default: 0),
-                                      purchased: $0.isPurchased,
-                                      quantity: Self.decimal(from: $0.amount, default: 1),
-                                      isWeight: $0.isWeight,
-                                      isImportant: $0.isImportant)
+        let items: [ShoppingListItemJsonModel] = try listItems.map({
+            try ShoppingListItemJsonModel(good: $0.title,
+                                          store: $0.store,
+                                          price: Self.decimal(from: $0.price),
+                                          purchased: $0.isPurchased,
+                                          quantity: Self.decimal(from: $0.amount),
+                                          isWeight: $0.isWeight,
+                                          isImportant: $0.isImportant)
         })
         return ShoppingListJsonModel(name: listModel.name, date: Self.exportedDate(listModel.date), items: items)
     }
     
-    private func jsonToListModel(jsonModel: ShoppingListJsonModel) async throws -> ShoppingListModel {
+    private static func shoppingListImport(from jsonModel: ShoppingListJsonModel) throws -> ShoppingListImport {
+        try validateListVersion(jsonModel.version)
         let items = jsonModel.items.map {
             ShoppingListImportItem(
                 name: $0.good,
@@ -131,9 +175,9 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
                 isPurchased: $0.purchased
             )
         }
-        return try await dao.importShoppingList(
+        return ShoppingListImport(
             name: jsonModel.name,
-            date: Self.importedDate(jsonModel.date),
+            date: try importedDate(jsonModel.date),
             items: items
         )
     }
@@ -145,7 +189,12 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
     
     func importList(data: Data) async throws -> ShoppingListModel {
         let jsonModel = try JSONDecoder().decode(ShoppingListJsonModel.self, from: data)
-        return try await jsonToListModel(jsonModel: jsonModel)
+        let importModel = try Self.shoppingListImport(from: jsonModel)
+        return try await dao.importShoppingList(
+            name: importModel.name,
+            date: importModel.date,
+            items: importModel.items
+        )
     }
     
     func exportBackup(lists: [ShoppingListModel]) async throws -> Data {
@@ -160,11 +209,8 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
     
     func importBackup(data: Data) async throws -> [ShoppingListModel] {
         let backup = try JSONDecoder().decode(Backup.self, from: data)
-        var lists: [ShoppingListModel] = []
-        lists.reserveCapacity(backup.lists.count)
-        for list in backup.lists {
-            lists.append(try await jsonToListModel(jsonModel: list))
-        }
-        return lists
+        try Self.validateBackupVersion(backup.version)
+        let imports = try backup.lists.map(Self.shoppingListImport)
+        return try await dao.importShoppingLists(imports)
     }
 }

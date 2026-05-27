@@ -48,7 +48,9 @@ final class EditShoppingListItemViewModel {
         let search = itemName
         goodsReloadTask = Task {
             do {
-                let names = try await dao.getGoods(search: search).map({ $0.name })
+                try await Task.sleep(for: .milliseconds(250))
+                try Task.checkCancellation()
+                let names = try await dao.getGoods(search: search, limit: 20).map({ $0.name })
                 try Task.checkCancellation()
                 goodsNames = names
             } catch is CancellationError {
@@ -63,7 +65,9 @@ final class EditShoppingListItemViewModel {
         let search = storeName
         storesReloadTask = Task {
             do {
-                let names = try await dao.getStores(search: search).map({ $0.name })
+                try await Task.sleep(for: .milliseconds(250))
+                try Task.checkCancellation()
+                let names = try await dao.getStores(search: search, limit: 20).map({ $0.name })
                 try Task.checkCancellation()
                 storesNames = names
             } catch is CancellationError {

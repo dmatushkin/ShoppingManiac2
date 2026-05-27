@@ -19,10 +19,18 @@ struct ShoppingListImportItem: Sendable, Equatable {
     let isPurchased: Bool
 }
 
-protocol DAOProtocol: Sendable {
+struct ShoppingListImport: Sendable, Equatable {
+    let name: String
+    let date: Date
+    let items: [ShoppingListImportItem]
+}
+
+@MainActor
+protocol DAOProtocol {
     func getShoppingLists() async throws -> [ShoppingListModel]
     func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel
     func importShoppingList(name: String, date: Date, items: [ShoppingListImportItem]) async throws -> ShoppingListModel
+    func importShoppingLists(_ lists: [ShoppingListImport]) async throws -> [ShoppingListModel]
     func removeShoppingList(_ item: ShoppingListModel) async throws
     func getShoppingListItems(list: ShoppingListModel) async throws -> [ShoppingListItemModel]
     func addShoppingListItem(list: ShoppingListModel,
@@ -44,18 +52,18 @@ protocol DAOProtocol: Sendable {
                               rating: Int) async throws
     func removeShoppingListItem(item: ShoppingListItemModel) async throws
     func togglePurchasedShoppingListItem(item: ShoppingListItemModel) async throws
-    func getGoods(search: String) async throws -> [GoodsItemModel]
+    func getGoods(search: String, limit: Int?) async throws -> [GoodsItemModel]
     func addGood(name: String, category: String) async throws -> GoodsItemModel
     func editGood(item: GoodsItemModel, name: String, category: String) async throws -> GoodsItemModel
     func removeGood(item: GoodsItemModel) async throws
-    func getCategories(search: String) async throws -> [CategoriesItemModel]
+    func getCategories(search: String, limit: Int?) async throws -> [CategoriesItemModel]
     func addCategory(name: String) async throws -> CategoriesItemModel
     func editCategory(item: CategoriesItemModel, name: String) async throws -> CategoriesItemModel
     func saveCategory(item: CategoriesItemModel?, name: String, goods: [String]) async throws -> CategoriesItemModel
     func removeCategory(item: CategoriesItemModel) async throws
     func getCategoryGoods(item: CategoriesItemModel) async throws -> [GoodsItemModel]
     func syncCategoryGoods(item: CategoriesItemModel, goods: [String]) async throws
-    func getStores(search: String) async throws -> [StoresItemModel]
+    func getStores(search: String, limit: Int?) async throws -> [StoresItemModel]
     func addStore(name: String) async throws -> StoresItemModel
     func editStore(item: StoresItemModel, name: String) async throws -> StoresItemModel
     func saveStore(item: StoresItemModel?, name: String, categories: [String]) async throws -> StoresItemModel
@@ -64,8 +72,23 @@ protocol DAOProtocol: Sendable {
     func syncStoreCategories(item: StoresItemModel, categories: [String]) async throws
 }
 
-final class DAO: DAOProtocol, @unchecked Sendable {
-    enum DBError: Error {
+extension DAOProtocol {
+    func getGoods(search: String) async throws -> [GoodsItemModel] {
+        try await getGoods(search: search, limit: nil)
+    }
+
+    func getCategories(search: String) async throws -> [CategoriesItemModel] {
+        try await getCategories(search: search, limit: nil)
+    }
+
+    func getStores(search: String) async throws -> [StoresItemModel] {
+        try await getStores(search: search, limit: nil)
+    }
+}
+
+@MainActor
+final class DAO: DAOProtocol {
+    enum DBError: Error, Equatable, LocalizedError {
         case unableToCreateShoppingList
         case unableToGetShoppingList
         case unableToCreateShoppingItem
@@ -76,8 +99,40 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         case unableToGetCategory
         case unableToCreateStore
         case unableToGetStore
-        case unableToCreateOder
+        case unableToCreateOrder
         case unableToGetOrder
+        case invalidShoppingItemName
+
+        var errorDescription: String? {
+            switch self {
+            case .unableToCreateShoppingList:
+                "Unable to create shopping list."
+            case .unableToGetShoppingList:
+                "Unable to load shopping list."
+            case .unableToCreateShoppingItem:
+                "Unable to create shopping item."
+            case .unableToGetShoppingItem:
+                "Unable to load shopping item."
+            case .unableToCreateGood:
+                "Unable to create good."
+            case .unableToGetGood:
+                "Unable to load good."
+            case .unableToCreateCategory:
+                "Unable to create category."
+            case .unableToGetCategory:
+                "Unable to load category."
+            case .unableToCreateStore:
+                "Unable to create store."
+            case .unableToGetStore:
+                "Unable to load store."
+            case .unableToCreateOrder:
+                "Unable to create category order."
+            case .unableToGetOrder:
+                "Unable to load category order."
+            case .invalidShoppingItemName:
+                "Shopping item name cannot be empty."
+            }
+        }
     }
 
     @Injected(\.contextProvider) private var contextProvider: ContextProviderProtocol
@@ -100,11 +155,23 @@ final class DAO: DAOProtocol, @unchecked Sendable {
             .filter { seenNames.insert(canonicalName($0)).inserted }
     }
 
-    private static func persistentIDString<T: PersistentModel>(_ model: T) -> String {
-        String(describing: model.persistentModelID.id)
+    static func persistentIDString<T: PersistentModel>(_ model: T) -> String {
+        guard let data = try? JSONEncoder().encode(model.persistentModelID) else {
+            return String(describing: model.persistentModelID.id)
+        }
+        return data.base64EncodedString()
+    }
+
+    private static func persistentID(from string: String) -> PersistentIdentifier? {
+        guard let data = Data(base64Encoded: string) else { return nil }
+        return try? JSONDecoder().decode(PersistentIdentifier.self, from: data)
     }
 
     private func fetchModel<T: PersistentModel>(id: String, context: ModelContext, as type: T.Type) throws -> T? {
+        if let persistentID = Self.persistentID(from: id),
+           let model = context.model(for: persistentID) as? T {
+            return model
+        }
         let descriptor = FetchDescriptor<T>()
         return try context.fetch(descriptor).first { Self.persistentIDString($0) == id }
     }
@@ -145,33 +212,47 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     }
 
     func importShoppingList(name: String, date: Date, items: [ShoppingListImportItem]) async throws -> ShoppingListModel {
-        let context = contextProvider.getContext()
-        let list = ShoppingList()
-        context.insert(list)
-        list.name = Self.normalizedName(name)
-        list.date = date
-        list.isRemoved = false
+        guard let list = try await importShoppingLists([ShoppingListImport(name: name, date: date, items: items)]).first else {
+            throw DBError.unableToCreateShoppingList
+        }
+        return list
+    }
 
-        for importedItem in items {
-            let item = ShoppingListItem()
-            context.insert(item)
-            try configureShoppingListItem(
-                item,
-                list: list,
-                name: importedItem.name,
-                amount: importedItem.amount,
-                store: importedItem.store,
-                isWeight: importedItem.isWeight,
-                price: importedItem.price,
-                isImportant: importedItem.isImportant,
-                rating: 0,
-                isPurchased: importedItem.isPurchased,
-                context: context
-            )
+    func importShoppingLists(_ lists: [ShoppingListImport]) async throws -> [ShoppingListModel] {
+        let context = contextProvider.getContext()
+        var importedLists: [ShoppingList] = []
+        importedLists.reserveCapacity(lists.count)
+
+        for importedList in lists {
+            let list = ShoppingList()
+            context.insert(list)
+            list.name = Self.normalizedName(importedList.name)
+            list.date = importedList.date
+            list.isRemoved = false
+
+            for importedItem in importedList.items {
+                let item = ShoppingListItem()
+                context.insert(item)
+                try configureShoppingListItem(
+                    item,
+                    list: list,
+                    name: importedItem.name,
+                    amount: importedItem.amount,
+                    store: importedItem.store,
+                    isWeight: importedItem.isWeight,
+                    price: importedItem.price,
+                    isImportant: importedItem.isImportant,
+                    rating: 0,
+                    isPurchased: importedItem.isPurchased,
+                    context: context
+                )
+            }
+
+            importedLists.append(list)
         }
 
         try context.save()
-        return Self.makeShoppingListModel(list)
+        return importedLists.map(Self.makeShoppingListModel)
     }
 
     private func fetchShoppingList(id: String, context: ModelContext) throws -> ShoppingList? {
@@ -189,10 +270,10 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let context = contextProvider.getContext()
         guard let list = try fetchShoppingList(id: list.id, context: context) else { throw DBError.unableToGetShoppingList }
         let listPersistentID = list.persistentModelID
-        let descriptor = FetchDescriptor<ShoppingListItem>(predicate: #Predicate { !$0.isRemoved })
-        return try context.fetch(descriptor)
-            .filter { $0.list?.persistentModelID == listPersistentID }
-            .map(Self.makeShoppingListItemModel)
+        let descriptor = FetchDescriptor<ShoppingListItem>(
+            predicate: #Predicate { !$0.isRemoved && $0.list?.persistentModelID == listPersistentID }
+        )
+        return try context.fetch(descriptor).map(Self.makeShoppingListItemModel)
     }
 
     func addShoppingListItem(list: ShoppingListModel,
@@ -267,11 +348,11 @@ final class DAO: DAOProtocol, @unchecked Sendable {
                                            context: ModelContext) throws {
         let resolvedName = Self.normalizedName(name)
         let resolvedStore = Self.normalizedName(store)
-        guard !resolvedName.isEmpty else { throw DBError.unableToGetShoppingList }
+        guard !resolvedName.isEmpty else { throw DBError.invalidShoppingItemName }
         item.list = list
         item.good = try createOrGetGood(name: resolvedName, context: context)
-        item.good?.personalRating = rating
         item.quantity = amount
+        item.rating = rating
         item.isWeight = isWeight
         item.price = price
         item.isImportant = isImportant
@@ -294,12 +375,15 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         try context.save()
     }
 
-    func getGoods(search: String) async throws -> [GoodsItemModel] {
+    func getGoods(search: String, limit: Int? = nil) async throws -> [GoodsItemModel] {
         let context = contextProvider.getContext()
         let search = Self.canonicalName(search)
-        let descriptor = search.isEmpty
-            ? FetchDescriptor<Good>(sortBy: [SortDescriptor(\.name)])
-            : FetchDescriptor<Good>(predicate: #Predicate { $0.canonicalName.contains(search) }, sortBy: [SortDescriptor(\.name)])
+        var descriptor = search.isEmpty
+            ? FetchDescriptor<Good>(predicate: #Predicate { !$0.isRemoved }, sortBy: [SortDescriptor(\.name)])
+            : FetchDescriptor<Good>(predicate: #Predicate { !$0.isRemoved && $0.canonicalName.contains(search) }, sortBy: [SortDescriptor(\.name)])
+        if let limit {
+            descriptor.fetchLimit = limit
+        }
         return try context.fetch(descriptor).map(Self.makeGoodsItemModel)
     }
 
@@ -310,6 +394,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         guard !resolvedName.isEmpty else { throw DBError.unableToCreateGood }
         let good = try createOrGetGood(name: resolvedName, context: context)
         good.category = resolvedCategory.isEmpty ? nil : try createOrGetCategory(name: resolvedCategory, context: context)
+        good.isRemoved = false
         try context.save()
         return Self.makeGoodsItemModel(good)
     }
@@ -321,6 +406,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         guard !resolvedName.isEmpty, let good = try fetchGood(id: item.id, context: context) else { throw DBError.unableToGetGood }
         good.name = resolvedName
         good.canonicalName = Self.canonicalName(resolvedName)
+        good.isRemoved = false
         good.category = resolvedCategory.isEmpty ? nil : try createOrGetCategory(name: resolvedCategory, context: context)
         try context.save()
         return Self.makeGoodsItemModel(good)
@@ -330,6 +416,9 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let resolvedName = Self.normalizedName(name)
         let canonicalName = Self.canonicalName(resolvedName)
         if let good = try fetchGood(canonicalName: canonicalName, context: context) {
+            good.name = resolvedName
+            good.canonicalName = canonicalName
+            good.isRemoved = false
             return good
         }
         let good = Good(name: resolvedName)
@@ -351,19 +440,19 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     func removeGood(item: GoodsItemModel) async throws {
         let context = contextProvider.getContext()
         guard let good = try fetchGood(id: item.id, context: context) else { throw DBError.unableToGetGood }
-        for item in good.items ?? [] {
-            item.isRemoved = true
-        }
-        context.delete(good)
+        good.isRemoved = true
         try context.save()
     }
 
-    func getCategories(search: String) async throws -> [CategoriesItemModel] {
+    func getCategories(search: String, limit: Int? = nil) async throws -> [CategoriesItemModel] {
         let context = contextProvider.getContext()
         let search = Self.canonicalName(search)
-        let descriptor = search.isEmpty
-            ? FetchDescriptor<Category>(predicate: #Predicate { !$0.name.isEmpty }, sortBy: [SortDescriptor(\.name)])
-            : FetchDescriptor<Category>(predicate: #Predicate { !$0.name.isEmpty && $0.canonicalName.contains(search) }, sortBy: [SortDescriptor(\.name)])
+        var descriptor = search.isEmpty
+            ? FetchDescriptor<Category>(predicate: #Predicate { !$0.isRemoved && !$0.name.isEmpty }, sortBy: [SortDescriptor(\.name)])
+            : FetchDescriptor<Category>(predicate: #Predicate { !$0.isRemoved && !$0.name.isEmpty && $0.canonicalName.contains(search) }, sortBy: [SortDescriptor(\.name)])
+        if let limit {
+            descriptor.fetchLimit = limit
+        }
         return try context.fetch(descriptor).map(Self.makeCategoriesItemModel)
     }
 
@@ -372,6 +461,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let resolvedName = Self.normalizedName(name)
         guard !resolvedName.isEmpty else { throw DBError.unableToCreateCategory }
         let category = try createOrGetCategory(name: resolvedName, context: context)
+        category.isRemoved = false
         try context.save()
         return Self.makeCategoriesItemModel(category)
     }
@@ -403,6 +493,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         guard !resolvedName.isEmpty, let category = try fetchCategory(id: item.id, context: context) else { throw DBError.unableToGetCategory }
         category.name = resolvedName
         category.canonicalName = Self.canonicalName(resolvedName)
+        category.isRemoved = false
         return category
     }
 
@@ -410,6 +501,9 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let resolvedName = Self.normalizedName(name)
         let canonicalName = Self.canonicalName(resolvedName)
         if let category = try fetchCategory(canonicalName: canonicalName, context: context) {
+            category.name = resolvedName
+            category.canonicalName = canonicalName
+            category.isRemoved = false
             return category
         }
         let category = Category(name: resolvedName)
@@ -431,7 +525,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     func removeCategory(item: CategoriesItemModel) async throws {
         let context = contextProvider.getContext()
         guard let category = try fetchCategory(id: item.id, context: context) else { throw DBError.unableToGetCategory }
-        context.delete(category)
+        category.isRemoved = true
         try context.save()
     }
 
@@ -439,6 +533,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let context = contextProvider.getContext()
         guard let category = try fetchCategory(id: item.id, context: context) else { throw DBError.unableToGetCategory }
         return (category.goods ?? [])
+            .filter { !$0.isRemoved }
             .sorted { $0.name < $1.name }
             .map(Self.makeGoodsItemModel)
     }
@@ -461,12 +556,15 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         }
     }
 
-    func getStores(search: String) async throws -> [StoresItemModel] {
+    func getStores(search: String, limit: Int? = nil) async throws -> [StoresItemModel] {
         let context = contextProvider.getContext()
         let search = Self.canonicalName(search)
-        let descriptor = search.isEmpty
-            ? FetchDescriptor<Store>(predicate: #Predicate { !$0.name.isEmpty }, sortBy: [SortDescriptor(\.name)])
-            : FetchDescriptor<Store>(predicate: #Predicate { !$0.name.isEmpty && $0.canonicalName.contains(search) }, sortBy: [SortDescriptor(\.name)])
+        var descriptor = search.isEmpty
+            ? FetchDescriptor<Store>(predicate: #Predicate { !$0.isRemoved && !$0.name.isEmpty }, sortBy: [SortDescriptor(\.name)])
+            : FetchDescriptor<Store>(predicate: #Predicate { !$0.isRemoved && !$0.name.isEmpty && $0.canonicalName.contains(search) }, sortBy: [SortDescriptor(\.name)])
+        if let limit {
+            descriptor.fetchLimit = limit
+        }
         return try context.fetch(descriptor).map(Self.makeStoresItemModel)
     }
 
@@ -475,6 +573,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let resolvedName = Self.normalizedName(name)
         guard !resolvedName.isEmpty else { throw DBError.unableToCreateStore }
         let store = try createOrGetStore(name: resolvedName, context: context)
+        store.isRemoved = false
         try context.save()
         return Self.makeStoresItemModel(store)
     }
@@ -506,6 +605,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         guard !resolvedName.isEmpty, let store = try fetchStore(id: item.id, context: context) else { throw DBError.unableToGetStore }
         store.name = resolvedName
         store.canonicalName = Self.canonicalName(resolvedName)
+        store.isRemoved = false
         return store
     }
 
@@ -513,6 +613,9 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         let resolvedName = Self.normalizedName(name)
         let canonicalName = Self.canonicalName(resolvedName)
         if let store = try fetchStore(canonicalName: canonicalName, context: context) {
+            store.name = resolvedName
+            store.canonicalName = canonicalName
+            store.isRemoved = false
             return store
         }
         let store = Store(name: resolvedName)
@@ -534,7 +637,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
     func removeStore(item: StoresItemModel) async throws {
         let context = contextProvider.getContext()
         guard let store = try fetchStore(id: item.id, context: context) else { throw DBError.unableToGetStore }
-        context.delete(store)
+        store.isRemoved = true
         try context.save()
     }
 
@@ -544,6 +647,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
         return (store.orders ?? [])
             .sorted { $0.order < $1.order }
             .compactMap(\.category)
+            .filter { !$0.isRemoved }
             .map(Self.makeCategoriesItemModel)
     }
 
@@ -599,7 +703,7 @@ final class DAO: DAOProtocol, @unchecked Sendable {
                                      isWeight: item.isWeight,
                                      price: price,
                                      isImportant: item.isImportant,
-                                     rating: item.good?.personalRating ?? 0)
+                                     rating: item.rating)
     }
 
     private static func makeGoodsItemModel(_ good: Good) -> GoodsItemModel {

@@ -8,13 +8,14 @@
 import SwiftUI
 import FactoryKit
 
+@MainActor
 protocol ShoppingListItemModelProtocol: AnyObject {
     func togglePurchased(item: ShoppingListItemModel) async
     func removeShoppingListItem(item: ShoppingListItemModel) async
     func editItem(item: ShoppingListItemModel) async
 }
 
-struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View  {
+struct ShoppingListItemView<Model: ShoppingListItemModelProtocol>: View  {
     
     private let item: ShoppingListItemModel
     private let model: Model

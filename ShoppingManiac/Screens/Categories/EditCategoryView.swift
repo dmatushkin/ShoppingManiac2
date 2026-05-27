@@ -8,12 +8,13 @@
 import SwiftUI
 import FactoryKit
 
+@MainActor
 protocol EditCategoryModelProtocol: AnyObject {
     func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async
     func getCategoryGoods(category: CategoriesItemModel) async -> [GoodsItemModel]
 }
 
-struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
+struct EditCategoryView<Model: EditCategoryModelProtocol>: View {
     
     let model: Model
     let item: CategoriesItemModel?

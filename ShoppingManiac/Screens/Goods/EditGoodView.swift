@@ -8,11 +8,12 @@
 import SwiftUI
 import FactoryKit
 
+@MainActor
 protocol EditGoodModelProtocol: AnyObject {
     func editGood(item: GoodsItemModel?, name: String, category: String) async
 }
 
-struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
+struct EditGoodView<Model: EditGoodModelProtocol>: View {
     
     let model: Model
     let item: GoodsItemModel?

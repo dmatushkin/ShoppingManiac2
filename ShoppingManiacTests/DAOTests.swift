@@ -3,10 +3,12 @@ import SwiftData
 import Testing
 @testable import ShoppingManiac
 
+@MainActor
 private func persistentIDString<T: PersistentModel>(_ model: T) -> String {
-    String(describing: model.persistentModelID.id)
+    DAO.persistentIDString(model)
 }
 
+@Suite(.serialized)
 @MainActor
 struct DAOTests {
     @Test("Shopping lists can be created, listed, and soft-deleted")
@@ -180,7 +182,7 @@ struct DAOTests {
         try await withTestContainer(contextProvider: provider) {
             let sut = DAO()
             let lists = try await sut.getShoppingLists()
-            let firstListModel = try #require(lists.first { $0.id == persistentIDString(firstList) })
+            let firstListModel = try #require(lists.first { $0.date == firstList.date })
             let items = try await sut.getShoppingListItems(list: firstListModel)
             let goods = try await sut.getGoods(search: "")
             let categories = try await sut.getCategories(search: "")
@@ -248,7 +250,7 @@ struct DAOTests {
                 try await sut.addShoppingListItem(list: missingList, name: "Milk", amount: "1", store: "", isWeight: false, price: "", isImportant: false, rating: 0, isPurchased: false)
             }
             let list = try await sut.addShoppingList(name: "Groceries", date: Date())
-            await expectDBError(.unableToGetShoppingList) {
+            await expectDBError(.invalidShoppingItemName) {
                 try await sut.addShoppingListItem(list: list, name: "   ", amount: "1", store: "", isWeight: false, price: "", isImportant: false, rating: 0, isPurchased: false)
             }
         }
@@ -343,6 +345,82 @@ struct DAOTests {
             await expectDBError(.unableToGetStore) {
                 try await sut.syncStoreCategories(item: missingStore, categories: ["Dairy"])
             }
+        }
+    }
+
+    @Test("Removing catalog entities preserves existing shopping list item display data")
+    func catalogSoftDeletesPreserveShoppingListHistory() async throws {
+        let provider = TestContextProvider(container: try makeInMemoryContainer())
+
+        try await withTestContainer(contextProvider: provider) {
+            let sut = DAO()
+            let list = try await sut.addShoppingList(name: "Groceries", date: Date())
+            let store = try await sut.addStore(name: "Market")
+            let category = try await sut.addCategory(name: "Dairy")
+            let good = try await sut.addGood(name: "Milk", category: category.name)
+            try await sut.addShoppingListItem(
+                list: list,
+                name: good.name,
+                amount: "1",
+                store: store.name,
+                isWeight: false,
+                price: "2",
+                isImportant: false,
+                rating: 3,
+                isPurchased: false
+            )
+
+            try await sut.removeGood(item: good)
+            try await sut.removeStore(item: store)
+            try await sut.removeCategory(item: category)
+
+            let item = try #require(try await sut.getShoppingListItems(list: list).first)
+            #expect(item.title == "Milk")
+            #expect(item.store == "Market")
+            #expect(item.category == "Dairy")
+            #expect(item.rating == 3)
+            #expect(try await sut.getGoods(search: "").isEmpty)
+            #expect(try await sut.getStores(search: "").isEmpty)
+            #expect(try await sut.getCategories(search: "").isEmpty)
+        }
+    }
+
+    @Test("Shopping list item ratings do not change other items for the same good")
+    func shoppingListItemRatingsArePerItem() async throws {
+        let provider = TestContextProvider(container: try makeInMemoryContainer())
+
+        try await withTestContainer(contextProvider: provider) {
+            let sut = DAO()
+            let list = try await sut.addShoppingList(name: "Groceries", date: Date())
+
+            try await sut.addShoppingListItem(list: list, name: "Milk", amount: "1", store: "", isWeight: false, price: "", isImportant: false, rating: 1, isPurchased: false)
+            try await sut.addShoppingListItem(list: list, name: "Milk", amount: "2", store: "", isWeight: false, price: "", isImportant: false, rating: 5, isPurchased: false)
+
+            let ratings = try await sut.getShoppingListItems(list: list).map(\.rating).sorted()
+            #expect(ratings == [1, 5])
+        }
+    }
+
+    @Test("File-backed store opens and reopens through the migration plan")
+    func fileBackedStoreUsesMigrationPlan() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let storeURL = directory.appendingPathComponent("ShoppingManiac.sqlite")
+
+        do {
+            let provider = TestContextProvider(container: try makeFileBackedContainer(url: storeURL))
+            try await withTestContainer(contextProvider: provider) {
+                let sut = DAO()
+                _ = try await sut.addShoppingList(name: "Disk", date: Date(timeIntervalSince1970: 1))
+            }
+        }
+
+        let provider = TestContextProvider(container: try makeFileBackedContainer(url: storeURL))
+        try await withTestContainer(contextProvider: provider) {
+            let sut = DAO()
+            let lists = try await sut.getShoppingLists()
+            #expect(lists.map(\.name) == ["Disk"])
         }
     }
 }

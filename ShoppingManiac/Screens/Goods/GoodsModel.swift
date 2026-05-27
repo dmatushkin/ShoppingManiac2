@@ -12,7 +12,7 @@ import Observation
 
 @MainActor
 @Observable
-final class GoodsModel: EditGoodModelProtocol, Sendable {
+final class GoodsModel: EditGoodModelProtocol {
 
     @ObservationIgnored
     @Injected(\.dao) private var dao: DAOProtocol

@@ -16,7 +16,8 @@ enum TestFailure: Error, Equatable, LocalizedError {
     }
 }
 
-final class SpyAppEventCenter: AppEventCenterProtocol, @unchecked Sendable {
+@MainActor
+final class SpyAppEventCenter: AppEventCenterProtocol {
     private let shoppingListsSubject = PassthroughSubject<Void, Never>()
     private let dataSubject = PassthroughSubject<Void, Never>()
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
@@ -66,7 +67,8 @@ final class SpyAppEventCenter: AppEventCenterProtocol, @unchecked Sendable {
     }
 }
 
-final class StubDAO: DAOProtocol, @unchecked Sendable {
+@MainActor
+final class StubDAO: DAOProtocol {
     var shoppingLists: [ShoppingListModel] = []
     var shoppingListItems: [ShoppingListItemModel] = []
     var goods: [GoodsItemModel] = []
@@ -131,26 +133,38 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
     }
 
     func importShoppingList(name: String, date: Date, items: [ShoppingListImportItem]) async throws -> ShoppingListModel {
-        if let importShoppingListError { throw importShoppingListError }
-        importedShoppingLists.append((name, date, items))
-        let list = ShoppingListModel(id: UUID().uuidString, name: name, date: date)
-        shoppingLists.append(list)
-        for item in items {
-            shoppingListItems.append(ShoppingListItemModel(
-                id: UUID().uuidString,
-                title: item.name,
-                store: item.store,
-                category: "",
-                categoryStoreOrder: nil,
-                isPurchased: item.isPurchased,
-                amount: "\(item.amount)",
-                isWeight: item.isWeight,
-                price: "\(item.price)",
-                isImportant: item.isImportant,
-                rating: 0
-            ))
+        guard let list = try await importShoppingLists([ShoppingListImport(name: name, date: date, items: items)]).first else {
+            throw TestFailure.requested("import failed")
         }
         return list
+    }
+
+    func importShoppingLists(_ lists: [ShoppingListImport]) async throws -> [ShoppingListModel] {
+        if let importShoppingListError { throw importShoppingListError }
+        var imported: [ShoppingListModel] = []
+        imported.reserveCapacity(lists.count)
+        for importModel in lists {
+            importedShoppingLists.append((importModel.name, importModel.date, importModel.items))
+            let list = ShoppingListModel(id: UUID().uuidString, name: importModel.name, date: importModel.date)
+            shoppingLists.append(list)
+            imported.append(list)
+            for item in importModel.items {
+                shoppingListItems.append(ShoppingListItemModel(
+                    id: UUID().uuidString,
+                    title: item.name,
+                    store: item.store,
+                    category: "",
+                    categoryStoreOrder: nil,
+                    isPurchased: item.isPurchased,
+                    amount: "\(item.amount)",
+                    isWeight: item.isWeight,
+                    price: "\(item.price)",
+                    isImportant: item.isImportant,
+                    rating: 0
+                ))
+            }
+        }
+        return imported
     }
 
     func removeShoppingList(_ item: ShoppingListModel) async throws {
@@ -232,10 +246,11 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
         }
     }
 
-    func getGoods(search: String) async throws -> [GoodsItemModel] {
+    func getGoods(search: String, limit: Int?) async throws -> [GoodsItemModel] {
         getGoodsCallCount += 1
         if let getGoodsError { throw getGoodsError }
-        return search.isEmpty ? goods : goods.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        let result = search.isEmpty ? goods : goods.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return limit.map { Array(result.prefix($0)) } ?? result
     }
 
     func addGood(name: String, category: String) async throws -> GoodsItemModel {
@@ -257,10 +272,11 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
         goods.removeAll { $0.id == item.id }
     }
 
-    func getCategories(search: String) async throws -> [CategoriesItemModel] {
+    func getCategories(search: String, limit: Int?) async throws -> [CategoriesItemModel] {
         getCategoriesCallCount += 1
         if let getCategoriesError { throw getCategoriesError }
-        return search.isEmpty ? categories : categories.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        let result = search.isEmpty ? categories : categories.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return limit.map { Array(result.prefix($0)) } ?? result
     }
 
     func addCategory(name: String) async throws -> CategoriesItemModel {
@@ -305,10 +321,11 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
         syncedCategoryGoods.append((item, goods))
     }
 
-    func getStores(search: String) async throws -> [StoresItemModel] {
+    func getStores(search: String, limit: Int?) async throws -> [StoresItemModel] {
         getStoresCallCount += 1
         if let getStoresError { throw getStoresError }
-        return search.isEmpty ? stores : stores.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        let result = search.isEmpty ? stores : stores.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return limit.map { Array(result.prefix($0)) } ?? result
     }
 
     func addStore(name: String) async throws -> StoresItemModel {
@@ -354,7 +371,8 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
     }
 }
 
-final class StubShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked Sendable {
+@MainActor
+final class StubShoppingListSerializer: ShoppingListSerializerProtocol {
     var exportListData = Data("list".utf8)
     var exportBackupData = Data("backup".utf8)
     var importedList = ShoppingListModel(id: "imported", name: "Imported", date: Date(timeIntervalSince1970: 0))
@@ -395,7 +413,8 @@ final class StubShoppingListSerializer: ShoppingListSerializerProtocol, @uncheck
     }
 }
 
-final class TestContextProvider: ContextProviderProtocol, @unchecked Sendable {
+@MainActor
+final class TestContextProvider: ContextProviderProtocol {
     let container: ModelContainer
 
     init(container: ModelContainer) {
@@ -408,21 +427,24 @@ final class TestContextProvider: ContextProviderProtocol, @unchecked Sendable {
 }
 
 func makeInMemoryContainer() throws -> ModelContainer {
-    let schema = Schema([
-        ShoppingList.self,
-        ShoppingListItem.self,
-        Good.self,
-        Category.self,
-        Store.self,
-        CategoryStoreOrder.self,
-        GoodRating.self,
-        Picture.self
-    ])
-    let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
-    return try ModelContainer(for: schema, configurations: [configuration])
+    let schema = ShoppingManiacSchema.current
+    let configuration = ModelConfiguration(
+        UUID().uuidString,
+        schema: schema,
+        isStoredInMemoryOnly: true,
+        cloudKitDatabase: .none
+    )
+    return try ModelContainer(for: schema, migrationPlan: ShoppingManiacMigrationPlan.self, configurations: [configuration])
+}
+
+func makeFileBackedContainer(url: URL) throws -> ModelContainer {
+    let schema = ShoppingManiacSchema.current
+    let configuration = ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none)
+    return try ModelContainer(for: schema, migrationPlan: ShoppingManiacMigrationPlan.self, configurations: [configuration])
 }
 
 @discardableResult
+@MainActor
 func withTestContainer<T>(
     dao: DAOProtocol? = nil,
     appEvents: AppEventCenterProtocol? = nil,

@@ -2,13 +2,14 @@
 //  DAOStub.swift
 //  ShoppingManiac2
 //
-//  Created by Codex on 26.05.2026.
+//  Created by Dmitry Matyushkin on 26.05.2026.
 //
 
 import Foundation
 
 #if DEBUG
-final class DAOStub: DAOProtocol, @unchecked Sendable {
+@MainActor
+final class DAOStub: DAOProtocol {
     var shoppingLists: [ShoppingListModel] = [
         ShoppingListModel(id: "preview-list", name: "Preview list", date: Date())
     ]
@@ -50,21 +51,33 @@ final class DAOStub: DAOProtocol, @unchecked Sendable {
     }
 
     func importShoppingList(name: String, date: Date, items: [ShoppingListImportItem]) async throws -> ShoppingListModel {
-        let list = try await addShoppingList(name: name, date: date)
-        for item in items {
-            try await addShoppingListItem(
-                list: list,
-                name: item.name,
-                amount: "\(item.amount)",
-                store: item.store,
-                isWeight: item.isWeight,
-                price: "\(item.price)",
-                isImportant: item.isImportant,
-                rating: 0,
-                isPurchased: item.isPurchased
-            )
+        let imported = try await importShoppingLists([ShoppingListImport(name: name, date: date, items: items)])
+        if let list = imported.first {
+            return list
         }
-        return list
+        return try await addShoppingList(name: name, date: date)
+    }
+
+    func importShoppingLists(_ lists: [ShoppingListImport]) async throws -> [ShoppingListModel] {
+        var imported: [ShoppingListModel] = []
+        for importModel in lists {
+            let list = try await addShoppingList(name: importModel.name, date: importModel.date)
+            imported.append(list)
+            for item in importModel.items {
+                try await addShoppingListItem(
+                    list: list,
+                    name: item.name,
+                    amount: "\(item.amount)",
+                    store: item.store,
+                    isWeight: item.isWeight,
+                    price: "\(item.price)",
+                    isImportant: item.isImportant,
+                    rating: 0,
+                    isPurchased: item.isPurchased
+                )
+            }
+        }
+        return imported
     }
 
     func removeShoppingList(_ item: ShoppingListModel) async throws {
@@ -154,8 +167,9 @@ final class DAOStub: DAOProtocol, @unchecked Sendable {
         }
     }
 
-    func getGoods(search: String) async throws -> [GoodsItemModel] {
-        search.isEmpty ? goods : goods.filter { $0.name.localizedCaseInsensitiveContains(search) }
+    func getGoods(search: String, limit: Int?) async throws -> [GoodsItemModel] {
+        let result = search.isEmpty ? goods : goods.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return limit.map { Array(result.prefix($0)) } ?? result
     }
 
     func addGood(name: String, category: String) async throws -> GoodsItemModel {
@@ -174,8 +188,9 @@ final class DAOStub: DAOProtocol, @unchecked Sendable {
         goods.removeAll { $0.id == item.id }
     }
 
-    func getCategories(search: String) async throws -> [CategoriesItemModel] {
-        search.isEmpty ? categories : categories.filter { $0.name.localizedCaseInsensitiveContains(search) }
+    func getCategories(search: String, limit: Int?) async throws -> [CategoriesItemModel] {
+        let result = search.isEmpty ? categories : categories.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return limit.map { Array(result.prefix($0)) } ?? result
     }
 
     func addCategory(name: String) async throws -> CategoriesItemModel {
@@ -213,8 +228,9 @@ final class DAOStub: DAOProtocol, @unchecked Sendable {
         categoryGoods[item.id] = goods.map { GoodsItemModel(id: UUID().uuidString, name: $0, category: item.name) }
     }
 
-    func getStores(search: String) async throws -> [StoresItemModel] {
-        search.isEmpty ? stores : stores.filter { $0.name.localizedCaseInsensitiveContains(search) }
+    func getStores(search: String, limit: Int?) async throws -> [StoresItemModel] {
+        let result = search.isEmpty ? stores : stores.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        return limit.map { Array(result.prefix($0)) } ?? result
     }
 
     func addStore(name: String) async throws -> StoresItemModel {
