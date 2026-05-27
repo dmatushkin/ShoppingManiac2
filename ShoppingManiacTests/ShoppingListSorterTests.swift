@@ -46,4 +46,20 @@ struct ShoppingListSorterTests {
         #expect(looseFruit.items.map(\.title) == ["Bananas"])
         #expect(output.items.map(\.title) == ["Soap"])
     }
+
+    @Test("Sections keep unique IDs when visible titles overlap")
+    func sectionIDsAreUniqueWhenTitlesOverlap() {
+        let output = ShoppingListSorter().sort([
+            makeShoppingItem(title: "Milk", store: "Market", category: "Dairy"),
+            makeShoppingItem(title: "Bread", store: "Corner", category: "Dairy"),
+            makeShoppingItem(title: "Soap", store: "", category: "Market")
+        ])
+
+        let sectionIds = output.sections.map(\.id)
+        let subsectionIds = output.sections.flatMap(\.subsections).map(\.id)
+
+        #expect(output.sections.map(\.title) == ["Corner", "Market", "Market"])
+        #expect(Set(sectionIds).count == sectionIds.count)
+        #expect(Set(subsectionIds).count == subsectionIds.count)
+    }
 }

@@ -9,8 +9,8 @@ import SwiftUI
 import FactoryKit
 
 protocol EditCategoryModelProtocol: AnyObject {
-    func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async throws
-    func getCategoryGoods(category: CategoriesItemModel) async throws -> [GoodsItemModel]
+    func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async
+    func getCategoryGoods(category: CategoriesItemModel) async -> [GoodsItemModel]
 }
 
 struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
@@ -36,7 +36,7 @@ struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
                 }
             }
             List {
-                ForEach(goods, id: \.self) { item in
+                ForEach(Array(goods.enumerated()), id: \.offset) { _, item in
                     Text(item)
                 }.onDelete(perform: { indexSet in
                     if let index = indexSet.first {
@@ -51,7 +51,7 @@ struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
-                        try await model.editCategory(item: item, name: name, goods: goods)
+                        await model.editCategory(item: item, name: name, goods: goods)
                         dismiss()
                     }
                 })
@@ -69,14 +69,15 @@ struct EditCategoryView<Model: EditCategoryModelProtocol&Sendable>: View {
             }
         }.padding()
             .background(Color("backgroundColor").ignoresSafeArea())
-            .onAppear(perform: {
+            .task(id: item?.id) {
                 name = item?.name ?? ""
                 if let item = item {
-                    Task {
-                        goods = try await model.getCategoryGoods(category: item).map({ $0.name })
-                    }
+                    goods = await model.getCategoryGoods(category: item).map({ $0.name })
+                } else {
+                    goods = []
                 }
-            }).navigationTitle("Edit category")
+            }
+            .navigationTitle("Edit category")
     }
 }
 

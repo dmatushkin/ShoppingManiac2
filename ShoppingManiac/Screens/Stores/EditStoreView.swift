@@ -37,10 +37,10 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
                 }
             }
             List {
-                ForEach(categories, id: \.self) { item in
+                ForEach(Array(categories.enumerated()), id: \.offset) { index, item in
                     Text(item).swipeActions {
                         Button("Delete") {
-                            if let index = categories.firstIndex(of: item) {
+                            if categories.indices.contains(index) {
                                 categories.remove(at: index)
                             }
                         }.tint(.red)
@@ -86,14 +86,15 @@ struct EditStoreView<Model: EditStoreModelProtocol&Sendable>: View {
             Spacer()
         }.padding()
             .background(Color("backgroundColor").ignoresSafeArea())
-            .onAppear(perform: {
+            .task(id: item?.id) {
                 name = item?.name ?? ""
                 if let item = item {
-                    Task {
-                        categories = await model.getStoreCategories(item: item).map({ $0.name })
-                    }
+                    categories = await model.getStoreCategories(item: item).map({ $0.name })
+                } else {
+                    categories = []
                 }
-            }).navigationTitle("Edit store")
+            }
+            .navigationTitle("Edit store")
     }
 }
 

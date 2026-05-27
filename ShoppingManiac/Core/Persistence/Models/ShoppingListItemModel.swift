@@ -9,7 +9,6 @@ import Foundation
 
 struct ShoppingListItemModel: Identifiable {
     let id: String
-    let uniqueId: String
     let title: String
     let store: String
     let category: String

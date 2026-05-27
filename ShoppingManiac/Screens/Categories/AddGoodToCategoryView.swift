@@ -31,8 +31,11 @@ struct AddGoodToCategoryView: View {
                         showingPopover = false
                     })
                     LargeAcceptButton(title: "Add", action: {
-                        if dataModel.itemName.isEmpty { return }
-                        goods = (goods + [dataModel.itemName]).sorted()
+                        let itemName = dataModel.itemName.shoppingNormalizedName
+                        if itemName.isEmpty { return }
+                        if !goods.contains(where: { $0.shoppingCanonicalName == itemName.shoppingCanonicalName }) {
+                            goods = (goods + [itemName]).sorted()
+                        }
                         dataModel.itemName = ""
                         showingPopover = false
                     })

@@ -52,6 +52,7 @@ struct ShoppingListView: View {
                                     .cornerRadius(10)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("shoppingList.shareButton")
                             .confirmationDialog("Share", isPresented: $model.showShareSheet) {
                                 Button("Share with file") {
                                     model.shareByFile(model: listModel)
@@ -73,6 +74,7 @@ struct ShoppingListView: View {
                                 .cornerRadius(10)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("shoppingList.addItemButton")
                             .padding(10)
                         }.padding(.bottom, 15)
                             .background(content: {
@@ -98,6 +100,6 @@ struct ShoppingListView: View {
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     NavigationStack {
-        ShoppingListView(listModel: ShoppingListModel(id: UUID().uuidString, uniqueId: "1241234", name: "test list", date: Date()))
+        ShoppingListView(listModel: ShoppingListModel(id: UUID().uuidString, name: "test list", date: Date()))
     }
 }

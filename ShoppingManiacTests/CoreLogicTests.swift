@@ -14,7 +14,7 @@ struct CoreLogicTests {
     @Test("ShoppingListModel title prefers non-empty name")
     func shoppingListTitleUsesName() {
         let date = Date(timeIntervalSince1970: 0)
-        let list = ShoppingListModel(id: "1", uniqueId: "u1", name: "Weekend", date: date)
+        let list = ShoppingListModel(id: "1", name: "Weekend", date: date)
 
         #expect(list.title == "Weekend")
     }
@@ -25,7 +25,7 @@ struct CoreLogicTests {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
-        let list = ShoppingListModel(id: "1", uniqueId: "u1", name: "", date: date)
+        let list = ShoppingListModel(id: "1", name: "", date: date)
 
         #expect(list.title == formatter.string(from: date))
     }

@@ -16,33 +16,37 @@ protocol ShoppingListSerializerProtocol: Sendable {
 }
 
 final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked Sendable {
-    
-    private let dateFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = DateFormatter.Style.medium
-        dateFormatter.timeStyle = DateFormatter.Style.medium
-        return dateFormatter
-    }()
-    
-    private let numberFormatter: NumberFormatter = {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .decimal
-        return numberFormatter
-    }()
-    
+
     nonisolated required init() {}
     
     @Injected(\.dao) private var dao: DAOProtocol
     
     private struct Backup: Codable {
+        static let currentVersion = 3
+
+        let version: Int?
         let lists: [ShoppingListJsonModel]
+
+        init(lists: [ShoppingListJsonModel]) {
+            self.version = Self.currentVersion
+            self.lists = lists
+        }
     }
     
     private struct ShoppingListJsonModel: Codable {
+        static let currentVersion = 3
+
+        let version: Int?
         let name: String
         let date: String
-        let uniqueId: String?
         let items: [ShoppingListItemJsonModel]
+
+        init(name: String, date: String, items: [ShoppingListItemJsonModel]) {
+            self.version = Self.currentVersion
+            self.name = name
+            self.date = date
+            self.items = items
+        }
     }
     
     private struct ShoppingListItemJsonModel: Codable {
@@ -53,7 +57,51 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
         let quantity: Decimal
         let isWeight: Bool
         let isImportant: Bool
-        let uniqueId: String?
+    }
+
+    private static func makeEncoder() -> JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return encoder
+    }
+
+    private static func exportedDate(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: date)
+    }
+
+    private static func importedDate(_ string: String) -> Date {
+        let fractionalFormatter = ISO8601DateFormatter()
+        fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = fractionalFormatter.date(from: string) {
+            return date
+        }
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        if let date = formatter.date(from: string) {
+            return date
+        }
+
+        let legacyFormatter = DateFormatter()
+        legacyFormatter.dateStyle = .medium
+        legacyFormatter.timeStyle = .medium
+        return legacyFormatter.date(from: string) ?? Date()
+    }
+
+    private static func decimal(from string: String, default defaultValue: Decimal) -> Decimal {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let decimal = Decimal(string: trimmed, locale: Locale.current) {
+            return decimal
+        }
+        if let decimal = Decimal(string: trimmed, locale: Locale(identifier: "en_US_POSIX")) {
+            return decimal
+        }
+
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        return formatter.number(from: trimmed)?.decimalValue ?? defaultValue
     }
     
     private func listModelToJson(listModel: ShoppingListModel) async throws -> ShoppingListJsonModel {
@@ -62,36 +110,37 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
         let items: [ShoppingListItemJsonModel] = listItems.map({
             ShoppingListItemJsonModel(good: $0.title,
                                       store: $0.store,
-                                      price: numberFormatter.number(from: $0.price)?.decimalValue ?? 0,
+                                      price: Self.decimal(from: $0.price, default: 0),
                                       purchased: $0.isPurchased,
-                                      quantity: numberFormatter.number(from: $0.amount)?.decimalValue ?? 1,
+                                      quantity: Self.decimal(from: $0.amount, default: 1),
                                       isWeight: $0.isWeight,
-                                      isImportant: $0.isImportant,
-                                      uniqueId: $0.uniqueId)
+                                      isImportant: $0.isImportant)
         })
-        return ShoppingListJsonModel(name: listModel.name, date: dateFormatter.string(from: listModel.date), uniqueId: listModel.uniqueId, items: items)
+        return ShoppingListJsonModel(name: listModel.name, date: Self.exportedDate(listModel.date), items: items)
     }
     
     private func jsonToListModel(jsonModel: ShoppingListJsonModel) async throws -> ShoppingListModel {
-        let list = try await dao.addShoppingList(name: jsonModel.name, date: dateFormatter.date(from: jsonModel.date) ?? Date(), uniqueId: jsonModel.uniqueId)
-        for item in jsonModel.items {
-            try await dao.addShoppingListItem(list: list,
-                                              name: item.good,
-                                              amount: numberFormatter.string(from: item.quantity as NSNumber) ?? "",
-                                              store: item.store,
-                                              isWeight: item.isWeight,
-                                              price: numberFormatter.string(from: item.price as NSNumber) ?? "",
-                                              isImportant: item.isImportant,
-                                              rating: 0,
-                                              isPurchased: item.purchased,
-                                              uniqueId: item.uniqueId)
+        let items = jsonModel.items.map {
+            ShoppingListImportItem(
+                name: $0.good,
+                amount: $0.quantity,
+                store: $0.store,
+                isWeight: $0.isWeight,
+                price: $0.price,
+                isImportant: $0.isImportant,
+                isPurchased: $0.purchased
+            )
         }
-        return list
+        return try await dao.importShoppingList(
+            name: jsonModel.name,
+            date: Self.importedDate(jsonModel.date),
+            items: items
+        )
     }
     
     func exportList(listModel: ShoppingListModel) async throws -> Data {
         let listJsonModel = try await listModelToJson(listModel: listModel)
-        return try JSONEncoder().encode(listJsonModel)
+        return try Self.makeEncoder().encode(listJsonModel)
     }
     
     func importList(data: Data) async throws -> ShoppingListModel {
@@ -100,17 +149,22 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked S
     }
     
     func exportBackup(lists: [ShoppingListModel]) async throws -> Data {
-        let jsonList = try await lists.asyncMap({model in
-            try await self.listModelToJson(listModel: model)
-        })
+        var jsonList: [ShoppingListJsonModel] = []
+        jsonList.reserveCapacity(lists.count)
+        for model in lists {
+            jsonList.append(try await listModelToJson(listModel: model))
+        }
         let backup = Backup(lists: jsonList)
-        return try JSONEncoder().encode(backup)
+        return try Self.makeEncoder().encode(backup)
     }
     
     func importBackup(data: Data) async throws -> [ShoppingListModel] {
         let backup = try JSONDecoder().decode(Backup.self, from: data)
-        return try await backup.lists.asyncMap({list in
-            try await self.jsonToListModel(jsonModel: list)
-        })
+        var lists: [ShoppingListModel] = []
+        lists.reserveCapacity(backup.lists.count)
+        for list in backup.lists {
+            lists.append(try await jsonToListModel(jsonModel: list))
+        }
+        return lists
     }
 }

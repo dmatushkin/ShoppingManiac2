@@ -5,6 +5,7 @@
 //  Created by Dmitry Matyushkin on 27.10.2021.
 //
 
+import Combine
 import SwiftUI
 import FactoryKit
 import Observation
@@ -19,6 +20,8 @@ final class StoresModel: EditStoreModelProtocol {
     @Injected(\.appEventCenter) private var appEvents
     @ObservationIgnored
     private var reloadTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var cancellables = Set<AnyCancellable>()
     
     var items: [StoresItemModel] = []
     var showAddSheet: Bool = false
@@ -30,6 +33,12 @@ final class StoresModel: EditStoreModelProtocol {
     
     init() {
         reload()
+        appEvents.dataDidChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.reload()
+            }
+            .store(in: &cancellables)
     }
     
     deinit {
@@ -53,14 +62,8 @@ final class StoresModel: EditStoreModelProtocol {
         
     func editStore(item: StoresItemModel?, name: String, categories: [String]) async {
         do {
-            if let item = item {
-                let store = try await dao.editStore(item: item, name: name)
-                try await dao.syncStoreCategories(item: store, categories: categories)
-            } else {
-                let store = try await dao.addStore(name: name)
-                try await dao.syncStoreCategories(item: store, categories: categories)
-            }
-            items = try await dao.getStores(search: searchString)
+            _ = try await dao.saveStore(item: item, name: name, categories: categories)
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to save store")
         }
@@ -72,7 +75,7 @@ final class StoresModel: EditStoreModelProtocol {
             for item in itemsToDelete {
                 try await dao.removeStore(item: item)
             }
-            items = try await dao.getStores(search: searchString)
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to delete store")
         }

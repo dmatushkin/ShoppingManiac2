@@ -57,16 +57,16 @@ final class ShoppingModel: AddShoppingListModelProtocol {
             
     func addItem(name: String) async {
         do {
-            let item = try await dao.addShoppingList(name: name, date: Date(), uniqueId: nil)
-            items = try await dao.getShoppingLists()
+            let item = try await dao.addShoppingList(name: name, date: Date())
             showAddSheet = false
             itemToOpen = item
+            appEvents.shoppingListsChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to create shopping list")
         }
     }
     
-    func cancelAddingItem() async throws {
+    func cancelAddingItem() async {
         showAddSheet = false
     }
 
@@ -76,7 +76,7 @@ final class ShoppingModel: AddShoppingListModelProtocol {
             for item in itemsToDelete {
                 try await dao.removeShoppingList(item)
             }
-            items = try await dao.getShoppingLists()
+            appEvents.shoppingListsChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to delete shopping list")
         }

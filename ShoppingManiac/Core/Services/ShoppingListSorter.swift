@@ -9,7 +9,7 @@ import Foundation
 import FactoryKit
 
 struct ShoppingListSection: Identifiable {
-    var id: String { title }
+    let id: String
     let title: String
     let isStore: Bool
     let subsections: [ShoppingListSection]
@@ -38,13 +38,13 @@ final class ShoppingListSorter: ShoppingListSorterProtocol {
         let stores = Array(Set(items.map({ $0.store }).filter({ !$0.isEmpty }))).sorted(by: { $0 < $1 })
         let noStoreItems = items.filter({ $0.store.isEmpty })
         let storeSections = stores.map({ storeName in
-            categorySort(items.filter({ $0.store == storeName }), title: storeName)
+            categorySort(items.filter({ $0.store == storeName }), id: "store:\(storeName)", title: storeName)
         }).filter({ !$0.subsections.isEmpty || !$0.items.isEmpty })
-        let noStoreSection = categorySort(noStoreItems, title: "")
+        let noStoreSection = categorySort(noStoreItems, id: "no-store", title: "")
         return ShoppingListOutput(sections: storeSections + noStoreSection.subsections, items: noStoreSection.items)
     }
     
-    private func categorySort(_ items: [ShoppingListItemModel], title: String) -> ShoppingListSection {
+    private func categorySort(_ items: [ShoppingListItemModel], id: String, title: String) -> ShoppingListSection {
         let categories = Array(Set(items.map({ CategoryIntermediate(name: $0.category, sortOrder: $0.categoryStoreOrder) })
                                     .filter({ !$0.name.isEmpty }))).sorted(by: {
             let sort1 = $0.sortOrder ?? Int.max
@@ -56,10 +56,15 @@ final class ShoppingListSorter: ShoppingListSorterProtocol {
             }
         })
         let subsections = categories.map({ category in
-            ShoppingListSection(title: category.name, isStore: false, subsections: [], items: nameAndPurchaseSort(items.filter({ $0.category == category.name })))
+            let sortOrderID = category.sortOrder.map(String.init) ?? "none"
+            return ShoppingListSection(id: "\(id)/category:\(category.name)/order:\(sortOrderID)",
+                                       title: category.name,
+                                       isStore: false,
+                                       subsections: [],
+                                       items: nameAndPurchaseSort(items.filter({ $0.category == category.name })))
         })
         let noCategoryItems = nameAndPurchaseSort(items.filter({ $0.category.isEmpty }))
-        return ShoppingListSection(title: title, isStore: true, subsections: subsections, items: noCategoryItems)
+        return ShoppingListSection(id: id, title: title, isStore: true, subsections: subsections, items: noCategoryItems)
     }
     
     private func nameAndPurchaseSort(_ items: [ShoppingListItemModel]) -> [ShoppingListItemModel] {

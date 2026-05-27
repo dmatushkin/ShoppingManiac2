@@ -18,13 +18,19 @@ enum TestFailure: Error, Equatable, LocalizedError {
 
 final class SpyAppEventCenter: AppEventCenterProtocol, @unchecked Sendable {
     private let shoppingListsSubject = PassthroughSubject<Void, Never>()
+    private let dataSubject = PassthroughSubject<Void, Never>()
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
     private(set) var shoppingListsChangeCount = 0
+    private(set) var dataChangeCount = 0
     private(set) var toasts: [ToastMessage] = []
 
     var shoppingListsDidChange: AnyPublisher<Void, Never> {
         shoppingListsSubject.eraseToAnyPublisher()
+    }
+
+    var dataDidChange: AnyPublisher<Void, Never> {
+        dataSubject.eraseToAnyPublisher()
     }
 
     var toastMessages: AnyPublisher<ToastMessage, Never> {
@@ -34,6 +40,12 @@ final class SpyAppEventCenter: AppEventCenterProtocol, @unchecked Sendable {
     func shoppingListsChanged() {
         shoppingListsChangeCount += 1
         shoppingListsSubject.send()
+        dataChanged()
+    }
+
+    func dataChanged() {
+        dataChangeCount += 1
+        dataSubject.send()
     }
 
     func showToast(_ message: ToastMessage) {
@@ -65,6 +77,7 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
 
     var getShoppingListsError: Error?
     var addShoppingListError: Error?
+    var importShoppingListError: Error?
     var removeShoppingListError: Error?
     var getShoppingListItemsError: Error?
     var addShoppingListItemError: Error?
@@ -78,32 +91,65 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
     var getCategoriesError: Error?
     var addCategoryError: Error?
     var editCategoryError: Error?
+    var saveCategoryError: Error?
     var removeCategoryError: Error?
     var getCategoryGoodsError: Error?
     var syncCategoryGoodsError: Error?
     var getStoresError: Error?
     var addStoreError: Error?
     var editStoreError: Error?
+    var saveStoreError: Error?
     var removeStoreError: Error?
     var getStoreCategoriesError: Error?
     var syncStoreCategoriesError: Error?
 
-    private(set) var addedShoppingListItems: [(ShoppingListModel, String, String, String, Bool, String, Bool, Int, Bool, String?)] = []
+    private(set) var addedShoppingListItems: [(ShoppingListModel, String, String, String, Bool, String, Bool, Int, Bool)] = []
+    private(set) var importedShoppingLists: [(String, Date, [ShoppingListImportItem])] = []
     private(set) var editedShoppingListItems: [(ShoppingListItemModel, String, String, String, Bool, String, Bool, Int)] = []
     private(set) var removedShoppingListItems: [ShoppingListItemModel] = []
     private(set) var toggledShoppingListItems: [ShoppingListItemModel] = []
     private(set) var syncedCategoryGoods: [(CategoriesItemModel, [String])] = []
+    private(set) var savedCategories: [(CategoriesItemModel?, String, [String])] = []
     private(set) var syncedStoreCategories: [(StoresItemModel, [String])] = []
+    private(set) var savedStores: [(StoresItemModel?, String, [String])] = []
+    private(set) var getShoppingListsCallCount = 0
+    private(set) var getGoodsCallCount = 0
+    private(set) var getCategoriesCallCount = 0
+    private(set) var getStoresCallCount = 0
 
     func getShoppingLists() async throws -> [ShoppingListModel] {
+        getShoppingListsCallCount += 1
         if let getShoppingListsError { throw getShoppingListsError }
         return shoppingLists
     }
 
-    func addShoppingList(name: String, date: Date, uniqueId: String?) async throws -> ShoppingListModel {
+    func addShoppingList(name: String, date: Date) async throws -> ShoppingListModel {
         if let addShoppingListError { throw addShoppingListError }
-        let list = ShoppingListModel(id: UUID().uuidString, uniqueId: uniqueId ?? UUID().uuidString, name: name, date: date)
+        let list = ShoppingListModel(id: UUID().uuidString, name: name, date: date)
         shoppingLists.append(list)
+        return list
+    }
+
+    func importShoppingList(name: String, date: Date, items: [ShoppingListImportItem]) async throws -> ShoppingListModel {
+        if let importShoppingListError { throw importShoppingListError }
+        importedShoppingLists.append((name, date, items))
+        let list = ShoppingListModel(id: UUID().uuidString, name: name, date: date)
+        shoppingLists.append(list)
+        for item in items {
+            shoppingListItems.append(ShoppingListItemModel(
+                id: UUID().uuidString,
+                title: item.name,
+                store: item.store,
+                category: "",
+                categoryStoreOrder: nil,
+                isPurchased: item.isPurchased,
+                amount: "\(item.amount)",
+                isWeight: item.isWeight,
+                price: "\(item.price)",
+                isImportant: item.isImportant,
+                rating: 0
+            ))
+        }
         return list
     }
 
@@ -126,14 +172,12 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
         price: String,
         isImportant: Bool,
         rating: Int,
-        isPurchased: Bool,
-        uniqueId: String?
+        isPurchased: Bool
     ) async throws {
         if let addShoppingListItemError { throw addShoppingListItemError }
-        addedShoppingListItems.append((list, name, amount, store, isWeight, price, isImportant, rating, isPurchased, uniqueId))
+        addedShoppingListItems.append((list, name, amount, store, isWeight, price, isImportant, rating, isPurchased))
         shoppingListItems.append(ShoppingListItemModel(
             id: UUID().uuidString,
-            uniqueId: uniqueId ?? UUID().uuidString,
             title: name,
             store: store,
             category: "",
@@ -174,7 +218,6 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
             guard current.id == item.id else { return current }
             return ShoppingListItemModel(
                 id: current.id,
-                uniqueId: current.uniqueId,
                 title: current.title,
                 store: current.store,
                 category: current.category,
@@ -190,6 +233,7 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
     }
 
     func getGoods(search: String) async throws -> [GoodsItemModel] {
+        getGoodsCallCount += 1
         if let getGoodsError { throw getGoodsError }
         return search.isEmpty ? goods : goods.filter { $0.name.localizedCaseInsensitiveContains(search) }
     }
@@ -214,6 +258,7 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
     }
 
     func getCategories(search: String) async throws -> [CategoriesItemModel] {
+        getCategoriesCallCount += 1
         if let getCategoriesError { throw getCategoriesError }
         return search.isEmpty ? categories : categories.filter { $0.name.localizedCaseInsensitiveContains(search) }
     }
@@ -232,6 +277,19 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
         return edited
     }
 
+    func saveCategory(item: CategoriesItemModel?, name: String, goods: [String]) async throws -> CategoriesItemModel {
+        if let saveCategoryError { throw saveCategoryError }
+        savedCategories.append((item, name, goods))
+        let category: CategoriesItemModel
+        if let item {
+            category = try await editCategory(item: item, name: name)
+        } else {
+            category = try await addCategory(name: name)
+        }
+        categoryGoods[category.id] = goods.map { GoodsItemModel(id: UUID().uuidString, name: $0, category: category.name) }
+        return category
+    }
+
     func removeCategory(item: CategoriesItemModel) async throws {
         if let removeCategoryError { throw removeCategoryError }
         categories.removeAll { $0.id == item.id }
@@ -248,6 +306,7 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
     }
 
     func getStores(search: String) async throws -> [StoresItemModel] {
+        getStoresCallCount += 1
         if let getStoresError { throw getStoresError }
         return search.isEmpty ? stores : stores.filter { $0.name.localizedCaseInsensitiveContains(search) }
     }
@@ -264,6 +323,19 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
         let edited = StoresItemModel(id: item.id, name: name)
         stores = stores.map { $0.id == item.id ? edited : $0 }
         return edited
+    }
+
+    func saveStore(item: StoresItemModel?, name: String, categories: [String]) async throws -> StoresItemModel {
+        if let saveStoreError { throw saveStoreError }
+        savedStores.append((item, name, categories))
+        let store: StoresItemModel
+        if let item {
+            store = try await editStore(item: item, name: name)
+        } else {
+            store = try await addStore(name: name)
+        }
+        storeCategories[store.id] = categories.map { CategoriesItemModel(id: UUID().uuidString, name: $0) }
+        return store
     }
 
     func removeStore(item: StoresItemModel) async throws {
@@ -285,7 +357,7 @@ final class StubDAO: DAOProtocol, @unchecked Sendable {
 final class StubShoppingListSerializer: ShoppingListSerializerProtocol, @unchecked Sendable {
     var exportListData = Data("list".utf8)
     var exportBackupData = Data("backup".utf8)
-    var importedList = ShoppingListModel(id: "imported", uniqueId: "imported-unique", name: "Imported", date: Date(timeIntervalSince1970: 0))
+    var importedList = ShoppingListModel(id: "imported", name: "Imported", date: Date(timeIntervalSince1970: 0))
     var importedBackup: [ShoppingListModel] = []
 
     var exportListError: Error?
@@ -427,16 +499,14 @@ func expectTestFailure(
 
 func makeList(
     id: String = UUID().uuidString,
-    uniqueId: String = UUID().uuidString,
     name: String = "Groceries",
     date: Date = Date(timeIntervalSince1970: 1_000)
 ) -> ShoppingListModel {
-    ShoppingListModel(id: id, uniqueId: uniqueId, name: name, date: date)
+    ShoppingListModel(id: id, name: name, date: date)
 }
 
 func makeShoppingItem(
     id: String = UUID().uuidString,
-    uniqueId: String = UUID().uuidString,
     title: String = "Milk",
     store: String = "",
     category: String = "",
@@ -450,7 +520,6 @@ func makeShoppingItem(
 ) -> ShoppingListItemModel {
     ShoppingListItemModel(
         id: id,
-        uniqueId: uniqueId,
         title: title,
         store: store,
         category: category,

@@ -30,9 +30,10 @@ struct AddCategoryToStoreView: View {
                         showingPopover = false
                     })
                     LargeAcceptButton(title: "Add", action: {
-                        if dataModel.itemName.isEmpty { return }
-                        if !categories.contains(dataModel.itemName) {
-                            categories.append(dataModel.itemName)
+                        let itemName = dataModel.itemName.shoppingNormalizedName
+                        if itemName.isEmpty { return }
+                        if !categories.contains(where: { $0.shoppingCanonicalName == itemName.shoppingCanonicalName }) {
+                            categories.append(itemName)
                         }                        
                         dataModel.itemName = ""
                         showingPopover = false

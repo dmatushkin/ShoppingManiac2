@@ -47,6 +47,7 @@ struct ShoppingScreen: View {
                         }) {
                             Label("Add Item", systemImage: "plus")
                         }
+                        .accessibilityIdentifier("shopping.addListButton")
                     }
                 }.navigationTitle("Shopping lists")
         }.sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {

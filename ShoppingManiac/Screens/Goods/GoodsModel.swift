@@ -5,6 +5,7 @@
 //  Created by Dmitry Matyushkin on 27.10.2021.
 //
 
+import Combine
 import SwiftUI
 import FactoryKit
 import Observation
@@ -19,6 +20,8 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
     @Injected(\.appEventCenter) private var appEvents
     @ObservationIgnored
     private var reloadTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var cancellables = Set<AnyCancellable>()
     
     var items: [GoodsItemModel] = []
     var showAddSheet: Bool = false
@@ -30,6 +33,12 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
     
     init() {
         reload()
+        appEvents.dataDidChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.reload()
+            }
+            .store(in: &cancellables)
     }
     
     deinit {
@@ -58,7 +67,7 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
             } else {
                 _ = try await dao.addGood(name: name, category: category)
             }
-            items = try await dao.getGoods(search: searchString)
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to save good")
         }
@@ -70,7 +79,7 @@ final class GoodsModel: EditGoodModelProtocol, Sendable {
             for item in itemsToDelete {
                 try await dao.removeGood(item: item)
             }
-            items = try await dao.getGoods(search: searchString)
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to delete good")
         }

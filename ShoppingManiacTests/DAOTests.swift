@@ -1,27 +1,30 @@
 import Foundation
+import SwiftData
 import Testing
 @testable import ShoppingManiac
 
+private func persistentIDString<T: PersistentModel>(_ model: T) -> String {
+    String(describing: model.persistentModelID.id)
+}
+
 @MainActor
 struct DAOTests {
-    @Test("Shopping lists can be created, listed, updated by uniqueId, and soft-deleted")
+    @Test("Shopping lists can be created, listed, and soft-deleted")
     func shoppingListLifecycle() async throws {
         let provider = TestContextProvider(container: try makeInMemoryContainer())
 
         try await withTestContainer(contextProvider: provider) {
             let sut = DAO()
-            let old = try await sut.addShoppingList(name: " Old ", date: Date(timeIntervalSince1970: 1), uniqueId: "same")
-            let newer = try await sut.addShoppingList(name: "New", date: Date(timeIntervalSince1970: 2), uniqueId: nil)
-            let updated = try await sut.addShoppingList(name: "Updated", date: Date(timeIntervalSince1970: 3), uniqueId: "same")
+            let old = try await sut.addShoppingList(name: " Old ", date: Date(timeIntervalSince1970: 1))
+            let newer = try await sut.addShoppingList(name: "New", date: Date(timeIntervalSince1970: 2))
             let lists = try await sut.getShoppingLists()
 
-            #expect(old.uniqueId == updated.uniqueId)
-            #expect(updated.name == "Updated")
-            #expect(lists.map(\.name) == ["Updated", "New"])
+            #expect(old.id != newer.id)
+            #expect(lists.map(\.name) == ["New", "Old"])
 
             try await sut.removeShoppingList(newer)
             let remaining = try await sut.getShoppingLists()
-            #expect(remaining.map(\.name) == ["Updated"])
+            #expect(remaining.map(\.name) == ["Old"])
         }
     }
 
@@ -31,7 +34,7 @@ struct DAOTests {
 
         try await withTestContainer(contextProvider: provider) {
             let sut = DAO()
-            let list = try await sut.addShoppingList(name: "Groceries", date: Date(), uniqueId: "list")
+            let list = try await sut.addShoppingList(name: "Groceries", date: Date())
             let store = try await sut.addStore(name: "Market")
             let category = try await sut.addCategory(name: "Dairy")
             try await sut.syncStoreCategories(item: store, categories: [category.name])
@@ -46,8 +49,7 @@ struct DAOTests {
                 price: "3",
                 isImportant: true,
                 rating: 4,
-                isPurchased: false,
-                uniqueId: "item-1"
+                isPurchased: false
             )
             var items = try await sut.getShoppingListItems(list: list)
             var item = try #require(items.first)
@@ -56,7 +58,7 @@ struct DAOTests {
             #expect(item.category == "Dairy")
             #expect(item.categoryStoreOrder == 0)
             #expect(item.amount == "2")
-            #expect(item.price == "3.0")
+            #expect(item.price == "3")
             #expect(item.isImportant)
             #expect(item.rating == 4)
             #expect(item.isPurchased == false)
@@ -142,6 +144,92 @@ struct DAOTests {
         }
     }
 
+    @Test("DAO returns persistent UI IDs when names collide")
+    func collidingNamesUsePersistentUIIDs() async throws {
+        let provider = TestContextProvider(container: try makeInMemoryContainer())
+        let context = provider.getContext()
+        let date = Date(timeIntervalSince1970: 1)
+
+        let firstList = ShoppingList(name: "Groceries", date: date)
+        let secondList = ShoppingList(name: "Groceries", date: date.addingTimeInterval(1))
+        let good = Good(name: "Milk")
+        let anotherGood = Good(name: "Milk")
+        let category = Category(name: "Dairy")
+        let anotherCategory = Category(name: "Dairy")
+        let store = Store(name: "Market")
+        let anotherStore = Store(name: "Market")
+        let firstItem = ShoppingListItem()
+        firstItem.list = firstList
+        firstItem.good = good
+        let secondItem = ShoppingListItem()
+        secondItem.list = firstList
+        secondItem.good = anotherGood
+
+        context.insert(firstList)
+        context.insert(secondList)
+        context.insert(good)
+        context.insert(anotherGood)
+        context.insert(category)
+        context.insert(anotherCategory)
+        context.insert(store)
+        context.insert(anotherStore)
+        context.insert(firstItem)
+        context.insert(secondItem)
+        try context.save()
+
+        try await withTestContainer(contextProvider: provider) {
+            let sut = DAO()
+            let lists = try await sut.getShoppingLists()
+            let firstListModel = try #require(lists.first { $0.id == persistentIDString(firstList) })
+            let items = try await sut.getShoppingListItems(list: firstListModel)
+            let goods = try await sut.getGoods(search: "")
+            let categories = try await sut.getCategories(search: "")
+            let stores = try await sut.getStores(search: "")
+
+            #expect(Set(lists.map(\.id)).count == lists.count)
+            #expect(Set(items.map(\.id)).count == items.count)
+            #expect(Set(goods.map(\.id)).count == goods.count)
+            #expect(Set(categories.map(\.id)).count == categories.count)
+            #expect(Set(stores.map(\.id)).count == stores.count)
+        }
+    }
+
+    @Test("Editing a good by persistent ID updates shopping list item titles")
+    func editingGoodByPersistentIDUpdatesShoppingListItems() async throws {
+        let provider = TestContextProvider(container: try makeInMemoryContainer())
+        let context = provider.getContext()
+        let list = ShoppingList(name: "Groceries", date: Date(timeIntervalSince1970: 1))
+        let itemGood = Good(name: "Milk")
+        let otherGood = Good(name: "Milk")
+        let item = ShoppingListItem()
+        item.list = list
+        item.good = itemGood
+
+        context.insert(list)
+        context.insert(itemGood)
+        context.insert(otherGood)
+        context.insert(item)
+        try context.save()
+
+        try await withTestContainer(contextProvider: provider) {
+            let sut = DAO()
+            let listModel = ShoppingListModel(
+                id: persistentIDString(list),
+                name: "Groceries",
+                date: list.date
+            )
+            #expect(try await sut.getShoppingListItems(list: listModel).map(\.title) == ["Milk"])
+
+            _ = try await sut.editGood(
+                item: GoodsItemModel(id: persistentIDString(itemGood), name: "Milk", category: ""),
+                name: "Oat Milk",
+                category: ""
+            )
+
+            #expect(try await sut.getShoppingListItems(list: listModel).map(\.title) == ["Oat Milk"])
+        }
+    }
+
     @Test("DAO throws expected shopping-list errors")
     func shoppingListErrors() async throws {
         let provider = TestContextProvider(container: try makeInMemoryContainer())
@@ -157,11 +245,11 @@ struct DAOTests {
                 _ = try await sut.getShoppingListItems(list: missingList)
             }
             await expectDBError(.unableToGetShoppingList) {
-                try await sut.addShoppingListItem(list: missingList, name: "Milk", amount: "1", store: "", isWeight: false, price: "", isImportant: false, rating: 0, isPurchased: false, uniqueId: nil)
+                try await sut.addShoppingListItem(list: missingList, name: "Milk", amount: "1", store: "", isWeight: false, price: "", isImportant: false, rating: 0, isPurchased: false)
             }
-            let list = try await sut.addShoppingList(name: "Groceries", date: Date(), uniqueId: nil)
+            let list = try await sut.addShoppingList(name: "Groceries", date: Date())
             await expectDBError(.unableToGetShoppingList) {
-                try await sut.addShoppingListItem(list: list, name: "   ", amount: "1", store: "", isWeight: false, price: "", isImportant: false, rating: 0, isPurchased: false, uniqueId: nil)
+                try await sut.addShoppingListItem(list: list, name: "   ", amount: "1", store: "", isWeight: false, price: "", isImportant: false, rating: 0, isPurchased: false)
             }
         }
     }

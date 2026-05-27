@@ -9,9 +9,9 @@ import SwiftUI
 import FactoryKit
 
 protocol ShoppingListItemModelProtocol: AnyObject {
-    func togglePurchased(item: ShoppingListItemModel) async throws
-    func removeShoppingListItem(item: ShoppingListItemModel) async throws
-    func editItem(item: ShoppingListItemModel) async throws
+    func togglePurchased(item: ShoppingListItemModel) async
+    func removeShoppingListItem(item: ShoppingListItemModel) async
+    func editItem(item: ShoppingListItemModel) async
 }
 
 struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View  {
@@ -27,7 +27,7 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
     var body: some View {
         Button {
             Task {
-                try await model.togglePurchased(item: item)
+                await model.togglePurchased(item: item)
             }
         } label: {
             HStack {
@@ -42,12 +42,12 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
         .swipeActions {
                 Button("Delete") {
                     Task {
-                        try await model.removeShoppingListItem(item: item)
+                        await model.removeShoppingListItem(item: item)
                     }
                 }.tint(.red)
                 Button("Edit") {
                     Task {
-                        try await model.editItem(item: item)
+                        await model.editItem(item: item)
                     }
                 }
         }
@@ -58,7 +58,6 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     Group {
         ShoppingListItemView(item: ShoppingListItemModel(id: UUID().uuidString,
-                                                                       uniqueId: "3452345",
                                                                        title: "Test title",
                                                                        store: "Test store",
                                                                        category: "Test category",
@@ -70,7 +69,6 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol&Sendable>: View
                                                                        isImportant: false,
                                                                        rating: 5), model: ShoppingListViewModel()).frame(width: 375, height: 50)
         ShoppingListItemView(item: ShoppingListItemModel(id: UUID().uuidString,
-                                                                       uniqueId: "1211234",
                                                                        title: "Test title",
                                                                        store: "Test store",
                                                                        category: "Test category",

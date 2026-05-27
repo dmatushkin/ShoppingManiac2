@@ -64,10 +64,10 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
                                               price: model.price,
                                               isImportant: model.isImportant,
                                               rating: model.rating,
-                                              isPurchased: false,
-                                              uniqueId: nil)
+                                              isPurchased: false)
             output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
             showAddSheet = false
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to add item")
         }
@@ -89,12 +89,13 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
                                                rating: model.rating)
             output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
             itemToShow = nil
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to save item")
         }
     }
         
-    func cancelAddingItem() async throws {
+    func cancelAddingItem() async {
         showAddSheet = false
         itemToShow = nil
     }
@@ -110,12 +111,13 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
             withAnimation {
                 output = sorter.sort(items)
             }
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to delete item")
         }
     }
 
-    func editItem(item: ShoppingListItemModel) async throws {
+    func editItem(item: ShoppingListItemModel) async {
         itemToShow = item
     }
     
@@ -127,6 +129,7 @@ final class ShoppingListViewModel: ShoppingListItemModelProtocol, EditShoppingLi
         do {
             try await dao.togglePurchasedShoppingListItem(item: item)
             output = sorter.sort(try await dao.getShoppingListItems(list: listModel))
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to update item")
         }

@@ -18,6 +18,8 @@ struct RoundRectTextField: View {
             TextField(title, text: $input)
                 .focused(focus)
                 .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .accessibilityIdentifier(title)
         }
     }
 }

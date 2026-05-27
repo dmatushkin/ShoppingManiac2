@@ -17,15 +17,34 @@ struct AppEventCenterTests {
     func publishesShoppingListChanges() {
         let sut = AppEventCenter()
         var changeCount = 0
+        var dataChangeCount = 0
         var cancellables = Set<AnyCancellable>()
         sut.shoppingListsDidChange
             .sink { changeCount += 1 }
+            .store(in: &cancellables)
+        sut.dataDidChange
+            .sink { dataChangeCount += 1 }
             .store(in: &cancellables)
 
         sut.shoppingListsChanged()
         sut.shoppingListsChanged()
 
         #expect(changeCount == 2)
+        #expect(dataChangeCount == 2)
+    }
+
+    @Test("AppEventCenter publishes data changes")
+    func publishesDataChanges() {
+        let sut = AppEventCenter()
+        var changeCount = 0
+        var cancellables = Set<AnyCancellable>()
+        sut.dataDidChange
+            .sink { changeCount += 1 }
+            .store(in: &cancellables)
+
+        sut.dataChanged()
+
+        #expect(changeCount == 1)
     }
 
     @Test("AppEventCenter publishes success and error toasts")

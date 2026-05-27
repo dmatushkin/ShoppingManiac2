@@ -42,9 +42,11 @@ struct ToastMessage: Identifiable, Equatable {
 
 protocol AppEventCenterProtocol: AnyObject {
     var shoppingListsDidChange: AnyPublisher<Void, Never> { get }
+    var dataDidChange: AnyPublisher<Void, Never> { get }
     var toastMessages: AnyPublisher<ToastMessage, Never> { get }
 
     func shoppingListsChanged()
+    func dataChanged()
     func showToast(_ message: ToastMessage)
     func showSuccess(_ title: String, detail: String?)
     func showError(_ title: String, detail: String?)
@@ -53,6 +55,7 @@ protocol AppEventCenterProtocol: AnyObject {
 
 final class AppEventCenter: AppEventCenterProtocol {
     private let shoppingListsSubject = PassthroughSubject<Void, Never>()
+    private let dataSubject = PassthroughSubject<Void, Never>()
     private let toastSubject = PassthroughSubject<ToastMessage, Never>()
 
     nonisolated init() {}
@@ -61,12 +64,21 @@ final class AppEventCenter: AppEventCenterProtocol {
         shoppingListsSubject.eraseToAnyPublisher()
     }
 
+    var dataDidChange: AnyPublisher<Void, Never> {
+        dataSubject.eraseToAnyPublisher()
+    }
+
     var toastMessages: AnyPublisher<ToastMessage, Never> {
         toastSubject.eraseToAnyPublisher()
     }
 
     func shoppingListsChanged() {
         shoppingListsSubject.send()
+        dataSubject.send()
+    }
+
+    func dataChanged() {
+        dataSubject.send()
     }
 
     func showToast(_ message: ToastMessage) {

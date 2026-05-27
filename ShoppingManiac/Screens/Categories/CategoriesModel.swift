@@ -5,6 +5,7 @@
 //  Created by Dmitry Matyushkin on 27.10.2021.
 //
 
+import Combine
 import SwiftUI
 import FactoryKit
 import Observation
@@ -19,6 +20,8 @@ final class CategoriesModel: EditCategoryModelProtocol {
     @Injected(\.appEventCenter) private var appEvents
     @ObservationIgnored
     private var reloadTask: Task<Void, Never>?
+    @ObservationIgnored
+    private var cancellables = Set<AnyCancellable>()
     
     var items: [CategoriesItemModel] = []
     var showAddSheet: Bool = false
@@ -30,6 +33,12 @@ final class CategoriesModel: EditCategoryModelProtocol {
     
     init() {
         reload()
+        appEvents.dataDidChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.reload()
+            }
+            .store(in: &cancellables)
     }
     
     deinit {
@@ -53,14 +62,8 @@ final class CategoriesModel: EditCategoryModelProtocol {
         
     func editCategory(item: CategoriesItemModel?, name: String, goods: [String]) async {
         do {
-            if let item = item {
-                let category = try await dao.editCategory(item: item, name: name)
-                try await dao.syncCategoryGoods(item: category, goods: goods)
-            } else {
-                let category = try await dao.addCategory(name: name)
-                try await dao.syncCategoryGoods(item: category, goods: goods)
-            }
-            items = try await dao.getCategories(search: searchString)
+            _ = try await dao.saveCategory(item: item, name: name, goods: goods)
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to save category")
         }
@@ -72,7 +75,7 @@ final class CategoriesModel: EditCategoryModelProtocol {
             for item in itemsToDelete {
                 try await dao.removeCategory(item: item)
             }
-            items = try await dao.getCategories(search: searchString)
+            appEvents.dataChanged()
         } catch {
             appEvents.showError(error, fallback: "Unable to delete category")
         }

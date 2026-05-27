@@ -9,7 +9,7 @@ import SwiftUI
 import FactoryKit
 
 protocol EditGoodModelProtocol: AnyObject {
-    func editGood(item: GoodsItemModel?, name: String, category: String) async throws
+    func editGood(item: GoodsItemModel?, name: String, category: String) async
 }
 
 struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
@@ -33,7 +33,7 @@ struct EditGoodView<Model: EditGoodModelProtocol&Sendable>: View {
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
                     if name.isEmpty { return }
                     Task {
-                        try await model.editGood(item: item, name: name, category: category)
+                        await model.editGood(item: item, name: name, category: category)
                         dismiss()
                     }
                 })

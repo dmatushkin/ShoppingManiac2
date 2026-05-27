@@ -16,7 +16,6 @@ struct ShoppingListModel: Identifiable, Hashable {
     }()
     
     let id: String
-    let uniqueId: String
     let name: String
     let date: Date
     

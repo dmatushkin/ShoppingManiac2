@@ -9,7 +9,17 @@ import Foundation
 
 extension String {
     
-    var nilIfEmpty: String? {
+    nonisolated var nilIfEmpty: String? {
         return self.isEmpty ? nil : self
+    }
+
+    nonisolated var shoppingNormalizedName: String {
+        trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    nonisolated var shoppingCanonicalName: String {
+        shoppingNormalizedName
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            .lowercased()
     }
 }

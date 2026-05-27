@@ -10,15 +10,13 @@ import SwiftData
 
 @Model
 final class ShoppingList {
-    var uniqueId: String = ""
     var name: String = ""
     var date: Date = Date()
     var isRemoved: Bool = false
     var ownerName: String?
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.list) var items: [ShoppingListItem]? = []
     
-    init(uniqueId: String = "", name: String = "", date: Date = Date(), isRemoved: Bool = false, ownerName: String? = nil) {
-        self.uniqueId = uniqueId
+    init(name: String = "", date: Date = Date(), isRemoved: Bool = false, ownerName: String? = nil) {
         self.name = name
         self.date = date
         self.isRemoved = isRemoved
@@ -28,27 +26,25 @@ final class ShoppingList {
 
 @Model
 final class ShoppingListItem {
-    var uniqueId: String = ""
     var comment: String?
     var isImportant: Bool = false
     var isRemoved: Bool = false
     var isWeight: Bool = false
-    var price: Float = 0
+    var price: Decimal = 0
     var purchased: Bool = false
     var purchaseDate: Date?
-    var quantity: Float = 0
+    var quantity: Decimal = 0
     var good: Good?
     var list: ShoppingList?
     var store: Store?
     
-    init(uniqueId: String = "") {
-        self.uniqueId = uniqueId
-    }
+    init() {}
 }
 
 @Model
 final class Good {
     var name: String = ""
+    var canonicalName: String = ""
     var personalRating: Int = 0
     var category: Category?
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.good) var items: [ShoppingListItem]? = []
@@ -57,6 +53,7 @@ final class Good {
     
     init(name: String = "", personalRating: Int = 0, category: Category? = nil) {
         self.name = name
+        self.canonicalName = name.shoppingCanonicalName
         self.personalRating = personalRating
         self.category = category
     }
@@ -65,6 +62,7 @@ final class Good {
 @Model
 final class Category {
     var name: String = ""
+    var canonicalName: String = ""
     var parent: Category?
     @Relationship(deleteRule: .nullify, inverse: \Category.parent) var children: [Category]? = []
     @Relationship(deleteRule: .nullify, inverse: \Good.category) var goods: [Good]? = []
@@ -72,6 +70,7 @@ final class Category {
     
     init(name: String = "", parent: Category? = nil) {
         self.name = name
+        self.canonicalName = name.shoppingCanonicalName
         self.parent = parent
     }
 }
@@ -79,11 +78,13 @@ final class Category {
 @Model
 final class Store {
     var name: String = ""
+    var canonicalName: String = ""
     @Relationship(deleteRule: .nullify, inverse: \ShoppingListItem.store) var items: [ShoppingListItem]? = []
     @Relationship(deleteRule: .cascade, inverse: \CategoryStoreOrder.store) var orders: [CategoryStoreOrder]? = []
     
     init(name: String = "") {
         self.name = name
+        self.canonicalName = name.shoppingCanonicalName
     }
 }
 

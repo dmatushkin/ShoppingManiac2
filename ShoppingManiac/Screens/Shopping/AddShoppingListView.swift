@@ -9,8 +9,8 @@ import SwiftUI
 import FactoryKit
 
 protocol AddShoppingListModelProtocol: AnyObject {
-    func addItem(name: String) async throws
-    func cancelAddingItem() async throws
+    func addItem(name: String) async
+    func cancelAddingItem() async
 }
 
 struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
@@ -24,39 +24,36 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol&Sendable>: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                RoundRectTextField(title: "Shopping list name", input: $listName, focus: $editFocused)
-                HStack {
-                    LargeCancelButton(title: "Cancel", action: {
-                        Task {
-                            try await model.cancelAddingItem()
-                        }
-                    })
-                    LargeAcceptButton(title: "Create", action: {
-                        Task {
-                            try await model.addItem(name: listName)
-                        }
-                    })
-                }.padding([.top])
-                Spacer()
-            }.toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button {
-                        editFocused = false
-                    } label: {
-                        Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
-                            .labelStyle(.iconOnly)
+        VStack {
+            RoundRectTextField(title: "Shopping list name", input: $listName, focus: $editFocused)
+            HStack {
+                LargeCancelButton(title: "Cancel", action: {
+                    editFocused = false
+                    Task {
+                        await model.cancelAddingItem()
                     }
+                })
+                LargeAcceptButton(title: "Create", action: {
+                    editFocused = false
+                    Task {
+                        await model.addItem(name: listName)
+                    }
+                })
+            }.padding([.top])
+        }
+        .frame(maxHeight: .infinity, alignment: .top)
+        .toolbar {
+            ToolbarItem(placement: .keyboard) {
+                Button {
+                    editFocused = false
+                } label: {
+                    Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
+                        .labelStyle(.iconOnly)
                 }
             }
-            #if os(iOS)
-            .toolbar(.hidden, for: .navigationBar)
-            #endif
-            .padding()
-                .background(Color("backgroundColor").ignoresSafeArea())
-        }        
+        }
+        .padding()
+        .background(Color("backgroundColor").ignoresSafeArea())
     }
 }
 

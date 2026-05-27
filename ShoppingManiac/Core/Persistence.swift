@@ -9,7 +9,9 @@ import Foundation
 import SwiftData
 
 final class PersistenceController: @unchecked Sendable {
-    static let shared = PersistenceController()
+    static let shared = PersistenceController(
+        inMemory: ProcessInfo.processInfo.arguments.contains("-UITestInMemoryStore")
+    )
     
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
