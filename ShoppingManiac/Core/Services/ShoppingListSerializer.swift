@@ -8,16 +8,14 @@
 import Foundation
 import FactoryKit
 
-@MainActor
-protocol ShoppingListSerializerProtocol {
+nonisolated protocol ShoppingListSerializerProtocol {
     func exportList(listModel: ShoppingListModel) async throws -> Data
     func importList(data: Data) async throws -> ShoppingListModel
     func exportBackup(lists: [ShoppingListModel]) async throws -> Data
     func importBackup(data: Data) async throws -> [ShoppingListModel]
 }
 
-@MainActor
-final class ShoppingListSerializer: ShoppingListSerializerProtocol {
+actor ShoppingListSerializer: ShoppingListSerializerProtocol {
     enum ImportError: Error, Equatable, LocalizedError {
         case invalidDate(String)
         case invalidDecimal(String)
@@ -38,7 +36,7 @@ final class ShoppingListSerializer: ShoppingListSerializerProtocol {
         }
     }
 
-    nonisolated required init() {}
+    init() {}
     
     @Injected(\.dao) private var dao: DAOProtocol
     

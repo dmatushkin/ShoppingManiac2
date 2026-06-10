@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ShoppingListItemModel: Identifiable {
+struct ShoppingListItemModel: Identifiable, Sendable {
     let id: String
     let title: String
     let store: String

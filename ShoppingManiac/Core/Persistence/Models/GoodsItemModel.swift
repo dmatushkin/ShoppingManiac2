@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct GoodsItemModel: Identifiable, Hashable {
+struct GoodsItemModel: Identifiable, Hashable, Sendable {
     let id: String
     let name: String
     let category: String

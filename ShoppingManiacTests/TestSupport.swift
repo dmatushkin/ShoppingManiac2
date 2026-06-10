@@ -371,8 +371,7 @@ final class StubDAO: DAOProtocol {
     }
 }
 
-@MainActor
-final class StubShoppingListSerializer: ShoppingListSerializerProtocol {
+nonisolated final class StubShoppingListSerializer: ShoppingListSerializerProtocol {
     var exportListData = Data("list".utf8)
     var exportBackupData = Data("backup".utf8)
     var importedList = ShoppingListModel(id: "imported", name: "Imported", date: Date(timeIntervalSince1970: 0))
@@ -419,6 +418,10 @@ final class TestContextProvider: ContextProviderProtocol {
 
     init(container: ModelContainer) {
         self.container = container
+    }
+
+    func getContainer() -> ModelContainer {
+        container
     }
 
     func getContext() -> ModelContext {

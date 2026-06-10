@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct StoresItemModel: Identifiable, Hashable {
+struct StoresItemModel: Identifiable, Hashable, Sendable {
     let id: String
     let name: String
 }

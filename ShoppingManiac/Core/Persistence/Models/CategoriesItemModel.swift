@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CategoriesItemModel: Identifiable, Hashable {
+struct CategoriesItemModel: Identifiable, Hashable, Sendable {
     let id: String
     let name: String
 }

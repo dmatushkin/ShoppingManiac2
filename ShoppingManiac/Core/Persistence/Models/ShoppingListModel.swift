@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ShoppingListModel: Identifiable, Hashable {
+struct ShoppingListModel: Identifiable, Hashable, Sendable {
     private static let formatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium

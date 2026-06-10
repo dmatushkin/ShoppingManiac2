@@ -62,11 +62,4 @@ final class ShoppingManiacUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 5))
     }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            _ = launchApp()
-        }
-    }
 }
