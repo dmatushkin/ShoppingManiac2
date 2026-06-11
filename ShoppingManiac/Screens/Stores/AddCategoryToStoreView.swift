@@ -38,6 +38,7 @@ struct AddCategoryToStoreView: View {
                         dataModel.itemName = ""
                         showingPopover = false
                     })
+                    .accessibilityIdentifier("addCategoryToStore.saveButton")
                 }.padding([.top])
                 Spacer()
             }.toolbar {

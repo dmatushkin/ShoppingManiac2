@@ -38,6 +38,7 @@ struct EditGoodView<Model: EditGoodModelProtocol>: View {
                         dismiss()
                     }
                 })
+                .accessibilityIdentifier("goodEditor.saveButton")
             }.padding([.top])
             Spacer()
         }.toolbar {

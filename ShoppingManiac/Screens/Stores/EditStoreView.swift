@@ -36,6 +36,7 @@ struct EditStoreView<Model: EditStoreModelProtocol>: View {
                 }.sheet(isPresented: $showingPopover, onDismiss: nil) {
                     AddCategoryToStoreView(categories: $categories, showingPopover: $showingPopover)
                 }
+                .accessibilityIdentifier("storeEditor.addCategoryButton")
             }
             List {
                 ForEach(Array(categories.enumerated()), id: \.offset) { index, item in
@@ -73,6 +74,7 @@ struct EditStoreView<Model: EditStoreModelProtocol>: View {
                         dismiss()
                     }
                 })
+                .accessibilityIdentifier("storeEditor.saveButton")
             }.toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()

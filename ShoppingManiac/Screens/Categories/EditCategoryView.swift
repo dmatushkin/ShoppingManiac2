@@ -35,6 +35,7 @@ struct EditCategoryView<Model: EditCategoryModelProtocol>: View {
                 }.sheet(isPresented: $showingPopover, onDismiss: nil) {
                     AddGoodToCategoryView(goods: $goods, showingPopover: $showingPopover)
                 }
+                .accessibilityIdentifier("categoryEditor.addGoodButton")
             }
             List {
                 ForEach(Array(goods.enumerated()), id: \.offset) { _, item in
@@ -56,6 +57,7 @@ struct EditCategoryView<Model: EditCategoryModelProtocol>: View {
                         dismiss()
                     }
                 })
+                .accessibilityIdentifier("categoryEditor.saveButton")
             }.padding([.top])
             Spacer()
         }.toolbar {

@@ -19,5 +19,6 @@ struct StarItemView: View {
             Image(rating > (ratingValue - 1) ? "star_selected" : "star_not_selected").padding(2)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("rating.star.\(ratingValue)")
     }
 }

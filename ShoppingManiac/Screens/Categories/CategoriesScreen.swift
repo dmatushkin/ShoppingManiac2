@@ -43,6 +43,7 @@ struct CategoriesScreen: View {
                         }) {
                             Label("Add Item", systemImage: "plus")
                         }
+                        .accessibilityIdentifier("categories.addButton")
                     }
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()

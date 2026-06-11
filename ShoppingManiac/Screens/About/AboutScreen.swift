@@ -31,6 +31,7 @@ struct AboutScreen: View {
             LargeAcceptButton(title: "Create backup") {
                 model.makeBackup()
             }.disabled(model.isLoading)
+                .accessibilityIdentifier("about.createBackupButton")
                 .overlay {
                     if model.isLoading {
                         ProgressView()
