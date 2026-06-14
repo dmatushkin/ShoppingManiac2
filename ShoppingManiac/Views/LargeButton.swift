@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct LargeButton: View {
-        
+    
+    @Environment(\.isEnabled) private var isEnabled
     let title: String
     let backgroundColor: Color
     let action: () -> Void
@@ -22,10 +23,13 @@ struct LargeButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .padding(8)
-                .frame(maxWidth: .infinity)
-                .background(Capsule().fill(backgroundColor)).foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(Capsule().fill(backgroundColor))
+                .foregroundStyle(isEnabled ? .white : .black.opacity(0.6))
                 .northWestShadow()
+                .opacity(isEnabled ? 1 : 0.45)
             }
         .buttonStyle(.plain)
     }

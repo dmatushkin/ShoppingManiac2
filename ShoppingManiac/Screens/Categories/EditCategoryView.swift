@@ -51,12 +51,13 @@ struct EditCategoryView<Model: EditCategoryModelProtocol>: View {
                     dismiss()
                 })
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
-                    if name.isEmpty { return }
+                    if name.shoppingNormalizedName.isEmpty { return }
                     Task {
-                        await model.editCategory(item: item, name: name, goods: goods)
+                        await model.editCategory(item: item, name: name.shoppingNormalizedName, goods: goods)
                         dismiss()
                     }
                 })
+                .disabled(name.shoppingNormalizedName.isEmpty)
                 .accessibilityIdentifier("categoryEditor.saveButton")
             }.padding([.top])
             Spacer()
@@ -84,7 +85,9 @@ struct EditCategoryView<Model: EditCategoryModelProtocol>: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     EditCategoryView(model: CategoriesModel(), item: CategoriesItemModel(id: UUID().uuidString, name: "Test category"))
 }
+#endif

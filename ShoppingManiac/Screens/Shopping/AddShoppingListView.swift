@@ -37,9 +37,10 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol>: View {
                 LargeAcceptButton(title: "Create", action: {
                     editFocused = false
                     Task {
-                        await model.addItem(name: listName)
+                        await model.addItem(name: listName.shoppingNormalizedName)
                     }
                 })
+                .disabled(listName.shoppingNormalizedName.isEmpty)
             }.padding([.top])
         }
         .frame(maxHeight: .infinity, alignment: .top)
@@ -58,7 +59,9 @@ struct AddShoppingListView<Model: AddShoppingListModelProtocol>: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     AddShoppingListView(model: ShoppingModel())
 }
+#endif

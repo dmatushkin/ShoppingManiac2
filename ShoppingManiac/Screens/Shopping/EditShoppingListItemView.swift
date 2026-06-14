@@ -60,7 +60,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol>: View 
                         }
                     })
                     LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
-                        if dataModel.itemName.isEmpty { return }
+                        if dataModel.itemName.shoppingNormalizedName.isEmpty { return }
                         dismissKeyboard()
                         Task {
                             if let item = item {
@@ -71,6 +71,7 @@ struct EditShoppingListItemView<Model: EditShoppingListItemModelProtocol>: View 
                             
                         }
                     })
+                    .disabled(dataModel.itemName.shoppingNormalizedName.isEmpty)
                 }
                 Spacer()
             }
@@ -113,6 +114,7 @@ private extension View {
     }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     EditShoppingListItemView(model: ShoppingListViewModel(),
@@ -128,6 +130,7 @@ private extension View {
                                                          isImportant: false,
                                                          rating: 3))
 }
+#endif
 
 private extension EditShoppingListItemView {
     func dismissKeyboard() {

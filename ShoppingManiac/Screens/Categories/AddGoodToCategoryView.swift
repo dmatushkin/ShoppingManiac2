@@ -39,6 +39,7 @@ struct AddGoodToCategoryView: View {
                         dataModel.itemName = ""
                         showingPopover = false
                     })
+                    .disabled(dataModel.itemName.shoppingNormalizedName.isEmpty)
                     .accessibilityIdentifier("addGoodToCategory.saveButton")
                 }.padding([.top])
                 Spacer()

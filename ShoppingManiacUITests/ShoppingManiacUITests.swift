@@ -43,6 +43,11 @@ final class ShoppingManiacUITests: XCTestCase {
                         in: app)
 
         XCTAssertTrue(app.staticTexts["Market"].waitForExistence(timeout: 5))
+        
+        enterText("milk", into: "Search", in: app)
+        XCTAssertTrue(app.staticTexts["Milk"].waitForExistence(timeout: 5))
+        enterText("", into: "Search", in: app, replacingExistingText: true)
+        dismissSearch(in: app)
 
         app.staticTexts["Milk"].tap()
         editVisibleRow(named: "Milk", in: app)
@@ -223,7 +228,13 @@ final class ShoppingManiacUITests: XCTestCase {
                            into fieldIdentifier: String,
                            in app: XCUIApplication,
                            replacingExistingText: Bool = false) {
-        let field = app.textFields[fieldIdentifier]
+        let textField = app.textFields[fieldIdentifier]
+        let field: XCUIElement
+        if textField.waitForExistence(timeout: 2) {
+            field = textField
+        } else {
+            field = app.searchFields[fieldIdentifier]
+        }
         XCTAssertTrue(field.waitForExistence(timeout: 5), "Missing text field \(fieldIdentifier)")
         if replacingExistingText {
             field.clearAndTypeText(text)
@@ -276,6 +287,14 @@ final class ShoppingManiacUITests: XCTestCase {
             cancelButton.tap()
         } else {
             app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1)).tap()
+        }
+    }
+    
+    @MainActor
+    private func dismissSearch(in app: XCUIApplication) {
+        let closeButton = app.buttons["Close"]
+        if closeButton.waitForExistence(timeout: 1) {
+            closeButton.tap()
         }
     }
 

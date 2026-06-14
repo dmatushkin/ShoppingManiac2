@@ -30,19 +30,29 @@ struct AutocompletionList: View {
     var body: some View {
         Group {
             if isVisible {
-                List {
-                    ForEach(uniqueItems, id: \.self) { element in
-                        Button {
-                            search = element
-                            focus.wrappedValue = false
-                        } label: {
-                            HStack {
-                                Text(element)
-                                Spacer()
-                            }.contentShape(Rectangle())
+                VStack(spacing: 0) {
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(uniqueItems, id: \.self) { element in
+                                Button {
+                                    search = element
+                                    focus.wrappedValue = false
+                                } label: {
+                                    HStack {
+                                        Text(element)
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 10)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                                Divider()
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
+                    .frame(maxHeight: 220)
+
                     Button {
                         focus.wrappedValue = false
                     } label: {
@@ -51,12 +61,21 @@ struct AutocompletionList: View {
                             Label("Dismiss suggestions", systemImage: "arrow.up.to.line")
                                 .labelStyle(.iconOnly)
                             Spacer()
-                        }.contentShape(Rectangle())
+                        }
+                        .padding(.vertical, 12)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
-                .listStyle(.plain)
+                .background(.regularMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(.quaternary, lineWidth: 1)
+                }
+                .shadow(radius: 8, y: 4)
                 .offset(y: topOffset)
+                .padding(.horizontal)
             }
         }
     }

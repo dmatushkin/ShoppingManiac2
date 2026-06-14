@@ -32,12 +32,13 @@ struct EditGoodView<Model: EditGoodModelProtocol>: View {
                     dismiss()
                 })
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
-                    if name.isEmpty { return }
+                    if name.shoppingNormalizedName.isEmpty { return }
                     Task {
-                        await model.editGood(item: item, name: name, category: category)
+                        await model.editGood(item: item, name: name.shoppingNormalizedName, category: category.shoppingNormalizedName)
                         dismiss()
                     }
                 })
+                .disabled(name.shoppingNormalizedName.isEmpty)
                 .accessibilityIdentifier("goodEditor.saveButton")
             }.padding([.top])
             Spacer()
@@ -61,7 +62,9 @@ struct EditGoodView<Model: EditGoodModelProtocol>: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     EditGoodView(model: GoodsModel(), item: GoodsItemModel(id: UUID().uuidString, name: "good name", category: "good category"))
 }
+#endif

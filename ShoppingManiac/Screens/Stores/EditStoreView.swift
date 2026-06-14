@@ -68,12 +68,13 @@ struct EditStoreView<Model: EditStoreModelProtocol>: View {
                     dismiss()
                 })
                 LargeAcceptButton(title: item == nil ? "Add" : "Save", action: {
-                    if name.isEmpty { return }
+                    if name.shoppingNormalizedName.isEmpty { return }
                     Task {
-                        await model.editStore(item: item, name: name, categories: categories)
+                        await model.editStore(item: item, name: name.shoppingNormalizedName, categories: categories)
                         dismiss()
                     }
                 })
+                .disabled(name.shoppingNormalizedName.isEmpty)
                 .accessibilityIdentifier("storeEditor.saveButton")
             }.toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
@@ -101,7 +102,9 @@ struct EditStoreView<Model: EditStoreModelProtocol>: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     EditStoreView(model: StoresModel(), item: StoresItemModel(id: UUID().uuidString, name: "Test store"))
 }
+#endif

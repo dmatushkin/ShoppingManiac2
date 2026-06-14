@@ -32,14 +32,24 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol>: View  {
             }
         } label: {
             HStack {
-                Image(systemName: item.isPurchased ? "checkmark.square" : "square").padding([.top, .bottom], 8)
+                Image(systemName: item.isPurchased ? "checkmark.square" : "square")
+                    .padding([.top, .bottom], 8)
+                    .accessibilityHidden(true)
                 Text(item.title).padding([.top, .bottom], 8)
+                if item.isImportant {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .foregroundStyle(.orange)
+                        .accessibilityHidden(true)
+                }
                 Spacer()
                 Text(item.amount)
             }.contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .listRowBackground(item.isImportant ? Color("importantItemColor") : Color("backgroundColor"))
+        .accessibilityLabel(item.title)
+        .accessibilityValue(accessibilityValue)
+        .accessibilityHint(item.isPurchased ? "Double tap to mark as not purchased." : "Double tap to mark as purchased.")
         .swipeActions {
                 Button("Delete") {
                     Task {
@@ -53,8 +63,20 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol>: View  {
                 }
         }
     }
+
+    private var accessibilityValue: String {
+        var values = [item.isPurchased ? "Purchased" : "Not purchased"]
+        if item.isImportant {
+            values.append("Important")
+        }
+        if !item.amount.isEmpty {
+            values.append("Amount \(item.amount)")
+        }
+        return values.joined(separator: ", ")
+    }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     Group {
@@ -82,3 +104,4 @@ struct ShoppingListItemView<Model: ShoppingListItemModelProtocol>: View  {
                                                                        rating: 5), model: ShoppingListViewModel()).frame(width: 375, height: 50)
     }
 }
+#endif

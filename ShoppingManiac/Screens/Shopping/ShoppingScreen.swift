@@ -36,6 +36,11 @@ struct ShoppingScreen: View {
             #else
             .listStyle(.inset)
             #endif
+                .overlay {
+                    if model.items.isEmpty {
+                        ContentUnavailableView("No shopping lists", systemImage: "cart", description: Text("Tap Add Item to create your first shopping list."))
+                    }
+                }
                 .background(Color("backgroundColor").ignoresSafeArea())
                 .navigationDestination(for: ShoppingListModel.self) { item in
                     ShoppingListView(listModel: item)
@@ -45,7 +50,7 @@ struct ShoppingScreen: View {
                         Button(action: {
                             model.showAddSheet = true
                         }) {
-                            Label("Add Item", systemImage: "plus")
+                            Label("Add List", systemImage: "plus")
                         }
                         .accessibilityIdentifier("shopping.addListButton")
                     }
@@ -61,7 +66,9 @@ struct ShoppingScreen: View {
 
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     ShoppingScreen()
 }
+#endif

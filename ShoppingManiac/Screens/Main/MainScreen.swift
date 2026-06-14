@@ -33,7 +33,9 @@ struct MainScreen: View {
                 Image("categories")
                 Text("Categories")
             }
-            AboutScreen().tabItem {
+            NavigationStack {
+                AboutScreen()
+            }.tabItem {
                 Image("empty_cart")
                 Text("About")
             }
@@ -43,7 +45,9 @@ struct MainScreen: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     MainScreen()
 }
+#endif

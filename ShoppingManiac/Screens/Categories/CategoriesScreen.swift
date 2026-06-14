@@ -11,7 +11,6 @@ import FactoryKit
 struct CategoriesScreen: View {
     
     @State private var model: CategoriesModel
-    @FocusState private var editFocused: Bool
     
     init() {
         _model = State(wrappedValue: CategoriesModel())
@@ -19,42 +18,43 @@ struct CategoriesScreen: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
-                RoundRectTextField(title: "Search", input: $model.searchString, focus: $editFocused).padding()
-                List {
-                    ForEach(model.items) { item in
-                        NavigationLink(value: item) {
-                            Text(item.name)
-                        }.listRowBackground(Color("backgroundColor"))
-                    }.onDelete(perform: {indexSet in
-                        Task {
-                            await model.removeStore(offsets: indexSet)
-                        }
-                    })
-                }.listStyle(.plain)
-                    .navigationDestination(for: CategoriesItemModel.self) { item in
-                        EditCategoryView(model: model, item: item)
+            List {
+                ForEach(model.items) { item in
+                    NavigationLink(value: item) {
+                        Text(item.name)
+                    }.listRowBackground(Color("backgroundColor"))
+                }.onDelete(perform: {indexSet in
+                    Task {
+                        await model.removeStore(offsets: indexSet)
                     }
-            }.background(Color("backgroundColor").ignoresSafeArea())
-                .toolbar {
-                    ToolbarItemGroup(placement: .primaryAction) {
-                        Button(action: {
-                            model.showAddSheet = true
-                        }) {
-                            Label("Add Item", systemImage: "plus")
-                        }
-                        .accessibilityIdentifier("categories.addButton")
+                })
+            }
+            .listStyle(.plain)
+            .overlay {
+                if model.items.isEmpty {
+                    if model.searchString.isEmpty {
+                        ContentUnavailableView("No categories", systemImage: "folder", description: Text("Tap Add Item to create categories."))
+                    } else {
+                        ContentUnavailableView.search
                     }
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Spacer()
-                        Button {
-                            editFocused = false
-                        } label: {
-                            Label("Dismiss keyboard", systemImage: "keyboard.chevron.compact.down")
-                                .labelStyle(.iconOnly)
-                        }
+                }
+            }
+            .searchable(text: $model.searchString, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search")
+            .navigationDestination(for: CategoriesItemModel.self) { item in
+                EditCategoryView(model: model, item: item)
+            }
+            .background(Color("backgroundColor").ignoresSafeArea())
+            .toolbar {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button(action: {
+                        model.showAddSheet = true
+                    }) {
+                        Label("Add Item", systemImage: "plus")
                     }
-                }.navigationTitle("Categories")
+                    .accessibilityIdentifier("categories.addButton")
+                }
+            }
+            .navigationTitle("Categories")
         }.onAppear(perform: {
             model.reload()
         }).sheet(isPresented: $model.showAddSheet, onDismiss: nil, content: {
@@ -63,7 +63,9 @@ struct CategoriesScreen: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let _ = Container.shared.dao.register(factory: { DAOStub() })
     CategoriesScreen()
 }
+#endif

@@ -16,9 +16,12 @@ struct StarItemView: View {
         Button {
             rating = ratingValue
         } label: {
-            Image(rating > (ratingValue - 1) ? "star_selected" : "star_not_selected").padding(2)
+            Image(decorative: rating > (ratingValue - 1) ? "star_selected" : "star_not_selected")
+                .padding(2)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Rate \(ratingValue) \(ratingValue == 1 ? "star" : "stars")")
+        .accessibilityValue(rating >= ratingValue ? "Selected" : "Not selected")
         .accessibilityIdentifier("rating.star.\(ratingValue)")
     }
 }
